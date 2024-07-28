@@ -2,6 +2,7 @@ import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import { ThemeProvider } from "./Context/ThemeProvider";
 import DevLearnPage from './Pages/DevLearnPage';
 import './App.css';
+import { NextUIProvider } from '@nextui-org/react'
 
 const router = createBrowserRouter([
   {
@@ -12,9 +13,11 @@ const router = createBrowserRouter([
 
 const App = () => {
   return (
-    <ThemeProvider>
-      <RouterProvider router={router} />
-    </ThemeProvider>
+    <NextUIProvider>
+      <ThemeProvider>
+        <RouterProvider router={router} />
+      </ThemeProvider>
+    </NextUIProvider>
   );
 };
 
