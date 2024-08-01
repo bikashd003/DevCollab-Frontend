@@ -12,6 +12,8 @@
   "dependencies": {
     "@nextui-org/react": "^2.4.6",
     "@reduxjs/toolkit": "^2.2.7",
+    "antd": "^5.19.3",
+    "axios": "^1.7.3",
     "formik": "^2.4.6",
     "framer-motion": "^11.3.19",
     "next-themes": "^0.3.0",

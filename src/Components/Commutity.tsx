@@ -1,8 +1,11 @@
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
-// import {Skeleton} from "@nextui-org/skeleton";
+import {Skeleton} from "@nextui-org/skeleton";
+import { useState } from 'react';
 
 const Commutity = () => {
+  const [isLoaded, setIsLoaded] = useState(false);
+  setTimeout(() => setIsLoaded(true), 2000);
   return (
     <>
       <section className="py-20 bg-gray-100 dark:bg-gray-900">
@@ -20,10 +23,12 @@ const Commutity = () => {
                   { quote: "The pair programming feature helped me overcome my biggest coding challenges.", author: "Mike T., Frontend Engineer" },
                   { quote: "Thanks to DevLearn, I landed my dream job as a software engineer!", author: "Emily R., Recent Graduate" },
                 ].map((item, index) => (
+                  <Skeleton isLoaded={isLoaded} className="rounded-lg">
                   <div key={index} className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
                     <p className="mb-4 dark:text-white italic">{`"${item.quote}"`}</p>
                     <p className="font-semibold dark:text-gray-300">- {item.author}</p>
                   </div>
+                  </Skeleton>
                 ))}
               </div>
             </div>

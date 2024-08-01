@@ -1,23 +1,24 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { FaGithub } from 'react-icons/fa';
 import { FcGoogle } from "react-icons/fc";
 import { IoCloseSharp } from "react-icons/io5";
 import { Formik, Form, Field, ErrorMessage, FormikHelpers } from 'formik';
 import SignupSchema from '../../Schemas/SignupSchema';
 import LoginSchema from '../../Schemas/LoginSchema';
+import { FaRegEye, FaRegEyeSlash } from "react-icons/fa6";
+import axios from 'axios';
 interface AuthModalProps {
     isOpen: boolean;
     onClose: () => void;
 }
-type FormValues = 
-  | { type: 'login'; email: string; password: string }
-  | { type: 'signup'; fullName: string; email: string; password: string; confirmPassword: string };
+type FormValues =
+    | { type: 'login'; email: string; password: string }
+    | { type: 'signup'; fullName: string; email: string; password: string; confirmPassword: string };
 
 const AuthenticateModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
     const [isLogin, setIsLogin] = useState(true);
-
-    if (!isOpen) return null;
-
+    const [isVisible, setIsVisible] = useState(false);
+    
     const handleSubmit = (values: FormValues, { setSubmitting }: FormikHelpers<FormValues>) => {
         // Handle form submission
         console.log(values);
@@ -25,17 +26,41 @@ const AuthenticateModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
     };
     const initialValues: FormValues = isLogin
     ? { type: 'login', email: '', password: '' }
-    : { type: 'signup', fullName: '', email: '', password: '', confirmPassword: '' };
-  
-    const handleGoogleAuth = () => {
-        // Implement Google authentication logic
-        console.log('Google authentication');
-    };
-
-    const handleGithubAuth = () => {
-        // Implement GitHub authentication logic
-        console.log('GitHub authentication');
-    };
+        : { type: 'signup', fullName: '', email: '', password: '', confirmPassword: '' };
+        const [githubAuthUrl, setGithubAuthUrl] = useState('');
+        
+        useEffect(() => {
+            axios.get('http://localhost:5000/auth/github/url')
+            .then(response => setGithubAuthUrl(response.data.url))
+            .catch(error => console.error('Error fetching GitHub auth URL:', error));
+        }, []);
+        useEffect(() => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const code = urlParams.get('code');
+            
+            if (code) {
+                axios.get(`http://localhost:5000/auth/github/callback?code=${code}`)
+                    .then(response => {
+                        console.log('Authenticated with GitHub:', response.data);
+                    })
+                    .catch(error => console.error('Error authenticating with GitHub:', error));
+            }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+        }, [window.location.search]);  
+        console.log("githubAuthUrl",githubAuthUrl)      
+        const handleGithubAuth = () => {
+            if (githubAuthUrl) {
+                window.location.href = githubAuthUrl;
+            } else {
+                console.error('GitHub authentication URL not available');
+            }
+        };
+        
+        const handleGoogleAuth = () => {
+            // Implement GitHub authentication logic
+            console.log('GitHub authentication');
+        };
+        if (!isOpen) return null;
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
@@ -59,9 +84,8 @@ const AuthenticateModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
                                         type="text"
                                         id="fullName"
                                         name="fullName"
-                                        className={`w-full px-3 py-2 text-gray-700 bg-gray-200 border rounded-lg focus:outline-none focus:border-blue-500 dark:bg-gray-700 dark:text-gray-300 dark:border-gray-600 ${
-                                            !isLogin && 'fullName' in errors && 'fullName' in touched && errors.fullName && touched.fullName ? 'border-red-500' : ''
-                                        }`}
+                                        className={`w-full px-3 py-2 text-gray-700 bg-gray-200 border rounded-lg focus:outline-none focus:border-blue-500 dark:bg-gray-700 dark:text-gray-300 dark:border-gray-600 ${!isLogin && 'fullName' in errors && 'fullName' in touched && errors.fullName && touched.fullName ? 'border-red-500' : ''
+                                            }`}
                                     />
                                     <ErrorMessage name="fullName" component="div" className="mt-1 text-sm text-red-500" />
                                 </div>
@@ -79,31 +103,45 @@ const AuthenticateModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
                                 />
                                 <ErrorMessage name="email" component="div" className="mt-1 text-sm text-red-500" />
                             </div>
-                            <div>
+                            <div className='relative'>
                                 <label htmlFor="password" className="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
                                     Password
                                 </label>
                                 <Field
-                                    type="password"
+                                     type={isVisible ? "text" : "password"}
                                     id="password"
                                     name="password"
                                     className={`w-full px-3 py-2 text-gray-700 bg-gray-200 border rounded-lg focus:outline-none focus:border-blue-500 dark:bg-gray-700 dark:text-gray-300 dark:border-gray-600 ${errors.password && touched.password ? 'border-red-500' : ''
                                         }`}
                                 />
+                                 <button className="focus:outline-none absolute right-3 top-[2.5rem]" type="button" onClick={() => setIsVisible(!isVisible)} >
+                                        {isVisible ? (
+                                            <FaRegEye size={20}/>
+                                        ) : (
+                                            <FaRegEyeSlash size={20}/>
+                                        )}
+                                    </button>
                                 <ErrorMessage name="password" component="div" className="mt-1 text-sm text-red-500" />
                             </div>
                             {!isLogin && (
-                                <div>
+                                <div className='relative'>
                                     <label htmlFor="confirmPassword" className="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
                                         Confirm Password
                                     </label>
                                     <Field
-                                        type="password"
+                                        type={isVisible ? "text" : "password"}
                                         id="confirmPassword"
                                         name="confirmPassword"
-                                        className={`w-full px-3 py-2 text-gray-700 bg-gray-200 border rounded-lg focus:outline-none focus:border-blue-500 dark:bg-gray-700 dark:text-gray-300 dark:border-gray-600 ${ !isLogin && 'confirmPassword' in errors && 'confirmPassword' in touched && errors.confirmPassword && touched.confirmPassword ? 'border-red-500' : ''
+                                        className={`w-full px-3 py-2 text-gray-700 bg-gray-200 border rounded-lg focus:outline-none focus:border-blue-500 dark:bg-gray-700 dark:text-gray-300 dark:border-gray-600 ${!isLogin && 'confirmPassword' in errors && 'confirmPassword' in touched && errors.confirmPassword && touched.confirmPassword ? 'border-red-500' : ''
                                             }`}
                                     />
+                                    <button className="focus:outline-none absolute right-3 top-[2.5rem]" type="button" onClick={() => setIsVisible(!isVisible)} >
+                                        {isVisible ? (
+                                            <FaRegEye size={20}/>
+                                        ) : (
+                                            <FaRegEyeSlash size={20}/>
+                                        )}
+                                    </button>
                                     <ErrorMessage name="confirmPassword" component="div" className="mt-1 text-sm text-red-500" />
                                 </div>
                             )}
