@@ -7,6 +7,7 @@ import SignupSchema from '../../Schemas/SignupSchema';
 import LoginSchema from '../../Schemas/LoginSchema';
 import { FaRegEye, FaRegEyeSlash } from "react-icons/fa6";
 import axios from 'axios';
+import BackendApi from "../../Constant/Api"
 interface AuthModalProps {
     isOpen: boolean;
     onClose: () => void;
@@ -18,6 +19,7 @@ type FormValues =
 const AuthenticateModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
     const [isLogin, setIsLogin] = useState(true);
     const [isVisible, setIsVisible] = useState(false);
+    const [githubAuthUrl, setGithubAuthUrl] = useState('');
     
     const handleSubmit = (values: FormValues, { setSubmitting }: FormikHelpers<FormValues>) => {
         // Handle form submission
@@ -27,10 +29,9 @@ const AuthenticateModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
     const initialValues: FormValues = isLogin
     ? { type: 'login', email: '', password: '' }
         : { type: 'signup', fullName: '', email: '', password: '', confirmPassword: '' };
-        const [githubAuthUrl, setGithubAuthUrl] = useState('');
         
         useEffect(() => {
-            axios.get('http://localhost:5000/auth/github/url')
+            axios.get(`${BackendApi}/auth/github/url`)
             .then(response => setGithubAuthUrl(response.data.url))
             .catch(error => console.error('Error fetching GitHub auth URL:', error));
         }, []);
@@ -39,7 +40,7 @@ const AuthenticateModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
             const code = urlParams.get('code');
             
             if (code) {
-                axios.get(`http://localhost:5000/auth/github/callback?code=${code}`)
+                axios.get(`${BackendApi}/auth/github/callback?code=${code}`)
                     .then(response => {
                         console.log('Authenticated with GitHub:', response.data);
                     })
@@ -47,7 +48,7 @@ const AuthenticateModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
             }
         // eslint-disable-next-line react-hooks/exhaustive-deps
         }, [window.location.search]);  
-        console.log("githubAuthUrl",githubAuthUrl)      
+
         const handleGithubAuth = () => {
             if (githubAuthUrl) {
                 window.location.href = githubAuthUrl;
