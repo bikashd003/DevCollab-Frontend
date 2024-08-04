@@ -1,8 +1,11 @@
+import RightSidebar from "../Components/RightSidebar"
 
 
 const Profile = () => {
   return (
-    <div>Profile</div>
+    <>
+    <RightSidebar />
+    </>
   )
 }
 

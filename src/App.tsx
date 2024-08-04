@@ -17,7 +17,7 @@ const router = createBrowserRouter([
     element: <PublicRoute element={<DevLearnPage />} />,
   },
   {
-    path: "/profile/user",
+    path: "/profile/:id",
     element: <ProtectedRoute element={<Profile />} />,
   },
   {
