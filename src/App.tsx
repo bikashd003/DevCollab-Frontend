@@ -7,11 +7,14 @@ import { NextUIProvider } from '@nextui-org/react';
 import ProtectedRoute from './Secure/ProtectedRoute';
 import Profile from './Pages/Profile';
 import useAxiosInterceptors from './Secure/UseAxiosInterceptors';
+import PublicRoute from "./Secure/PublicRoute";
+import NotFound from "./Pages/NotFound";
+import ErrorBoundary from "./Components/ErrorBoundary";
 
 const router = createBrowserRouter([
   {
     path: "/",
-    element: <DevLearnPage />,
+    element: <PublicRoute element={<DevLearnPage />} />,
   },
   {
     path: "/profile/user",
@@ -19,7 +22,7 @@ const router = createBrowserRouter([
   },
   {
     path: "*",
-    element: <div>Not found</div>, 
+    element: <NotFound />, 
   },
 ]);
 
@@ -30,7 +33,9 @@ const App = () => {
   return (
     <NextUIProvider>
       <ThemeProvider>
+      <ErrorBoundary>
           <RouterProvider router={router} />
+        </ErrorBoundary>
       </ThemeProvider>
     </NextUIProvider>
   );

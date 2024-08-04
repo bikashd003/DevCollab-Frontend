@@ -37,8 +37,9 @@ const useAxiosInterceptors = () => {
           originalRequest._retry = true;
           try {
             const response = await axios.post(`${BackendApi}/auth/token`, {}, { withCredentials: true });
-            setAccessToken(response.data.accessToken);
-            originalRequest.headers['Authorization'] = `Bearer ${response.data.accessToken}`;
+            setAccessToken(response.data.token);
+            setIsAuthenticated(true);
+            originalRequest.headers['Authorization'] = `Bearer ${response.data.token}`;
             return axios(originalRequest);
           } catch (err) {
             console.error('Failed to refresh token', err);

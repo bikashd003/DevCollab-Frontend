@@ -2,13 +2,14 @@ import { Navigate } from 'react-router-dom';
 import { ReactElement } from 'react';
 import { useAuth } from './AuthContext';
 
-interface ProtectedRouteProps {
+interface PublicRouteProps {
   element: ReactElement;
 }
 
-const ProtectedRoute = ({ element }: ProtectedRouteProps) => {
+const PublicRoute = ({ element }: PublicRouteProps) => {
   const { isAuthenticated } = useAuth();
-  return isAuthenticated ? element : <Navigate to="/" />;
+
+  return !isAuthenticated ? element : <Navigate to="/profile/user" />;
 };
 
-export default ProtectedRoute;
+export default PublicRoute;
