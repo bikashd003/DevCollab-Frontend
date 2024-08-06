@@ -11,12 +11,14 @@
     "pretty": "prettier --write \"**/*.{js,,tsx,jsx,json}\""
   },
   "dependencies": {
+    "@apollo/client": "^3.11.3",
     "@nextui-org/react": "^2.4.6",
     "@reduxjs/toolkit": "^2.2.7",
     "antd": "^5.19.3",
     "axios": "^1.7.3",
     "formik": "^2.4.6",
     "framer-motion": "^11.3.19",
+    "graphql": "^16.9.0",
     "husky": "^9.1.4",
     "next-themes": "^0.3.0",
     "react": "^18.3.1",

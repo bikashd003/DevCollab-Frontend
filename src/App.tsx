@@ -10,7 +10,6 @@ import useAxiosInterceptors from './Secure/UseAxiosInterceptors';
 import PublicRoute from "./Secure/PublicRoute";
 import NotFound from "./Pages/NotFound";
 import ErrorBoundary from "./Components/ErrorBoundary";
-
 const router = createBrowserRouter([
   {
     path: "/",
