@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   Avatar,
   Tooltip,
@@ -15,13 +15,17 @@ import { Popover } from "antd";
 import { MdLogout } from "react-icons/md";
 import { IoIosPerson } from "react-icons/io";
 import { IoMdHelpCircleOutline } from "react-icons/io";
-
+import { toggleSidebar } from '../Redux/ProfileSlice';
+import { useDispatch, useSelector } from 'react-redux';
+import type { RootState } from '../Redux/Store';
+import { setIsCollapsed } from '../Redux/ProfileSlice';
 const RightSidebar = () => {
-  const [isCollapsed, setIsCollapsed] = useState(false);
+  const dispatch = useDispatch();
+  const isCollapsed = useSelector((state: RootState) => state.profile.isCollapsed);
   const [activeItem, setActiveItem] = useState('Home');
 
-  const toggleSidebar = () => {
-    setIsCollapsed(!isCollapsed);
+  const togglebar = () => {
+    dispatch(toggleSidebar());
   };
   const handleLogout = () => {
 
@@ -34,6 +38,20 @@ const RightSidebar = () => {
     { icon: <FiSettings size={24} />, label: 'Settings' },
     { icon: <IoMdHelpCircleOutline size={24} />, label: 'Help or Support' },
   ];
+  useEffect(() => {
+    //set to setIsCollapsed true when window width is less than 768px
+    const handleResize = () => {
+      if (window.innerWidth < 768) {
+        dispatch(setIsCollapsed(true));
+      } else {
+        dispatch(setIsCollapsed(false));
+      }
+    }
+    window.addEventListener('resize', handleResize);
+    return () => {
+      window.removeEventListener('resize', handleResize);
+    }
+  }, [dispatch])
 
   return (
     <motion.div
@@ -43,7 +61,7 @@ const RightSidebar = () => {
     >
       <div className="flex justify-end">
         <button
-          onClick={toggleSidebar}
+          onClick={togglebar}
           className="dark:text-gray-300 p-4"
         >
           <CgMenuRightAlt size={20} />

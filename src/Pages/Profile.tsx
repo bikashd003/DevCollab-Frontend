@@ -1,3 +1,4 @@
+import ProfileDetails from "../Components/ProfileDetails";
 import RightSidebar from "../Components/RightSidebar";
 import { useQuery, gql } from '@apollo/client';
 
@@ -22,19 +23,15 @@ const Profile = () => {
   if (error) return <p>Error: {error.message}</p>;
 
   const { contact } = data;
-
-  return (
-    <>
-      <RightSidebar />
-      <div>
-        <h2>Contact Details</h2>
-        <p>Country: {contact.country}</p>
-        <p>Pincode: {contact.pincode}</p>
-        <p>ID: {contact.id}</p>
-        <p>City: {contact.city}</p>
+  console.log(contact)
+    return (
+      <div className="flex">
+        <RightSidebar />
+        <div className="flex-grow">
+          <ProfileDetails />
+        </div>
       </div>
-    </>
-  );
-};
+    );
+  };
 
 export default Profile;
