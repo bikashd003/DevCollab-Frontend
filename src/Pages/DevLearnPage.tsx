@@ -2,9 +2,9 @@ import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import DP from "../assets/Developers collaborating.png"
 import AuthenticateModal from '../Components/Modal/AuthenticateModal';
-import Footer from '../Components/Footer';
-import Commutity from '../Components/Commutity';
-import Nav from '../Components/Nav';
+import Footer from '../Components/Home/Footer';
+import Commutity from '../Components/Home/Commutity';
+import Nav from '../Components/Home/Nav';
 
 const DevLearnPage: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);

@@ -7,6 +7,7 @@ interface AuthContextType {
   accessToken: string | null;
   setAccessToken: (token: string | null) => void;
   setIsAuthenticated: (isAuthenticated: boolean) => void;
+  handleLogout: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -15,6 +16,15 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [accessToken, setAccessToken] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const handleLogout = async () => {
+    try {
+      await axios.get(`${BackendApi}/github/logout`);
+      setIsAuthenticated(false);
+      setAccessToken(null);
+    } catch (err) {
+      console.error('Logout failed', err);
+    }
+  }
 
   useEffect(() => {
     const silentRefresh = async () => {
@@ -34,7 +44,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   return (
-    <AuthContext.Provider value={{ isAuthenticated, accessToken, setAccessToken, setIsAuthenticated }}>
+    <AuthContext.Provider value={{ isAuthenticated, accessToken, setAccessToken, setIsAuthenticated, handleLogout }}>
       {!loading && children} 
     </AuthContext.Provider>
   );

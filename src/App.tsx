@@ -10,21 +10,39 @@ import useAxiosInterceptors from './Secure/UseAxiosInterceptors';
 import PublicRoute from "./Secure/PublicRoute";
 import NotFound from "./Pages/NotFound";
 import ErrorBoundary from "./Components/ErrorBoundary";
+import HomeLayout from "./Components/Profile/HomeLayout";
+import ProjectInput from "./Components/Profile/ProjectInput";
+
 const router = createBrowserRouter([
   {
     path: "/",
-    element: <PublicRoute element={<DevLearnPage />} />,
-  },
-  {
-    path: "/profile/:id",
-    element: <ProtectedRoute element={<Profile />} />,
+    children: [
+      {
+        index: true,
+        element: <PublicRoute element={<DevLearnPage />} />,
+      },
+      {
+        path: "home",
+        element: <ProtectedRoute element={<HomeLayout />} />,
+        children: [
+          {
+            path: ":id",
+            element: <ProtectedRoute element={<Profile />} />,
+          },
+          {
+            path: "projects",
+            element: <ProjectInput />,
+          },
+
+        ],
+      },
+    ],
   },
   {
     path: "*",
     element: <NotFound />, 
   },
 ]);
-
 
 const App = () => {
   useAxiosInterceptors();

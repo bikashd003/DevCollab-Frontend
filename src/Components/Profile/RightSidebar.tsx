@@ -15,21 +15,22 @@ import { Popover } from "antd";
 import { MdLogout } from "react-icons/md";
 import { IoIosPerson } from "react-icons/io";
 import { IoMdHelpCircleOutline } from "react-icons/io";
-import { toggleSidebar } from '../Redux/ProfileSlice';
+import { toggleSidebar } from '../../Redux/ProfileSlice';
 import { useDispatch, useSelector } from 'react-redux';
-import type { RootState } from '../Redux/Store';
-import { setIsCollapsed } from '../Redux/ProfileSlice';
+import type { RootState } from '../../Redux/Store';
+import { setIsCollapsed } from '../../Redux/ProfileSlice';
+import { useAuth } from '../../Secure/AuthContext';
+import { useNavigate } from 'react-router-dom';
 const RightSidebar = () => {
+  const { handleLogout } = useAuth()
   const dispatch = useDispatch();
   const isCollapsed = useSelector((state: RootState) => state.profile.isCollapsed);
   const [activeItem, setActiveItem] = useState('Home');
+  const navigate = useNavigate()
 
   const togglebar = () => {
     dispatch(toggleSidebar());
   };
-  const handleLogout = () => {
-
-  }
   const menuItems = [
     { icon: <FiHome size={24} />, label: 'Home' },
     { icon: <IoIosPerson size={24} />, label: 'Profile' },
@@ -38,6 +39,10 @@ const RightSidebar = () => {
     { icon: <FiSettings size={24} />, label: 'Settings' },
     { icon: <IoMdHelpCircleOutline size={24} />, label: 'Help or Support' },
   ];
+  const handleTabChange = (label: string) => {
+    setActiveItem(label);
+    navigate(`/home/${label.toLocaleLowerCase()}`)
+  };
   useEffect(() => {
     //set to setIsCollapsed true when window width is less than 768px
     const handleResize = () => {
@@ -69,40 +74,39 @@ const RightSidebar = () => {
       </div>
 
       <div className="flex-grow flex flex-col gap-3 items-center px-2 py-4">
-  {menuItems.map((item, index) => (
-    <Tooltip
-      key={index}
-      content={item.label}
-      placement="right"
-      isDisabled={!isCollapsed}
-    >
-      <button
-        className={`
+        {menuItems.map((item, index) => (
+          <Tooltip
+            key={index}
+            content={item.label}
+            placement="right"
+            isDisabled={!isCollapsed}
+          >
+            <button
+              className={`
           flex items-center p-2 dark:text-gray-300 
           rounded-xl
           ${isCollapsed ? 'justify-center w-12 h-12' : 'justify-start w-full h-12'}
-          ${
-            activeItem === item.label 
-              ? 'bg-primary text-white dark:bg-primary dark:text-white'
-              : ' hover:bg-gray-100 dark:hover:bg-gray-700 '
-          }
+          ${activeItem === item.label
+                  ? 'bg-primary text-white dark:bg-primary dark:text-white'
+                  : ' hover:bg-gray-100 dark:hover:bg-gray-700 '
+                }
         `}
-        onClick={() => setActiveItem(item.label)}
-      >
-        <div className={`flex items-center ${isCollapsed ? 'justify-center' : 'justify-start w-full'}`}>
-          <span>
-            {item.icon}
-          </span>
-          {!isCollapsed && (
-            <span className="ml-3 font-medium whitespace-nowrap transition-opacity duration-200">
-              {item.label}
-            </span>
-          )}
-        </div>
-      </button>
-    </Tooltip>
-  ))}
-</div>
+              onClick={() => handleTabChange(item.label)}
+            >
+              <div className={`flex items-center ${isCollapsed ? 'justify-center' : 'justify-start w-full'}`}>
+                <span>
+                  {item.icon}
+                </span>
+                {!isCollapsed && (
+                  <span className="ml-3 font-medium whitespace-nowrap transition-opacity duration-200">
+                    {item.label}
+                  </span>
+                )}
+              </div>
+            </button>
+          </Tooltip>
+        ))}
+      </div>
 
       <div className='flex justify-between  bg-gray-600 py-2 px-4'>
         <div className={`flex items-center  ${isCollapsed ? 'justify-center' : 'justify-start'}`}>

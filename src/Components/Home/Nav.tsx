@@ -1,5 +1,5 @@
 import { Navbar, NavbarBrand, NavbarContent, NavbarItem, Link, Button, Switch } from "@nextui-org/react";
-import { useTheme } from '../Context/ThemeProvider';
+import { useTheme } from "../../Context/ThemeProvider";
 import { BsSun } from "react-icons/bs";
 import { IoMoonSharp } from "react-icons/io5";
 import { motion, AnimatePresence } from 'framer-motion';
@@ -12,7 +12,7 @@ interface NavProps {
 }
 
 
-const Nav = ({setIsModalOpen}:NavProps) => {
+const Nav = ({ setIsModalOpen }: NavProps) => {
   const { theme, setTheme } = useTheme();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const MotionLink = motion.a;
@@ -39,7 +39,7 @@ const Nav = ({setIsModalOpen}:NavProps) => {
           </NavbarItem>
         </NavbarContent>
         <NavbarContent justify="end">
-        <NavbarItem className="hidden lg:flex">
+          <NavbarItem className="hidden lg:flex">
             <Switch
               defaultSelected
               size="sm"
@@ -50,14 +50,14 @@ const Nav = ({setIsModalOpen}:NavProps) => {
             />
           </NavbarItem>
           <NavbarItem className="hidden lg:flex">
-          <MotionLink href="#"
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                className="bg-blue-600 text-white px-4 py-1 rounded-full hover:bg-blue-700 transition duration-300"
-                onClick={() => setIsModalOpen(true)}
-              >
-                Sign Up
-              </MotionLink>
+            <MotionLink href="#"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              className="bg-blue-600 text-white px-4 py-1 rounded-full hover:bg-blue-700 transition duration-300"
+              onClick={() => setIsModalOpen(true)}
+            >
+              Sign Up
+            </MotionLink>
           </NavbarItem>
           <NavbarItem className="sm:hidden">
             <button onClick={() => setIsMenuOpen(!isMenuOpen)} className="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 focus:outline-none">

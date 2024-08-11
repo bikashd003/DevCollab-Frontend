@@ -1,5 +1,4 @@
-import ProfileDetails from "../Components/ProfileDetails";
-import RightSidebar from "../Components/RightSidebar";
+import ProfileDetails from "../Components/Profile/ProfileDetails";
 import { useQuery, gql } from '@apollo/client';
 
 const GET_CONTACT = gql`
@@ -25,11 +24,8 @@ const Profile = () => {
   const { contact } = data;
   console.log(contact)
     return (
-      <div className="flex">
-        <RightSidebar />
-        <div className="flex-grow">
-          <ProfileDetails />
-        </div>
+      <div className=" h-full">
+        <ProfileDetails />
       </div>
     );
   };
