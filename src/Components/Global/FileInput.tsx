@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { PlusOutlined } from '@ant-design/icons';
+import { PlusOutlined, LoadingOutlined } from '@ant-design/icons';
 import { Image, Upload, message } from 'antd';
 import type { GetProp, UploadFile, UploadProps } from 'antd';
 import ImgCrop from 'antd-img-crop';
@@ -9,7 +9,7 @@ import BackendApi from '../../Constant/Api';
 type FileType = Parameters<GetProp<UploadProps, 'beforeUpload'>>[0];
 
 interface FileInputProps {
-    onChange?: (imageUrl: string | null) => void; // Assuming you want to return the image URL
+    onChange?: (imageUrl: string | null) => void; 
     accept?: string;
     maxSize?: number;
 }
@@ -27,6 +27,7 @@ const FileInput: React.FC<FileInputProps> = ({
     accept = 'image/*',
     maxSize = 5 * 1024 * 1024, // 5MB default
 }) => {
+    const [loading, setLoading] = useState(false);
     const [previewOpen, setPreviewOpen] = useState(false);
     const [previewImage, setPreviewImage] = useState('');
     const [fileList, setFileList] = useState<UploadFile[]>([]);
@@ -41,29 +42,63 @@ const FileInput: React.FC<FileInputProps> = ({
     };
 
     const handleChange: UploadProps['onChange'] = async ({ fileList: newFileList }) => {
-        if (newFileList[0].originFileObj) {
+        setFileList(newFileList);
+
+        if (loading) return; // Prevent multiple uploads
+
+        if (newFileList[0]?.originFileObj) {
+            setLoading(true);
+
             const formData = new FormData();
             formData.append('image', newFileList[0].originFileObj);
 
             try {
-                const response = await axios.post(`${BackendApi}/cloudinary/upload`, formData, {
-                    headers: { 'Content-Type': 'multipart/form-data' },
-                });
+                const response = await axios.post<{ imageUrl: string }>(
+                    `${BackendApi}/cloudinary/upload`,
+                    formData,
+                    {
+                        headers: { 'Content-Type': 'multipart/form-data' },
+                    }
+                );
 
-                // Return the URL of the uploaded image
-                onChange?.(response.data.imageUrl);
+                if (response.status === 200) {
+                    const updatedFileList: UploadFile[] = newFileList.map((file) => ({
+                        ...file,
+                        url: response.data.imageUrl,
+                        status: 'done',
+                    }));
+
+                    setFileList(updatedFileList);
+                    onChange?.(response.data.imageUrl);
+                } else {
+                    throw new Error(`Upload failed with status ${response.status}`);
+                }
             } catch (error) {
                 message.error('Failed to upload image');
                 console.error('Failed to upload image:', error);
+
+                const updatedFileList: UploadFile[] = newFileList.map((file) => ({
+                    ...file,
+                    status: 'error',
+                    error: {
+                        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                        status: (error as any).response?.status || 500,
+                        method: 'post',
+                        url: '',
+                    },
+                }));
+
+                setFileList(updatedFileList);
                 onChange?.(null);
+            } finally {
+                setLoading(false);
             }
-            setFileList(newFileList);
         }
     };
 
     const beforeUpload = (file: FileType) => {
-        const acceptedTypes = accept.split(','); // Split the accept string into an array of types
-        const isAccepted = acceptedTypes.includes(file.type); // Check if the file type is included
+        const acceptedTypes = accept.split(',');
+        const isAccepted = acceptedTypes.includes(file.type); 
 
         if (!isAccepted) {
             message.error(`You can only upload ${accept} files!`);
@@ -81,7 +116,7 @@ const FileInput: React.FC<FileInputProps> = ({
 
     const uploadButton = (
         <button style={{ border: 0, background: 'none' }} type="button">
-            <PlusOutlined />
+            {loading ? <LoadingOutlined /> : <PlusOutlined />}
             <div style={{ marginTop: 8 }}>Upload</div>
         </button>
     );
@@ -102,13 +137,11 @@ const FileInput: React.FC<FileInputProps> = ({
             </ImgCrop>
             {previewImage && (
                 <Image
-                    wrapperStyle={{ display: 'none' }}
                     preview={{
                         visible: previewOpen,
                         onVisibleChange: (visible) => setPreviewOpen(visible),
-                        afterOpenChange: (visible) => !visible && setPreviewImage(''),
+                        src: previewImage,
                     }}
-                    src={previewImage}
                 />
             )}
         </>
