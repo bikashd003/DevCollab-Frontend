@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import {
   Avatar,
   Tooltip,
@@ -20,29 +20,38 @@ import { useDispatch, useSelector } from 'react-redux';
 import type { RootState } from '../../Redux/Store';
 import { setIsCollapsed } from '../../Redux/ProfileSlice';
 import { useAuth } from '../../Secure/AuthContext';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 const RightSidebar = () => {
   const { handleLogout } = useAuth()
   const dispatch = useDispatch();
   const isCollapsed = useSelector((state: RootState) => state.profile.isCollapsed);
   const [activeItem, setActiveItem] = useState('Home');
   const navigate = useNavigate()
+  const location = useLocation();
 
   const togglebar = () => {
     dispatch(toggleSidebar());
   };
-  const menuItems = [
+  const menuItems = useMemo(() => [
     { icon: <FiHome size={24} />, label: 'Home' },
     { icon: <IoIosPerson size={24} />, label: 'Profile' },
     { icon: <FiBarChart size={24} />, label: 'Projects' },
     { icon: <FiMessageCircle size={24} />, label: 'Messages' },
     { icon: <FiSettings size={24} />, label: 'Settings' },
     { icon: <IoMdHelpCircleOutline size={24} />, label: 'Help or Support' },
-  ];
+  ], []);
   const handleTabChange = (label: string) => {
     setActiveItem(label);
     navigate(`/home/${label.toLocaleLowerCase()}`)
   };
+  useEffect(() => {
+    // Update active item based on current pathname
+    const currentPath = location.pathname.split('/').pop()?.toLowerCase();
+    const activeMenuItem = menuItems.find(item => item.label.toLowerCase() === currentPath);
+    if (activeMenuItem) {
+      setActiveItem(activeMenuItem.label);
+    }
+  }, [location, menuItems]);
   useEffect(() => {
     //set to setIsCollapsed true when window width is less than 768px
     const handleResize = () => {

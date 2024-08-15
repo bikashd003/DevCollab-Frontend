@@ -2,16 +2,17 @@ import React, { useState } from 'react';
 import { PlusOutlined, LoadingOutlined } from '@ant-design/icons';
 import { Image, Upload, message } from 'antd';
 import type { GetProp, UploadFile, UploadProps } from 'antd';
-import ImgCrop from 'antd-img-crop';
 import axios from 'axios';
 import BackendApi from '../../Constant/Api';
 
 type FileType = Parameters<GetProp<UploadProps, 'beforeUpload'>>[0];
 
 interface FileInputProps {
-    onChange?: (imageUrl: string | null) => void; 
+    onChange?: (imageUrl: string | null) => void;
     accept?: string;
     maxSize?: number;
+    fileList?: UploadFile[];
+    setFileList?: React.Dispatch<React.SetStateAction<UploadFile[]>>;
 }
 
 const getBase64 = (file: FileType): Promise<string> =>
@@ -26,11 +27,13 @@ const FileInput: React.FC<FileInputProps> = ({
     onChange,
     accept = 'image/*',
     maxSize = 5 * 1024 * 1024, // 5MB default
+    fileList = [],
+    setFileList = () => { },
 }) => {
     const [loading, setLoading] = useState(false);
     const [previewOpen, setPreviewOpen] = useState(false);
     const [previewImage, setPreviewImage] = useState('');
-    const [fileList, setFileList] = useState<UploadFile[]>([]);
+
 
     const handlePreview = async (file: UploadFile) => {
         if (!file.url && !file.preview) {
@@ -41,64 +44,79 @@ const FileInput: React.FC<FileInputProps> = ({
         setPreviewOpen(true);
     };
 
-    const handleChange: UploadProps['onChange'] = async ({ fileList: newFileList }) => {
-        setFileList(newFileList);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const handleUpload = async (options: any) => {
+        const { file, onSuccess, onError } = options;
 
-        if (loading) return; // Prevent multiple uploads
+        setLoading(true);
 
-        if (newFileList[0]?.originFileObj) {
-            setLoading(true);
+        const formData = new FormData();
+        formData.append('image', file);
 
-            const formData = new FormData();
-            formData.append('image', newFileList[0].originFileObj);
-
-            try {
-                const response = await axios.post<{ imageUrl: string }>(
-                    `${BackendApi}/cloudinary/upload`,
-                    formData,
-                    {
-                        headers: { 'Content-Type': 'multipart/form-data' },
-                    }
-                );
-
-                if (response.status === 200) {
-                    const updatedFileList: UploadFile[] = newFileList.map((file) => ({
-                        ...file,
-                        url: response.data.imageUrl,
-                        status: 'done',
-                    }));
-
-                    setFileList(updatedFileList);
-                    onChange?.(response.data.imageUrl);
-                } else {
-                    throw new Error(`Upload failed with status ${response.status}`);
+        try {
+            const response = await axios.post<{ imageUrl: string; publicId: string }>(
+                `${BackendApi}/cloudinary/upload`,
+                formData,
+                {
+                    headers: { 'Content-Type': 'multipart/form-data' },
                 }
-            } catch (error) {
-                message.error('Failed to upload image');
-                console.error('Failed to upload image:', error);
+            );
 
-                const updatedFileList: UploadFile[] = newFileList.map((file) => ({
-                    ...file,
-                    status: 'error',
-                    error: {
-                        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                        status: (error as any).response?.status || 500,
-                        method: 'post',
-                        url: '',
-                    },
-                }));
-
-                setFileList(updatedFileList);
-                onChange?.(null);
-            } finally {
-                setLoading(false);
+            if (response.status === 200) {
+                const newFile: UploadFile = {
+                    uid: file.uid,
+                    name: file.name,
+                    status: 'done',
+                    url: response.data.imageUrl,
+                    response: { publicId: response.data.publicId },
+                };
+                setFileList([newFile]);
+                onChange?.(response.data.imageUrl);
+                onSuccess(response, file);
+            } else {
+                throw new Error(`Upload failed with status ${response.status}`);
             }
+        } catch (error) {
+            message.error('Failed to upload image');
+            console.error('Failed to upload image:', error);
+            onError(error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleDelete = async (file: UploadFile) => {
+        try {
+            console.log(file)
+            const publicId = file.response?.publicId;
+            if (!publicId) {
+                throw new Error('Public ID is missing');
+            }
+
+            const response = await axios.post(
+                `${BackendApi}/cloudinary/delete`,
+                { publicId },
+                {
+                    headers: { 'Content-Type': 'application/json' },
+                }
+            );
+
+            if (response.status === 200) {
+                message.success('Image deleted successfully');
+                setFileList((prevList) => prevList.filter((item) => item.uid !== file.uid));
+                onChange?.(null);
+            } else {
+                throw new Error(`Delete failed with status ${response.status}`);
+            }
+        } catch (error) {
+            message.error('Failed to delete image');
+            console.error('Failed to delete image:', error);
         }
     };
 
     const beforeUpload = (file: FileType) => {
         const acceptedTypes = accept.split(',');
-        const isAccepted = acceptedTypes.includes(file.type); 
+        const isAccepted = acceptedTypes.includes(file.type);
 
         if (!isAccepted) {
             message.error(`You can only upload ${accept} files!`);
@@ -123,18 +141,18 @@ const FileInput: React.FC<FileInputProps> = ({
 
     return (
         <>
-            <ImgCrop rotationSlider>
-                <Upload
-                    listType="picture-card"
-                    fileList={fileList}
-                    onPreview={handlePreview}
-                    onChange={handleChange}
-                    beforeUpload={beforeUpload}
-                    accept={accept}
-                >
-                    {fileList.length >= 1 ? null : uploadButton}
-                </Upload>
-            </ImgCrop>
+            <Upload
+                listType="picture-card"
+                fileList={fileList}
+                onPreview={handlePreview}
+                beforeUpload={beforeUpload}
+                onRemove={handleDelete}
+                accept={accept}
+                customRequest={handleUpload}
+                showUploadList={{ showRemoveIcon: !loading }}
+            >
+                {fileList.length >= 1 ? null : uploadButton}
+            </Upload>
             {previewImage && (
                 <Image
                     preview={{

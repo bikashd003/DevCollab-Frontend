@@ -1,5 +1,5 @@
 import { Outlet } from 'react-router-dom';
-import RightSidebar from './RightSidebar';
+import LeftSidebar from './LeftSidebar';
 
 const HomeLayout = () => {
   return (
@@ -7,7 +7,7 @@ const HomeLayout = () => {
       <div className="flex-grow">
         <Outlet />
       </div>
-      <RightSidebar />
+      <LeftSidebar />
     </div>
   );
 };
