@@ -4,11 +4,11 @@ import {
   Tooltip,
 } from '@nextui-org/react';
 import {
-  FiHome,
   FiSettings,
   FiBarChart,
   FiMessageCircle
 } from 'react-icons/fi';
+import { GiSkills } from "react-icons/gi";
 import { motion } from 'framer-motion';
 import { CgMenuRightAlt } from "react-icons/cg";
 import { Popover } from "antd";
@@ -25,7 +25,7 @@ const RightSidebar = () => {
   const { handleLogout } = useAuth()
   const dispatch = useDispatch();
   const isCollapsed = useSelector((state: RootState) => state.profile.isCollapsed);
-  const [activeItem, setActiveItem] = useState('Home');
+  const [activeItem, setActiveItem] = useState('Profile');
   const navigate = useNavigate()
   const location = useLocation();
 
@@ -33,9 +33,9 @@ const RightSidebar = () => {
     dispatch(toggleSidebar());
   };
   const menuItems = useMemo(() => [
-    { icon: <FiHome size={24} />, label: 'Home' },
     { icon: <IoIosPerson size={24} />, label: 'Profile' },
     { icon: <FiBarChart size={24} />, label: 'Projects' },
+    { icon: <GiSkills size={24} />, label: 'Skills' },
     { icon: <FiMessageCircle size={24} />, label: 'Messages' },
     { icon: <FiSettings size={24} />, label: 'Settings' },
     { icon: <IoMdHelpCircleOutline size={24} />, label: 'Help or Support' },

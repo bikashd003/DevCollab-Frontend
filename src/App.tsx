@@ -11,7 +11,8 @@ import PublicRoute from "./Secure/PublicRoute";
 import NotFound from "./Pages/NotFound";
 import ErrorBoundary from "./Components/ErrorBoundary";
 import HomeLayout from "./Components/Profile/HomeLayout";
-import ProjectInput from "./Components/Profile/ProjectInput";
+import Projects from "./Pages/Projects";
+import Skills from "./Pages/Skills";
 
 const router = createBrowserRouter([
   {
@@ -31,7 +32,11 @@ const router = createBrowserRouter([
           },
           {
             path: "projects",
-            element: <ProtectedRoute element={<ProjectInput />} />,
+            element: <ProtectedRoute element={<Projects />} />,
+          },
+          {
+            path: "skills",
+            element: <ProtectedRoute element={<Skills />} />,
           },
 
         ],

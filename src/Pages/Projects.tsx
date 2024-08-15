@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
-import FileInput from '../Global/FileInput';
+import FileInput from '../Components/Global/FileInput';
 import { useMutation } from '@apollo/client';
-import ADD_PROJECT_MUTATION from '../../GraphQL/Mutations/Projects';
+import ADD_PROJECT_MUTATION from '../GraphQL/Mutations/Projects';
 import { Input, Textarea, Button } from '@nextui-org/react';
 import { message, UploadFile } from 'antd';
-const ProjectInput: React.FC = () => {
+const Projects: React.FC = () => {
     const [title, setTitle] = useState('');
     const [description, setDescription] = useState('');
     const [projectLink, setProjectLink] = useState('');
@@ -104,7 +104,7 @@ const ProjectInput: React.FC = () => {
                     </div>
                     {error && <p className="text-red-500 mt-2">{`// Error: ${error}`}</p>}
                 </form>
-                <div className="p-4 bg-gray-700 border-t border-gray-600">
+                <div className="p-4 bottom-0 bg-gray-700 border-t border-gray-600">
                     <span className="text-yellow-400">{`}`}</span>
                 </div>
             </div>
@@ -112,4 +112,4 @@ const ProjectInput: React.FC = () => {
     );
 };
 
-export default ProjectInput;
+export default Projects;
