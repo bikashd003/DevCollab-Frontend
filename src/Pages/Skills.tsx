@@ -2,12 +2,16 @@ import { useState } from "react";
 import Select, { MultiValue, StylesConfig } from "react-select";
 import makeAnimated from 'react-select/animated';
 import SkillList from "../Constant/Skills";
-import { Rate } from "antd";
+import { message, Rate } from "antd";
 import { Button } from "@nextui-org/react";
+import { ADD_SKILL_MUTAION } from "../GraphQL/Mutations/Skills"
+import { useMutation } from "@apollo/client";
+
 interface SkillOption {
     label: string;
     value: string;
 }
+
 const customStyles: StylesConfig<SkillOption, true> = {
     control: (provided, state) => ({
         ...provided,
@@ -20,15 +24,31 @@ const customStyles: StylesConfig<SkillOption, true> = {
         backgroundColor: '#1f2937'
     }),
 };
+
 const Skills: React.FC = () => {
-    const [selectedSkill, setSelectedSkill] = useState<MultiValue<SkillOption>>([]);
-    const [rate, setRate] = useState<number>(0);
+    const [selectedSkills, setSelectedSkills] = useState<MultiValue<SkillOption>>([]);
+    const [rates, setRates] = useState<{ [key: string]: number }>({});
     const animatedComponents = makeAnimated();
 
+    const [createSkill, { loading, error }] = useMutation(ADD_SKILL_MUTAION, {
+        onCompleted: () => {
+            setSelectedSkills([]);
+            setRates({});
+            message.success('Skills added successfully')
+        },
+    });
+
     const handleCreateSkills = () => {
-        console.log(selectedSkill);
-        console.log(rate);
+        selectedSkills.forEach((skill) => {
+            createSkill({
+                variables: {
+                    title: skill.value,
+                    proficiency: rates[skill.value] || 0
+                }
+            });
+        });
     };
+
     return (
         <div className="min-h-screen bg-gray-900 text-green-400 font-mono flex p-4 sm:p-6 md:p-8 ml-0 min-[320px]:ml-16 min-[760px]:ml-40">
             <div className="w-full relative max-w-full bg-gray-800 rounded-lg shadow-lg overflow-hidden mx-auto sm:mx-4 md:mx-8">
@@ -42,28 +62,27 @@ const Skills: React.FC = () => {
                         placeholder="Select Skills"
                         isMulti
                         options={SkillList}
-                        value={selectedSkill}
-                        onChange={(e) => setSelectedSkill(e)}
+                        value={selectedSkills}
+                        onChange={(e) => setSelectedSkills(e)}
                         className="w-full"
                         styles={customStyles}
                     />
                 </div>
-                <div>
-
-                </div>
                 <div className="p-4 overflow-auto max-h-[69vh]">
                     <h3 className="text-lg font-semibold">Skills <span className="text-yellow-400">{`[`}</span></h3>
                     <ul className="list-inside mt-2">
-                        {selectedSkill?.map((skill) => (
-                            <div>
+                        {selectedSkills.map((skill) => (
+                            <div key={skill.label}>
                                 <span>{`{`}</span>
-                                <li key={skill.value}>Name: '{skill.label}',
-                                </li>
+                                <li key={skill.value}>Name: '{skill.label}',</li>
                                 <div>
-                                    Profeciency: {' '}
+                                    Proficiency: {' '}
                                     <Rate
                                         character={({ index = 0 }) => index + 1}
-                                        onChange={(e) => setRate(e)} className="text-sm" />
+                                        value={rates[skill.value]}
+                                        onChange={(e) => setRates({ ...rates, [skill.value]: e })}
+                                        className="text-sm"
+                                    />
                                 </div>
                                 <span>{`}`}</span>
                             </div>
@@ -77,11 +96,12 @@ const Skills: React.FC = () => {
                         color="success"
                         onClick={handleCreateSkills}
                         className="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded"
-                    // disabled={loading}
+                        disabled={loading}
                     >
-                        {'Run Skills.create()'}
+                        {loading ? 'Compiling...' : 'Run Skills.create()'}
                     </Button>
                 </div>
+                {error && <p className="text-red-500 mt-2">{`// Error: ${error.message}`}</p>}
                 <div className="p-4 bg-gray-700 border-b border-gray-600 absolute w-full bottom-0">
                     <h2 className="text-xl font-semibold text-yellow-400">{`};`}</h2>
                 </div>

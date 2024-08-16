@@ -1,22 +1,9 @@
 import ProfileDetails from "../Components/Profile/ProfileDetails";
-import { useQuery, gql } from '@apollo/client';
-
-const GET_CONTACT = gql`
-  query GetContact($contactId: ID!) {
-    contact(id: $contactId) {
-      country
-      pincode
-      id
-      city
-    }
-  }
-`;
+import { useQuery } from '@apollo/client';
+import { GET_USER_DATA } from '../GraphQL/Queries/Users'
 
 const Profile = () => {
-  const contactId = "66b51712ff43e67d16887784"; 
-  const { loading, error, data } = useQuery(GET_CONTACT, {
-    variables: { contactId },
-  });
+  const { loading, error, data } = useQuery(GET_USER_DATA);
 
   if (loading) return <p>Loading...</p>;
   if (error) return <p>Error: {error.message}</p>;
