@@ -1,4 +1,4 @@
-// import { Card } from "@nextui-org/react";
+import { Skeleton } from "@nextui-org/react";
 
 const UserDetails = () => {
     const skills = ["JavaScript", "React", "Node.js", "TypeScript", "CSS", "SQL", "Git", "AWS"];
@@ -62,7 +62,7 @@ const UserDetails = () => {
                     </div>
                     <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2 ml-8">
                         {projects.map((project, index) => (
-                            <div key={index} className="dark:bg-zinc-800 shadow-md border border-zinc-700 rounded-lg">
+                            <Skeleton key={index} className="dark:bg-zinc-800 shadow-md border border-zinc-700 rounded-lg">
                                 <div className="p-4">
                                     <img
                                         src="/placeholder.svg"
@@ -73,7 +73,7 @@ const UserDetails = () => {
                                     <h4 className="text-lg font-semibold text-teal-400">{project.title}</h4>
                                     <p className="text-sm text-zinc-400">{project.description}</p>
                                 </div>
-                            </div>
+                            </Skeleton>
                         ))}
                     </div>
                 </div>

@@ -6,24 +6,22 @@ import { Link } from 'react-router-dom';
 import { FaSquareXTwitter } from "react-icons/fa6";
 import { FaLinkedin } from "react-icons/fa";
 import UserDetails from './UserDetails';
+import { useQuery } from '@apollo/client';
+import { GET_USER_DATA } from '../../GraphQL/Queries/Users';
+import { Skeleton } from "@nextui-org/react";
 const ProfileDetails: React.FC = () => {
-    // const isCollapsed = useSelector((state: RootState) => state.profile.isCollapsed);
-    const userDetails = {
-        name: 'John Doe',
-        email: 'johndoe@example.com',
-        bio: 'Software Developer | React Enthusiast',
-        avatar: 'https://i.pravatar.cc/150?u=a042581f4e29026024d',
-        location: 'New York, USA',
-        joinDate: 'January 2022',
-    };
+    const { loading, data } = useQuery(GET_USER_DATA);
+
     return (
         <div className={`flex max-w-4xl justify-center md:max-w-6xl h-full mx-auto p-6 md:p-10`}>
             <div className='w-full md:w-2/4'>
                 <div className="w-full md:w-2/3 flex flex-col items-center">
+                    <Skeleton isLoaded={!loading} className='rounded-full'>
                     <Avatar
                         size={{ xs: 100, sm: 80, md: 100, lg: 200, xl: 200, xxl: 250 }}
-                        src={userDetails.avatar}
-                    />
+                            src={data?.user?.profilePicture}
+                        />
+                    </Skeleton>
                 </div>
                 <div className="w-full md:w-2/3 flex flex-col gap-4">
                     <div className="grid gap-1">
