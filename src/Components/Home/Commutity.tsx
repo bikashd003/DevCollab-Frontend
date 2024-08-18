@@ -8,7 +8,7 @@ const Commutity = () => {
   setTimeout(() => setIsLoaded(true), 2000);
   return (
     <>
-      <section className="py-20 bg-gray-100 dark:bg-gray-900">
+      <section className="py-20">
           <motion.div
             initial={{ opacity: 0, y: -80 }}
             animate={{ opacity: 1, y: 0 }}
@@ -16,7 +16,7 @@ const Commutity = () => {
             className=""
           >
             <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-              <h2 className="text-3xl font-bold text-center mb-12 dark:text-white">What Our Community Says</h2>
+            <h2 className="text-3xl font-bold text-center mb-12 dark:text-dark-foreground text-foreground">What Our Community Says</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                 {[
                   { quote: "DevLearn has transformed the way I approach coding. The community support is incredible!", author: "Sarah J., Full Stack Developer" },
@@ -24,9 +24,9 @@ const Commutity = () => {
                   { quote: "Thanks to DevLearn, I landed my dream job as a software engineer!", author: "Emily R., Recent Graduate" },
                 ].map((item, index) => (
                   <Skeleton isLoaded={isLoaded} className="rounded-lg">
-                  <div key={index} className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
-                    <p className="mb-4 dark:text-white italic">{`"${item.quote}"`}</p>
-                    <p className="font-semibold dark:text-gray-300">- {item.author}</p>
+                    <div key={index} className="bg-white p-6 rounded-lg shadow-md">
+                      <p className="mb-4 dark:text-black italic text-foreground">{`"${item.quote}"`}</p>
+                      <p className="font-semibold dark:text-black text-foreground">- {item.author}</p>
                   </div>
                   </Skeleton>
                 ))}

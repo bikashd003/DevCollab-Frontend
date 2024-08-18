@@ -43,7 +43,7 @@ const Footer: React.FC = () => {
       initial="hidden"
       animate={controls}
       variants={containerVariants}
-      className="bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-300 py-8"
+      className="bg-background dark:bg-dark-background text-gray-800 dark:text-dark-foreground py-8"
     >
       <div className="container mx-auto px-4">
         <div className="flex flex-wrap justify-between items-center">
@@ -51,8 +51,8 @@ const Footer: React.FC = () => {
             variants={itemVariants}
             className="w-full md:w-1/3 mb-6 md:mb-0"
           >
-            <h3 className="text-2xl font-bold mb-2 text-gray-900 dark:text-white">DevCollab</h3>
-            <p className="text-gray-600 dark:text-gray-400">Connecting developers worldwide</p>
+            <h3 className="text-2xl font-bold mb-2 text-gray-900 dark:text-dark-foreground ">DevCollab</h3>
+            <p className="text-gray-600 ark:text-dark-foreground ">Connecting developers worldwide</p>
           </motion.div>
           
           <motion.div 
@@ -72,7 +72,7 @@ const Footer: React.FC = () => {
             variants={itemVariants}
             className="w-full md:w-1/3"
           >
-            <h4 className="text-lg font-semibold mb-2 text-gray-900 dark:text-white">Connect With Us</h4>
+            <h4 className="text-lg font-semibold mb-2 text-gray-900 dark:text-dark-foreground ">Connect With Us</h4>
             <div className="flex space-x-4">
               <motion.a 
                 whileHover={{ y: -3 }}
@@ -101,7 +101,7 @@ const Footer: React.FC = () => {
         
         <motion.div 
           variants={itemVariants}
-          className="mt-8 pt-8 border-t border-gray-300 dark:border-gray-700 text-center text-gray-600 dark:text-gray-400"
+          className="mt-8 pt-8 border-t border-gray-300 dark:border-gray-700 text-center text-gray-600 dark:text-dark-foreground"
         >
           <p>&copy; {new Date().getFullYear()} DevCollab. All rights reserved.</p>
         </motion.div>

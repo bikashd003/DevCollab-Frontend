@@ -1,7 +1,7 @@
 
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import { ThemeProvider } from "./Context/ThemeProvider";
-import DevLearnPage from './Pages/DevLearnPage';
+import DevCollabHome from './Pages/DevCollabHome';
 import './App.css';
 import { NextUIProvider } from '@nextui-org/react';
 import ProtectedRoute from './Secure/ProtectedRoute';
@@ -20,7 +20,7 @@ const router = createBrowserRouter([
     children: [
       {
         index: true,
-        element: <PublicRoute element={<DevLearnPage />} />,
+        element: <PublicRoute element={<DevCollabHome />} />,
       },
       {
         path: "home",

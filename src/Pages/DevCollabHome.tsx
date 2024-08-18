@@ -6,7 +6,7 @@ import Footer from '../Components/Home/Footer';
 import Commutity from '../Components/Home/Commutity';
 import Nav from '../Components/Home/Nav';
 
-const DevLearnPage: React.FC = () => {
+const DevCollabHome: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const MotionLink = motion.a;
@@ -15,7 +15,7 @@ const DevLearnPage: React.FC = () => {
     closed: { opacity: 0, y: 0 },
   };
   return (
-    <div className="font-sans bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-200 min-h-screen transition-colors duration-300">
+    <div className="font-sans min-h-screen transition-colors duration-300">
       <motion.div
         variants={modalVariants}
         initial="closed"
@@ -24,7 +24,7 @@ const DevLearnPage: React.FC = () => {
       >
         <AuthenticateModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
       </motion.div>
-      <Nav setIsModalOpen={setIsModalOpen}/>
+      <Nav setIsModalOpen={setIsModalOpen} />
       <main>
         <section className="bg-gradient-to-r from-blue-500 to-purple-600 dark:from-blue-700 dark:to-purple-800 text-white py-20">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center">
@@ -55,13 +55,13 @@ const DevLearnPage: React.FC = () => {
           </div>
 
         </section>
-      <Commutity />
+        <Commutity />
       </main>
 
-     
+
       <Footer />
     </div>
   );
 };
 
-export default DevLearnPage;
+export default DevCollabHome;
