@@ -1,10 +1,11 @@
 import { motion } from 'framer-motion';
-import { Link } from 'react-router-dom';
 import {Skeleton} from "@nextui-org/skeleton";
 import { useState } from 'react';
+// import { useNavigate } from 'react-router-dom';
 
 const Commutity = () => {
   const [isLoaded, setIsLoaded] = useState(false);
+  // const navigate = useNavigate()
   setTimeout(() => setIsLoaded(true), 2000);
   return (
     <>
@@ -38,7 +39,7 @@ const Commutity = () => {
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
             <h2 className="text-3xl font-bold mb-4">Ready to Start Your Journey?</h2>
             <p className="text-xl mb-8">Join thousands of developers learning and growing together.</p>
-            <Link to="#" className="bg-white text-blue-600 px-8 py-3 rounded-full font-semibold hover:bg-blue-100 transition duration-300 animate-bounce inline-block">Sign Up Now</Link>
+          {/* <p className="bg-white text-blue-600 px-8 py-3 cursor-pointer rounded-full font-semibold hover:bg-blue-100 transition duration-300 animate-bounce inline-block" onClick={() => navigate("/")}>Sign Up Now</p> */}
           </div>
         </section>
     </>

@@ -40,7 +40,7 @@ const DevCollabHome: React.FC = () => {
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 className="bg-white text-blue-600 px-6 py-3 rounded-full font-semibold hover:bg-blue-100 transition duration-300 inline-block"
-              >
+                onClick={() => setIsModalOpen(true)}>
                 Get Started
               </MotionLink>
             </motion.div>
