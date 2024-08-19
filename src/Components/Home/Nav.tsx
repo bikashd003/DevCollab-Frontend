@@ -26,19 +26,22 @@ const Nav = ({ setIsModalOpen }: NavProps) => {
   return (
     <>
 
-      <Navbar isBordered isBlurred>
+      <Navbar isBordered isBlurred className="font-sans">
         <NavbarBrand>
           <p className="font-bold text-inherit cursor-pointer" onClick={() => navigate('/')}>DevCollab</p>
         </NavbarBrand>
         <NavbarContent className="hidden sm:flex gap-4" justify="center">
           <NavbarItem>
-            <Link color="foreground" to="/">Home</Link>
+            <Link className="text-foreground hover:text-gray-400" to="/">Home</Link>
           </NavbarItem>
           <NavbarItem>
-            <Link to="/about" color="foreground">About</Link>
+            <Link to="/about" className="text-foreground hover:text-gray-400">About</Link>
           </NavbarItem>
           <NavbarItem>
-            <Link color="foreground" to="/blogs">Blogs</Link>
+            <Link className="text-foreground hover:text-gray-400" to="/questions">Questions</Link>
+          </NavbarItem>
+          <NavbarItem>
+            <Link className="text-foreground hover:text-gray-400" to="/blogs">Blogs</Link>
           </NavbarItem>
         </NavbarContent>
         <NavbarContent justify="end">
@@ -83,6 +86,7 @@ const Nav = ({ setIsModalOpen }: NavProps) => {
             <motion.nav className="flex flex-col gap-4">
               <motion.a whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} href="#" className="text-foreground pl-2" onClick={() => navigate('/')}>Home</motion.a>
               <motion.a whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} href="#" className="text-foreground" onClick={() => navigate('/about')}>About</motion.a>
+              <motion.a whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} href="#" className="text-foreground" onClick={() => navigate('/questions')}>Questions</motion.a>
               <motion.a whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} href="#" className="text-foreground" onClick={() => navigate('/blogs')}>Blogs</motion.a>
               <motion.a whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} href="#" className="text-foreground">
                 <Button color="primary" variant="flat" fullWidth onClick={() => setIsModalOpen(true)}>Sign Up</Button>

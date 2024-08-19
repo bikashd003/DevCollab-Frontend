@@ -13,6 +13,8 @@ import ErrorBoundary from "./Components/ErrorBoundary";
 import HomeLayout from "./Components/Profile/HomeLayout";
 import Projects from "./Pages/Projects";
 import Skills from "./Pages/Skills";
+import Questions from "./Pages/Questions";
+import AskQuestion from "./Pages/AskQuestion";
 
 const router = createBrowserRouter([
   {
@@ -38,16 +40,29 @@ const router = createBrowserRouter([
             path: "skills",
             element: <ProtectedRoute element={<Skills />} />,
           },
-
         ],
       },
     ],
   },
   {
+    path: "/questions",
+    children: [
+      {
+        index: true,
+        element: <Questions />,
+      },
+      {
+        path: "ask",
+        element: <AskQuestion />,
+      },
+    ],
+  },
+  {
     path: "*",
-    element: <NotFound />, 
+    element: <NotFound />,
   },
 ]);
+
 
 const App = () => {
   useAxiosInterceptors();
