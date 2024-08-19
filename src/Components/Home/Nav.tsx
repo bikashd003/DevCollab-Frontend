@@ -1,4 +1,4 @@
-import { Navbar, NavbarBrand, NavbarContent, NavbarItem, Link, Button, Switch } from "@nextui-org/react";
+import { Navbar, NavbarBrand, NavbarContent, NavbarItem, Button, Switch } from "@nextui-org/react";
 import { useTheme } from "../../Context/ThemeProvider";
 import { BsSun } from "react-icons/bs";
 import { IoMoonSharp } from "react-icons/io5";
@@ -6,6 +6,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useState } from "react";
 import { MdOutlineClose } from "react-icons/md";
 import { IoMenu } from "react-icons/io5";
+import { useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 
 interface NavProps {
   setIsModalOpen: (value: boolean) => void;
@@ -15,6 +17,7 @@ interface NavProps {
 const Nav = ({ setIsModalOpen }: NavProps) => {
   const { theme, setTheme } = useTheme();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const navigate = useNavigate();
   const MotionLink = motion.a;
   const menuVariants = {
     open: { opacity: 1, y: 0 },
@@ -25,17 +28,17 @@ const Nav = ({ setIsModalOpen }: NavProps) => {
 
       <Navbar isBordered isBlurred>
         <NavbarBrand>
-          <p className="font-bold text-inherit">DevCollab</p>
+          <p className="font-bold text-inherit cursor-pointer" onClick={() => navigate('/')}>DevCollab</p>
         </NavbarBrand>
         <NavbarContent className="hidden sm:flex gap-4" justify="center">
           <NavbarItem>
-            <Link color="foreground" href="#">Features</Link>
+            <Link color="foreground" to="/">Home</Link>
           </NavbarItem>
           <NavbarItem>
-            <Link href="#" color="foreground">Customers</Link>
+            <Link to="/about" color="foreground">About</Link>
           </NavbarItem>
           <NavbarItem>
-            <Link color="foreground" href="#">Integrations</Link>
+            <Link color="foreground" to="/blogs">Blogs</Link>
           </NavbarItem>
         </NavbarContent>
         <NavbarContent justify="end">
@@ -78,9 +81,9 @@ const Nav = ({ setIsModalOpen }: NavProps) => {
             className="fixed top-16 left-0 right-0 bg-background z-50 p-4 shadow-lg sm:hidden"
           >
             <motion.nav className="flex flex-col gap-4">
-              <motion.a whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} href="#" className="text-foreground pl-2">Features</motion.a>
-              <motion.a whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} href="#" className="text-foreground">Customers</motion.a>
-              <motion.a whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} href="#" className="text-foreground">Integrations</motion.a>
+              <motion.a whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} href="#" className="text-foreground pl-2" onClick={() => navigate('/')}>Home</motion.a>
+              <motion.a whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} href="#" className="text-foreground" onClick={() => navigate('/about')}>About</motion.a>
+              <motion.a whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} href="#" className="text-foreground" onClick={() => navigate('/blogs')}>Blogs</motion.a>
               <motion.a whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} href="#" className="text-foreground">
                 <Button color="primary" variant="flat" fullWidth onClick={() => setIsModalOpen(true)}>Sign Up</Button>
               </motion.a>
