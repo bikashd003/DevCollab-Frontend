@@ -65,8 +65,8 @@ const AuthenticateModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-            <div className="relative w-full max-w-md p-6 rounded-lg shadow-xl bg-white dark:bg-gray-800">
-                <h2 className="mb-4 text-2xl font-bold text-center text-gray-800 dark:text-gray-100">
+            <div className="relative w-full max-w-md p-6 rounded-lg shadow-xl bg-white dark:bg-dark-background">
+                <h2 className="mb-4 text-2xl font-bold text-center text-foreground dark:text-dark-foreground">
                     {isLogin ? 'Login' : 'Sign Up'}
                 </h2>
                 <Formik
@@ -78,7 +78,7 @@ const AuthenticateModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
                         <Form className="space-y-4">
                             {!isLogin && (
                                 <div>
-                                    <label htmlFor="fullName" className="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+                                    <label htmlFor="fullName" className="block mb-2 text-sm font-medium text-gray-700 dark:text-dark-foreground">
                                         Full Name
                                     </label>
                                     <Field
