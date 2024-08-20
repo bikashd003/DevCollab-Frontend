@@ -3,3 +3,8 @@
   padding: 0;
   box-sizing: border-box;
 }
+body .w-md-editor-text-pre>code,
+body .w-md-editor-text-input {
+  font-size: 16px !important;
+  line-height: 15px !important;
+}
