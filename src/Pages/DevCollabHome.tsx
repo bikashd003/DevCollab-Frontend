@@ -1,30 +1,16 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { motion } from 'framer-motion';
 import DP from "../assets/Developers collaborating.png"
-import AuthenticateModal from '../Components/Modal/AuthenticateModal';
 import Footer from '../Components/Home/Footer';
 import Commutity from '../Components/Home/Commutity';
-import Nav from '../Components/Home/Nav';
+import { setIsModalOpen } from '../Redux/OvarallSlice';
 
 const DevCollabHome: React.FC = () => {
-  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const MotionLink = motion.a;
-  const modalVariants = {
-    open: { opacity: 1, y: 500 },
-    closed: { opacity: 0, y: 0 },
-  };
+
   return (
     <div className="font-sans min-h-screen transition-colors duration-300">
-      <motion.div
-        variants={modalVariants}
-        initial="closed"
-        animate={isModalOpen ? 'open' : 'closed'}
-        transition={{ duration: 0.3 }}
-      >
-        <AuthenticateModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
-      </motion.div>
-      <Nav setIsModalOpen={setIsModalOpen} />
       <main>
         <section className="bg-gradient-to-r from-blue-500 to-purple-600 dark:from-blue-700 dark:to-purple-800 text-white py-20">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center">

@@ -15,10 +15,20 @@ import Projects from "./Pages/Projects";
 import Skills from "./Pages/Skills";
 import Questions from "./Pages/Questions";
 import AskQuestion from "./Pages/AskQuestion";
-
+import Nav from "./Components/Home/Nav";
+import { Outlet } from "react-router-dom";
+const MainLayout: React.FC = () => {
+  return (
+    <div>
+      <Nav />
+      <Outlet />
+    </div>
+  );
+};
 const router = createBrowserRouter([
   {
     path: "/",
+    element: <MainLayout />,
     children: [
       {
         index: true,
@@ -46,6 +56,7 @@ const router = createBrowserRouter([
   },
   {
     path: "/questions",
+    element: <MainLayout />,
     children: [
       {
         index: true,

@@ -8,13 +8,15 @@ import { MdOutlineClose } from "react-icons/md";
 import { IoMenu } from "react-icons/io5";
 import { useNavigate } from "react-router-dom";
 import { Link } from "react-router-dom";
+import { useDispatch, useSelector } from 'react-redux';
+import { setIsModalOpen } from "../../Redux/OvarallSlice";
+import { RootState } from "../../Redux/Store";
+import AuthenticateModal from "../Modal/AuthenticateModal";
 
-interface NavProps {
-  setIsModalOpen: (value: boolean) => void;
-}
 
-
-const Nav = ({ setIsModalOpen }: NavProps) => {
+const Nav = () => {
+  const dispatch = useDispatch();
+  const isModalOpen = useSelector((state: RootState) => state.overall.isModalOpen);
   const { theme, setTheme } = useTheme();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const navigate = useNavigate();
@@ -22,6 +24,10 @@ const Nav = ({ setIsModalOpen }: NavProps) => {
   const menuVariants = {
     open: { opacity: 1, y: 0 },
     closed: { opacity: 0, y: "-100%" }
+  };
+  const modalVariants = {
+    open: { opacity: 1, y: 500 },
+    closed: { opacity: 0, y: 0 },
   };
   return (
     <>
@@ -60,7 +66,7 @@ const Nav = ({ setIsModalOpen }: NavProps) => {
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               className="bg-blue-600 text-white px-4 py-1 rounded-full hover:bg-blue-700 transition duration-300"
-              onClick={() => setIsModalOpen(true)}
+              onClick={() => dispatch(setIsModalOpen(true))}
             >
               Sign Up
             </MotionLink>
@@ -89,12 +95,20 @@ const Nav = ({ setIsModalOpen }: NavProps) => {
               <motion.a whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} href="#" className="text-foreground" onClick={() => navigate('/questions')}>Questions</motion.a>
               <motion.a whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} href="#" className="text-foreground" onClick={() => navigate('/blogs')}>Blogs</motion.a>
               <motion.a whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} href="#" className="text-foreground">
-                <Button color="primary" variant="flat" fullWidth onClick={() => setIsModalOpen(true)}>Sign Up</Button>
+                <Button color="primary" variant="flat" fullWidth onClick={() => dispatch(setIsModalOpen(true))}>Sign Up</Button>
               </motion.a>
             </motion.nav>
           </motion.div>
         )}
       </AnimatePresence>
+      <motion.div
+        variants={modalVariants}
+        initial="closed"
+        animate={isModalOpen ? 'open' : 'closed'}
+        transition={{ duration: 0.3 }}
+      >
+        <AuthenticateModal isOpen={isModalOpen} onClose={() => dispatch(setIsModalOpen(false))} />
+      </motion.div>
     </>
   );
 }
