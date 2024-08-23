@@ -57,27 +57,35 @@ const QuestionsPage: React.FC = () => {
     ];
     return (
         <div className="flex flex-col min-h-screen bg-background text-foreground dark:bg-dark-background dark:text-dark-foreground">
-            <main className="flex-1 container px-4 md:px-6 py-8">
-                <div className="grid grid-cols-[240px_1fr] gap-8">
-                    <aside className="bg-background dark:bg-dark-background rounded-lg shadow-sm p-4">
-                        <h3 className="text-lg font-semibold mb-4">Filters</h3>
-                        <div className="grid gap-4">
+            <main className="md:px-8 p-8">
+                <div className="grid grid-cols-12 gap-4">
+                    <aside className="col-span-12 md:col-span-3 dark:bg-dark-background rounded-lg shadow-md p-4">
+                        <h3 className="text-xl font-bold text-gray-800 mb-4">Filters</h3>
+                        <div className="grid gap-6">
+                            {/* Tags Section */}
                             <div>
-                                <h4 className="text-sm font-medium mb-2">Tags</h4>
-                                <div className="grid grid-cols-2 gap-2">
+                                <h4 className="text-sm font-semibold text-gray-300 mb-3 border-b border-gray-700 pb-1">Tags</h4>
+                                <div className="flex gap-2 flex-wrap">
                                     {['React', 'JavaScript', 'Python', 'CSS', 'Node.js', 'SQL'].map((tag) => (
-                                        <a key={tag} className="bg-muted/50 rounded-md px-2 py-1 text-sm hover:bg-muted" href="#">
+                                        <a
+                                            key={tag}
+                                            className="bg-gray-700 hover:bg-gray-600 text-white rounded-md px-3 py-1 text-xs font-mono transition-colors duration-200 ease-in-out"
+                                            href="#"
+                                        >
                                             {tag}
                                         </a>
                                     ))}
                                 </div>
                             </div>
+                            {/* Sort By Section */}
                             <div>
-                                <h4 className="text-sm font-medium mb-2">Sort By</h4>
+                                <h4 className="text-sm font-semibold text-gray-300 mb-3 border-b border-gray-700 pb-1">Sort By</h4>
+                                {/* Add sorting options here */}
                             </div>
                         </div>
                     </aside>
-                    <section>
+
+                    <section className='col-span-12 md:col-span-6  rounded-lg shadow-md p-4'>
                         <div className="flex items-center mb-4">
                             <div className="relative flex-1">
                                 <input
@@ -97,17 +105,27 @@ const QuestionsPage: React.FC = () => {
                             ))}
                         </div>
                     </section>
+                    <aside className="col-span-12 md:col-span-3 dark:bg-dark-background rounded-lg shadow-md p-4">
+                        <h3 className="text-lg font-semibold mb-4">Filters</h3>
+                        <div className="grid gap-4">
+                            <div>
+                                <h4 className="text-sm font-medium mb-2">Tags</h4>
+                                <div className="grid grid-cols-2 gap-2">
+                                    {['React', 'JavaScript', 'Python', 'CSS', 'Node.js', 'SQL'].map((tag) => (
+                                        <a key={tag} className="bg-muted/50 rounded-md px-2 py-1 text-sm hover:bg-muted" href="#">
+                                            {tag}
+                                        </a>
+                                    ))}
+                                </div>
+                            </div>
+                            <div>
+                                <h4 className="text-sm font-medium mb-2">Sort By</h4>
+                            </div>
+                        </div>
+                    </aside>
                 </div>
             </main>
-            <footer className="bg-muted py-6 border-t">
-                <div className="container flex items-center justify-between px-4 md:px-6">
-                    <div className="text-sm text-muted-foreground">© 2024 StackOverflow. All rights reserved.</div>
-                    <div className="flex items-center gap-4">
-                        <a className="text-sm hover:underline" href="#">Terms of Service</a>
-                        <a className="text-sm hover:underline" href="#">Privacy Policy</a>
-                    </div>
-                </div>
-            </footer>
+            <hr />
         </div>
     );
 };

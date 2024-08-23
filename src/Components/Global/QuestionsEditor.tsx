@@ -83,7 +83,7 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({ content, setContent }) 
     }, []);
 
     return (
-        <div className="border w-1/3" data-color-mode={colorMode}>
+        <div className="border w-full" data-color-mode={colorMode}>
             <MDEditor
                 value={content}
                 preview="edit"
