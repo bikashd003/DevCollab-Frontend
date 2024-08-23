@@ -2,6 +2,7 @@ import React from 'react';
 import QuestionCard from '../Components/QuestionCard';
 import { CiSearch } from "react-icons/ci";
 import { useNavigate } from 'react-router-dom';
+import { Pagination } from '@nextui-org/react';
 
 interface Question {
     id: number;
@@ -26,7 +27,7 @@ const QuestionsPage: React.FC = () => {
             tags: ["react", "hooks", "forms"],
             author: {
                 name: "John Doe",
-                avatar: "/placeholder-user.jpg"
+                avatar: "https://avatars.githubusercontent.com/u/99291618?v=4"
             },
             postedAt: "2 hours ago"
         },
@@ -38,7 +39,7 @@ const QuestionsPage: React.FC = () => {
             tags: ["sql", "performance", "optimization"],
             author: {
                 name: "Sarah Anderson",
-                avatar: "/placeholder-user.jpg"
+                avatar: "https://avatars.githubusercontent.com/u/99291618?v=4"
             },
             postedAt: "1 day ago"
         },
@@ -50,7 +51,7 @@ const QuestionsPage: React.FC = () => {
             tags: ["next.js", "authentication", "security"],
             author: {
                 name: "Michael Johnson",
-                avatar: "/placeholder-user.jpg"
+                avatar: "https://avatars.githubusercontent.com/u/99291618?v=4"
             },
             postedAt: "3 days ago"
         }
@@ -104,24 +105,12 @@ const QuestionsPage: React.FC = () => {
                                 <QuestionCard key={question.id} question={question} />
                             ))}
                         </div>
+                        <div className='flex justify-end mt-2'>
+                            <Pagination showControls total={10} initialPage={1} />
+                        </div>
                     </section>
                     <aside className="col-span-12 md:col-span-3 dark:bg-dark-background rounded-lg shadow-md p-4">
-                        <h3 className="text-lg font-semibold mb-4">Filters</h3>
-                        <div className="grid gap-4">
-                            <div>
-                                <h4 className="text-sm font-medium mb-2">Tags</h4>
-                                <div className="grid grid-cols-2 gap-2">
-                                    {['React', 'JavaScript', 'Python', 'CSS', 'Node.js', 'SQL'].map((tag) => (
-                                        <a key={tag} className="bg-muted/50 rounded-md px-2 py-1 text-sm hover:bg-muted" href="#">
-                                            {tag}
-                                        </a>
-                                    ))}
-                                </div>
-                            </div>
-                            <div>
-                                <h4 className="text-sm font-medium mb-2">Sort By</h4>
-                            </div>
-                        </div>
+
                     </aside>
                 </div>
             </main>
