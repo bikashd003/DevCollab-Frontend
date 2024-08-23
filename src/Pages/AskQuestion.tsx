@@ -4,15 +4,13 @@ import { CheckOutlined, QuestionCircleOutlined } from '@ant-design/icons';
 import * as yup from 'yup';
 import QuestionEditor from '../Components/Global/QuestionsEditor';
 import questionSchema from '../Schemas/QuestionSchema';
+import { ADD_QUESTION_MUTAION } from '../GraphQL/Mutations/Questions/Question';
+import { useMutation } from '@apollo/client';
 
 interface FormData {
     title: string;
     content: string;
     tags: string[];
-    category: string;
-    isUrgent: boolean;
-    expectedResponseTime: number;
-    relatedLinks: string[];
 }
 
 interface FormErrors {
@@ -21,14 +19,24 @@ interface FormErrors {
 
 const QuestionInput: React.FC = () => {
     const [current, setCurrent] = useState(0);
+    const [createQuestion] = useMutation(ADD_QUESTION_MUTAION, {
+        onCompleted: () => {
+            setFormData({
+                title: '',
+                content: '',
+                tags: [],
+            });
+            setCurrent(0);
+            message.success('Question submitted successfully!');
+        }
+        , onError: (err) => {
+            message.error(err.message);
+        }
+    });
     const [formData, setFormData] = useState<FormData>({
         title: '',
         content: '',
         tags: [],
-        category: '',
-        isUrgent: false,
-        expectedResponseTime: 0,
-        relatedLinks: [],
     });
     const [errors, setErrors] = useState<FormErrors>({});
 
@@ -52,6 +60,7 @@ const QuestionInput: React.FC = () => {
                     break;
                 case 2:
                     schemaToValidate = yup.object().shape({ tags: questionSchema.fields.tags });
+                    console.log(schemaToValidate)
                     break;
                 default:
                     schemaToValidate = questionSchema;
@@ -75,23 +84,10 @@ const QuestionInput: React.FC = () => {
 
     const handleNext = async () => {
         if (await validateStep(current)) {
-            if (current < 3) {
+            if (current < 2) {
                 setCurrent(current + 1);
             } else {
-                // Submit the question
-                console.log(formData);
-                // Reset form after submission
-                setFormData({
-                    title: '',
-                    content: '',
-                    tags: [],
-                    category: '',
-                    isUrgent: false,
-                    expectedResponseTime: 0,
-                    relatedLinks: [],
-                });
-                setCurrent(0);
-                message.success('Question submitted successfully!');
+                await createQuestion({ variables: { ...formData } })
             }
         }
     };

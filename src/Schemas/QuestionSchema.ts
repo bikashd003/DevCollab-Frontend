@@ -30,7 +30,6 @@ const questionSchema = yup.object().shape({
     content: yup
         .string()
         .trim()
-        .min(100, 'Content should be at least 100 characters long.')
         .max(10000, 'Content should be at most 10,000 characters long.')
         .required('Content is required.')
         .test('no-spam', 'Content contains spam words', (value) => {
@@ -50,7 +49,6 @@ const questionSchema = yup.object().shape({
                 .trim()
                 .min(2, 'Tag should be at least 2 characters long.')
                 .max(20, 'Tag should be at most 20 characters long.')
-                .matches(/^[a-z0-9-]+$/, 'Tags should only contain lowercase letters, numbers, and hyphens')
                 .test('no-spam', 'Tag contains spam words', (value) => {
                     const spamWords = ['viagra', 'cialis', 'make money fast', 'earn extra cash', 'work from home'];
                     return !spamWords.some((word) => value?.toLowerCase().includes(word));
