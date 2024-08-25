@@ -1,10 +1,14 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import QuestionCard from '../Components/QuestionCard';
-import { CiSearch } from "react-icons/ci";
+import { SearchOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import { Pagination } from '@nextui-org/react';
-import { GET_ALL_QUESTIONS } from '../GraphQL/Queries/Questions/Questions';
-import { useQuery } from '@apollo/client';
+import { GET_ALL_QUESTIONS, SEARCH_QUESTIONS } from '../GraphQL/Queries/Questions/Questions';
+import { useQuery, useLazyQuery } from '@apollo/client';
+import { Input, Popover } from 'antd';
+import Filter from '../Components/Questions/Filter';
+import { debounce } from 'lodash';
+
 interface Question {
     id: number;
     title: string;
@@ -20,70 +24,152 @@ interface Question {
 
 const QuestionsPage: React.FC = () => {
     const navigate = useNavigate()
+    const [questions, setQuestions] = useState<Question[]>([])
+    const [searchTerm, setSearchTerm] = useState('');
+    const [popoverVisible, setPopoverVisible] = useState(false);
+    const [searchResults, setSearchResults] = useState<Question[]>([]);
+    const [totalSearchPages, setTotalSearchPages] = useState(0);
     const [page, setPage] = useState(1);
     const [itemsPerPage] = useState(10);
     const { loading, data } = useQuery(GET_ALL_QUESTIONS, {
         variables: {
             limit: itemsPerPage,
             offset: (page - 1) * itemsPerPage,
+        },
+        skip: searchTerm ? true : false,
+    },
+    );
+    useEffect(() => {
+        if (data?.getQuestions?.questions) {
+            setQuestions(data?.getQuestions?.questions)
         }
+    }, [data])
+    const [executeSearch, { loading: searchLoading }] = useLazyQuery(SEARCH_QUESTIONS, {
+        onCompleted: (data) => {
+            setSearchResults(data.searchQuestions.questions);
+            setTotalSearchPages(data.searchQuestions.totalPages);
+        },
     });
+    const submitSearch = (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
 
+        if (searchTerm.startsWith('user:')) {
+            // Handle search by user
+            const username = searchTerm.replace('user:', '').trim();
+            executeSearch({
+                variables: {
+                    searchTerm: username,
+                    searchBy: 'user', // Assuming your query handles this
+                    limit: itemsPerPage,
+                    offset: (page - 1) * itemsPerPage,
+                },
+            });
+        } else if (searchTerm.startsWith('[') && searchTerm.endsWith(']')) {
+            // Handle search by tags
+            const tags = searchTerm.match(/\[(.*?)\]/g)?.map(tag => tag.replace(/\[|\]/g, ''));
+            executeSearch({
+                variables: {
+                    searchTerm: tags?.join(' '),
+                    searchBy: 'tags', // Assuming your query handles this
+                    limit: itemsPerPage,
+                    offset: (page - 1) * itemsPerPage,
+                },
+            });
+        } else {
+            // Handle normal search by title
+            executeSearch({
+                variables: {
+                    searchTerm,
+                    limit: itemsPerPage,
+                    offset: (page - 1) * itemsPerPage,
+                },
+            });
+        }
+    };
 
+    const handleSearch = debounce((value: string) => {
+        setPopoverVisible(!!value);
+        if (value) {
+            executeSearch({
+                variables: {
+                    searchTerm: value,
+                    limit: itemsPerPage,
+                    offset: (page - 1) * itemsPerPage,
+                },
+            });
+        } else {
+            setSearchResults([]);
+            setTotalSearchPages(0);
+        }
+    }, 300);
+
+    const content = (
+        <>
+            {searchResults.length === 0 ? (
+                <div className='w-[35vw] grid grid-cols-1 md:grid-cols-2 gap-2'>
+                    <div className=''>
+                        <p><strong>[tag] </strong>: search by tag</p>
+                        <p> <strong>title</strong> : search by title</p>
+                    </div>
+                    <div className='whitespace-nowrap'>
+                        <p><strong>user:1234</strong> :search by user</p>
+                    </div>
+                </div>
+            ) :
+                searchResults.map((question, index) => (
+                    <div key={index} className='flex items-center gap-2'>
+                        <SearchOutlined />
+                        <p>{question.title}</p>
+                    </div>
+                ))
+            }
+            <hr className='my-2' />
+            <div className='flex justify-end'>
+                <button className='bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2 rounded-md' onClick={() => navigate('/questions/ask')}>Ask Question</button>
+            </div>
+        </>
+    );
     return (
         <div className="flex flex-col min-h-screen bg-background text-foreground dark:bg-dark-background dark:text-dark-foreground">
             <main className="md:px-8 p-8">
                 <div className="grid grid-cols-12 gap-4">
-                    <aside className="col-span-12 md:col-span-3 dark:bg-dark-background rounded-lg shadow-md p-4">
-                        <h3 className="text-xl font-bold text-gray-800 mb-4">Filters</h3>
-                        <div className="grid gap-6">
-                            {/* Tags Section */}
-                            <div>
-                                <h4 className="text-sm font-semibold text-gray-300 mb-3 border-b border-gray-700 pb-1">Tags</h4>
-                                <div className="flex gap-2 flex-wrap">
-                                    {['React', 'JavaScript', 'Python', 'CSS', 'Node.js', 'SQL'].map((tag) => (
-                                        <a
-                                            key={tag}
-                                            className="bg-gray-700 hover:bg-gray-600 text-white rounded-md px-3 py-1 text-xs font-mono transition-colors duration-200 ease-in-out"
-                                            href="#"
-                                        >
-                                            {tag}
-                                        </a>
-                                    ))}
-                                </div>
-                            </div>
-                            {/* Sort By Section */}
-                            <div>
-                                <h4 className="text-sm font-semibold text-gray-300 mb-3 border-b border-gray-700 pb-1">Sort By</h4>
-                                {/* Add sorting options here */}
-                            </div>
-                        </div>
-                    </aside>
+                    <Filter />
 
                     <section className='col-span-12 md:col-span-6  rounded-lg shadow-md p-4 overflow-y-auto max-h-[85vh]'>
                         <div className="flex flex-col gap-4 mb-4">
                             <button className="w-fit self-end bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2 rounded-md" onClick={() => navigate('/questions/ask')}>
                                 Ask Question
                             </button>
-                            <form className="relative" onSubmit={() => { }}>
-                                <input
-                                    className="flex h-10 w-full rounded-md border bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 pl-8"
-                                    placeholder="Search questions..."
-                                    type="search"
-                                />
-                                <CiSearch className="absolute left-2 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                            </form>
+                            <Popover
+                                content={content}
+                                placement="bottom"
+                                trigger="click"
+                                open={popoverVisible}
+                                onOpenChange={setPopoverVisible}
+                            >
+                                <form onSubmit={submitSearch}>
+
+                                    <Input
+                                        placeholder="Search questions..."
+                                        prefix={<SearchOutlined />}
+                                        value={searchTerm}
+                                        onChange={(e) => { setSearchTerm(e.target.value), handleSearch(e.target.value) }}
+                                    />
+                                </form>
+                            </Popover>
 
                         </div>
                         <div className="grid gap-4">
-                            {data?.getQuestions?.questions?.map((question: Question) => (
-                                <QuestionCard key={question.id} question={question} loading={loading} />
-                            ))}
+                            {
+                                questions?.map((question: Question) => (
+                                    <QuestionCard key={question.id} question={question} loading={loading} />
+                                ))
+                            }
                         </div>
                         <div className='flex justify-end mt-2'>
                             <Pagination
                                 showControls
-                                total={data?.getQuestions?.totalPages}
+                                total={searchTerm ? totalSearchPages : data?.getQuestions?.totalPages}
                                 initialPage={1}
                                 page={page}
                                 onChange={(newPage) => setPage(newPage)}
