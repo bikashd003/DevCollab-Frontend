@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import QuestionCard from '../Components/QuestionCard';
 import { CiSearch } from "react-icons/ci";
 import { useNavigate } from 'react-router-dom';
@@ -20,7 +20,16 @@ interface Question {
 
 const QuestionsPage: React.FC = () => {
     const navigate = useNavigate()
-    const { loading, data } = useQuery(GET_ALL_QUESTIONS);
+    const [page, setPage] = useState(1);
+    const [itemsPerPage] = useState(10);
+    const { loading, data } = useQuery(GET_ALL_QUESTIONS, {
+        variables: {
+            limit: itemsPerPage,
+            offset: (page - 1) * itemsPerPage,
+        }
+    });
+
+
     return (
         <div className="flex flex-col min-h-screen bg-background text-foreground dark:bg-dark-background dark:text-dark-foreground">
             <main className="md:px-8 p-8">
@@ -67,12 +76,18 @@ const QuestionsPage: React.FC = () => {
 
                         </div>
                         <div className="grid gap-4">
-                            {data?.getQuestions?.map((question: Question) => (
+                            {data?.getQuestions?.questions?.map((question: Question) => (
                                 <QuestionCard key={question.id} question={question} loading={loading} />
                             ))}
                         </div>
                         <div className='flex justify-end mt-2'>
-                            <Pagination showControls total={10} initialPage={1} />
+                            <Pagination
+                                showControls
+                                total={data?.getQuestions?.totalPages}
+                                initialPage={1}
+                                page={page}
+                                onChange={(newPage) => setPage(newPage)}
+                            />
                         </div>
                     </section>
                     <aside className="col-span-12 md:col-span-3 dark:bg-dark-background rounded-lg shadow-md p-4">
