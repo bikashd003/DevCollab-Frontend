@@ -60,7 +60,7 @@ const QuestionsPage: React.FC = () => {
                         </div>
                     </aside>
 
-                    <section className='col-span-12 md:col-span-6  rounded-lg shadow-md p-4'>
+                    <section className='col-span-12 md:col-span-6  rounded-lg shadow-md p-4 overflow-y-auto max-h-[85vh]'>
                         <div className="flex flex-col gap-4 mb-4">
                             <button className="w-fit self-end bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2 rounded-md" onClick={() => navigate('/questions/ask')}>
                                 Ask Question
