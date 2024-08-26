@@ -19,7 +19,7 @@ export const GET_ALL_QUESTIONS = gql`
   }
 `;
 export const SEARCH_QUESTIONS = gql`
-  query SearchQuestions($searchTerm: String!, $limit: Int!, $offset: Int!, $tags: [String], $userId: ID) {
+  query SearchQuestions($searchTerm: String, $limit: Int!, $offset: Int!, $tags: [String], $userId: ID) {
     searchQuestions(
       searchTerm: $searchTerm
       limit: $limit

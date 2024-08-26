@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import QuestionCard from '../Components/QuestionCard';
 import { SearchOutlined } from '@ant-design/icons';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Pagination } from '@nextui-org/react';
 import { GET_ALL_QUESTIONS, SEARCH_QUESTIONS } from '../GraphQL/Queries/Questions/Questions';
 import { useQuery, useLazyQuery } from '@apollo/client';
@@ -44,9 +44,15 @@ const QuestionsPage: React.FC = () => {
             setQuestions(data?.getQuestions?.questions)
         }
     }, [data])
-    const [executeSearch, { loading: searchLoading }] = useLazyQuery(SEARCH_QUESTIONS, {
+    const [executeSearch] = useLazyQuery(SEARCH_QUESTIONS, {
         onCompleted: (data) => {
             setSearchResults(data.searchQuestions.questions);
+            setTotalSearchPages(data.searchQuestions.totalPages);
+        },
+    });
+    const [executeSubmitSearch, { loading: submitSearchLoading }] = useLazyQuery(SEARCH_QUESTIONS, {
+        onCompleted: (data) => {
+            setQuestions(data.searchQuestions.questions);
             setTotalSearchPages(data.searchQuestions.totalPages);
         },
     });
@@ -56,10 +62,9 @@ const QuestionsPage: React.FC = () => {
         if (searchTerm.startsWith('user:')) {
             // Handle search by user
             const username = searchTerm.replace('user:', '').trim();
-            executeSearch({
+            executeSubmitSearch({
                 variables: {
-                    searchTerm: username,
-                    searchBy: 'user', // Assuming your query handles this
+                    userId: username,
                     limit: itemsPerPage,
                     offset: (page - 1) * itemsPerPage,
                 },
@@ -67,17 +72,16 @@ const QuestionsPage: React.FC = () => {
         } else if (searchTerm.startsWith('[') && searchTerm.endsWith(']')) {
             // Handle search by tags
             const tags = searchTerm.match(/\[(.*?)\]/g)?.map(tag => tag.replace(/\[|\]/g, ''));
-            executeSearch({
+            executeSubmitSearch({
                 variables: {
-                    searchTerm: tags?.join(' '),
-                    searchBy: 'tags', // Assuming your query handles this
+                    tags: tags,
                     limit: itemsPerPage,
                     offset: (page - 1) * itemsPerPage,
                 },
             });
         } else {
             // Handle normal search by title
-            executeSearch({
+            executeSubmitSearch({
                 variables: {
                     searchTerm,
                     limit: itemsPerPage,
@@ -108,8 +112,8 @@ const QuestionsPage: React.FC = () => {
             {searchResults.length === 0 ? (
                 <div className='w-[35vw] grid grid-cols-1 md:grid-cols-2 gap-2'>
                     <div className=''>
-                        <p><strong>[tag] </strong>: search by tag</p>
-                        <p> <strong>title</strong> : search by title</p>
+                        <p><strong>[tag]</strong> :search by tag</p>
+                        <p><strong>title</strong> :search by title</p>
                     </div>
                     <div className='whitespace-nowrap'>
                         <p><strong>user:1234</strong> :search by user</p>
@@ -117,9 +121,9 @@ const QuestionsPage: React.FC = () => {
                 </div>
             ) :
                 searchResults.map((question, index) => (
-                    <div key={index} className='flex items-center gap-2'>
+                    <div className='flex gap-2 items-center text-primary' key={index}>
                         <SearchOutlined />
-                        <p>{question.title}</p>
+                        <Link to="">{question.title}</Link>
                     </div>
                 ))
             }
@@ -162,7 +166,7 @@ const QuestionsPage: React.FC = () => {
                         <div className="grid gap-4">
                             {
                                 questions?.map((question: Question) => (
-                                    <QuestionCard key={question.id} question={question} loading={loading} />
+                                    <QuestionCard key={question.id} question={question} loading={searchTerm ? submitSearchLoading : loading} />
                                 ))
                             }
                         </div>
