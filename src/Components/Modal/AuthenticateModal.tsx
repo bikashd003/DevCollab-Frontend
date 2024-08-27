@@ -21,7 +21,7 @@ const AuthenticateModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
   const [isVisible, setIsVisible] = useState(false);
   const [githubAuthUrl, setGithubAuthUrl] = useState('');
 
-  const handleSubmit = (values: FormValues, { setSubmitting }: FormikHelpers<FormValues>) => {
+  const handleSubmit = (_: FormValues, { setSubmitting }: FormikHelpers<FormValues>) => {
     // Handle form submission
     setSubmitting(false);
   };
