@@ -1,11 +1,13 @@
-import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import axios from 'axios';
+import { createContext, ReactNode, useContext, useEffect, useState } from 'react';
 import BackendApi from '../Constant/Api';
 
 interface AuthContextType {
   isAuthenticated: boolean;
   accessToken: string | null;
+  // eslint-disable-next-line no-unused-vars
   setAccessToken: (token: string | null) => void;
+  // eslint-disable-next-line no-unused-vars
   setIsAuthenticated: (isAuthenticated: boolean) => void;
   handleLogout: () => void;
 }
@@ -22,18 +24,22 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setIsAuthenticated(false);
       setAccessToken(null);
     } catch (err) {
-      console.error('Logout failed', err);
+      // console.error('Logout failed', err);
     }
-  }
+  };
 
   useEffect(() => {
     const silentRefresh = async () => {
       try {
-        const response = await axios.post(`${BackendApi}/auth/token`, {}, { withCredentials: true });
-        setAccessToken(response.data.token);  
+        const response = await axios.post(
+          `${BackendApi}/auth/token`,
+          {},
+          { withCredentials: true }
+        );
+        setAccessToken(response.data.token);
         setIsAuthenticated(true);
       } catch (err) {
-        console.error('Silent refresh failed', err);
+        // console.error('Silent refresh failed', err);
         setIsAuthenticated(false);
       } finally {
         setLoading(false);
@@ -44,13 +50,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   return (
-    <AuthContext.Provider value={{ isAuthenticated, accessToken, setAccessToken, setIsAuthenticated, handleLogout }}>
-      {!loading && children} 
+    <AuthContext.Provider
+      value={{ isAuthenticated, accessToken, setAccessToken, setIsAuthenticated, handleLogout }}
+    >
+      {!loading && children}
     </AuthContext.Provider>
   );
 };
 
-// eslint-disable-next-line react-refresh/only-export-components
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (context === undefined) {

@@ -1,11 +1,11 @@
-import React from 'react';
 import { motion } from 'framer-motion';
+import React from 'react';
 
 const NotFound: React.FC = () => {
   return (
     <div className="min-h-screen bg-gray-900 flex items-center justify-center px-4">
       <div className="max-w-4xl w-full text-center">
-        <motion.h1 
+        <motion.h1
           className="text-6xl font-bold text-purple-400 mb-8"
           initial={{ opacity: 0, y: -50 }}
           animate={{ opacity: 1, y: 0 }}
@@ -23,21 +23,21 @@ const NotFound: React.FC = () => {
           Page not found
           <span className="text-pink-400">/&gt;</span>
         </motion.div>
-        <motion.p 
+        <motion.p
           className="text-xl text-gray-400 mb-12"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.4, duration: 0.5 }}
         >
-          The code you're looking for seems to have vanished into the digital void.
+          The code you&apos;re looking for seems to have vanished into the digital void.
         </motion.p>
         <motion.div
           className="inline-block"
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
         >
-          <a 
-            href="/" 
+          <a
+            href="/"
             className="px-6 py-3 bg-purple-600 text-white rounded-full hover:bg-purple-700 transition duration-300 ease-in-out"
           >
             Return to Home

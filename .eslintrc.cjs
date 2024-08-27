@@ -9,7 +9,6 @@ module.exports = {
   plugins: ['@typescript-eslint', 'react', 'prettier'],
   ignorePatterns: ['dist', '.eslintrc.cjs'],
   rules: {
-    'prettier/prettier': 'error',
     'no-console': 'error', // This will cause ESLint to error on console.log
     'react/react-in-jsx-scope': 'off', // Not needed in Next.js
     '@typescript-eslint/explicit-module-boundary-types': 'off',

@@ -1,7 +1,7 @@
-import { useEffect } from 'react';
 import axios from 'axios';
-import { useAuth } from './AuthContext';
+import { useEffect } from 'react';
 import BackendApi from '../Constant/Api';
+import { useAuth } from './AuthContext';
 
 // Create an axios instance
 const api = axios.create({
@@ -15,34 +15,38 @@ const useAxiosInterceptors = () => {
   useEffect(() => {
     // Request interceptor to add the access token to headers
     const requestInterceptor = api.interceptors.request.use(
-      (config) => {
+      config => {
         if (accessToken) {
           config.headers['Authorization'] = `Bearer ${accessToken}`;
         }
         return config;
       },
-      (error) => {
+      error => {
         return Promise.reject(error);
       }
     );
 
     // Response interceptor to handle token expiration
     const responseInterceptor = api.interceptors.response.use(
-      (response) => {
+      response => {
         return response;
       },
-      async (error) => {
+      async error => {
         const originalRequest = error.config;
         if (error.response.status === 401 && !originalRequest._retry) {
           originalRequest._retry = true;
           try {
-            const response = await axios.post(`${BackendApi}/auth/token`, {}, { withCredentials: true });
+            const response = await axios.post(
+              `${BackendApi}/auth/token`,
+              {},
+              { withCredentials: true }
+            );
             setAccessToken(response.data.token);
             setIsAuthenticated(true);
             originalRequest.headers['Authorization'] = `Bearer ${response.data.token}`;
             return axios(originalRequest);
           } catch (err) {
-            console.error('Failed to refresh token', err);
+            // console.error('Failed to refresh token', err);
             setIsAuthenticated(false);
           }
         }
