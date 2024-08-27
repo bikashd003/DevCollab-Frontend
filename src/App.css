@@ -80,3 +80,29 @@ html.dark body .custom-steps.ant-steps .ant-steps-item-process .ant-steps-item-c
   background-color: #177ddc;
   border-color: #177ddc;
 }
+/* In your CSS file or styled-component */
+
+.custom-scrollbar {
+
+  /* For Webkit-based browsers (Chrome, Safari) */
+  &::-webkit-scrollbar {
+    width: 10px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: #f1f1f1;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 6px;
+  }
+
+  &::-webkit-scrollbar-thumb:hover {
+    background: #555;
+  }
+
+  /* For Firefox */
+  scrollbar-width: thin;
+  scrollbar-color: #888 #f1f1f1;
+}

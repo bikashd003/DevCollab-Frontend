@@ -18,6 +18,8 @@ import AskQuestion from "./Pages/AskQuestion";
 import Nav from "./Components/Home/Nav";
 import { Outlet } from "react-router-dom";
 import Footer from "./Components/Home/Footer";
+import AboutPage from "./Pages/AboutPage";
+import BlogPage from "./Pages/BlogPage";
 const MainLayout: React.FC = () => {
   return (
     <div>
@@ -54,6 +56,14 @@ const router = createBrowserRouter([
           },
         ],
       },
+      {
+        path: "about",
+        element: <PublicRoute element={<AboutPage />} />,
+      },
+      {
+        path: 'blogs',
+        element: <PublicRoute element={<BlogPage />} />,
+      }
     ],
   },
   {
