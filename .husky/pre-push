@@ -1,0 +1,8 @@
+#!/bin/sh
+if [ "$SKIP_HOOK" = "true" ]; then
+  echo "Skipping pre-push hook"
+  exit 0
+fi
+
+
+npm run build
