@@ -138,7 +138,7 @@ export default function BlogPage() {
 
       {isModalOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
-          <div className="bg-zinc-800 p-6 rounded-lg w-full max-w-md">
+          <div className="bg-zinc-800 p-6 rounded-lg w-full max-w-[76rem]">
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-xl font-bold">Write New Blog Post</h2>
               <button
@@ -166,6 +166,7 @@ export default function BlogPage() {
                       type="text"
                       id="title"
                       name="title"
+                      placeholder="Enter a title for your blog post"
                       className={`w-full px-3 py-2 text-gray-700 bg-gray-200 border rounded-lg focus:outline-none focus:border-blue-500 dark:bg-gray-700 dark:text-gray-300 dark:border-gray-600 ${
                         errors.title && touched.title ? 'border-red-500' : ''
                       }`}
@@ -187,8 +188,10 @@ export default function BlogPage() {
                       as="textarea"
                       id="content"
                       name="content"
-                      rows={5}
-                      className={`w-full px-3 py-2 text-gray-700 bg-gray-200 border rounded-lg focus:outline-none focus:border-blue-500 dark:bg-gray-700 dark:text-gray-300 dark:border-gray-600 ${
+                      rows={20}
+                      cols={30}
+                      placeholder="Write your blog post here..."
+                      className={`resize-none w-full px-3 py-2 text-gray-700 bg-gray-200 border rounded-lg focus:outline-none focus:border-blue-500 dark:bg-gray-700 dark:text-gray-300 dark:border-gray-600 ${
                         errors.content && touched.content ? 'border-red-500' : ''
                       }`}
                     />
