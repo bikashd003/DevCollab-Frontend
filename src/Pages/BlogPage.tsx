@@ -1,26 +1,23 @@
-import React, { useState } from 'react';
+import { ErrorMessage, Field, Form, Formik, FormikHelpers } from 'formik';
+import BlogSchema from '../Schemas/BlogSchema';
+import { useState } from 'react';
 import { BsShare, BsX } from 'react-icons/bs';
 import { FaPenSquare, FaThumbsUp } from 'react-icons/fa';
 import { FiMessageSquare } from 'react-icons/fi';
 
+type FormValues = { title: string; content: string };
+
 export default function BlogPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [newPost, setNewPost] = useState({ title: '', content: '' });
-
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
-    setNewPost(prev => ({ ...prev, [name]: value }));
-  };
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    // Here you would typically send this data to your backend
-    setNewPost({ title: '', content: '' });
+  const initialValues: FormValues = { title: '', content: '' };
+  const handleSubmit = (_: FormValues, { setSubmitting }: FormikHelpers<FormValues>) => {
+    // Handle form submission
+    setSubmitting(false);
     setIsModalOpen(false);
   };
 
   return (
-    <div className="min-h-screen bg-zinc-900 text-zinc-100 font-mono">
+    <div className="min-h-screen bg-background text-foreground dark:bg-dark-background dark:text-dark-foreground font-mono">
       <main className="container mx-auto px-4 py-8 flex flex-col lg:flex-row gap-8">
         <div className="lg:w-3/4 space-y-8">
           <button
@@ -31,7 +28,8 @@ export default function BlogPage() {
             Write New Post
           </button>
 
-          <div className="bg-zinc-800 border border-zinc-700 rounded-lg p-6">
+          {/* Blog Post Sample */}
+          <div className="dark:bg-dark-background border border-zinc-700 rounded-lg p-6">
             <div className="flex items-center space-x-4 mb-4">
               <div className="w-10 h-10 bg-emerald-500 rounded-full"></div>
               <div>
@@ -61,7 +59,8 @@ export default function BlogPage() {
             </div>
           </div>
 
-          <div className="bg-zinc-800 border border-zinc-700 rounded-lg p-6">
+          {/* Another Blog Post Sample */}
+          <div className="dark:bg-dark-background border border-zinc-700 rounded-lg p-6">
             <div className="flex items-center space-x-4 mb-4">
               <div className="w-10 h-10 bg-emerald-500 rounded-full"></div>
               <div>
@@ -94,7 +93,7 @@ export default function BlogPage() {
         </div>
 
         <aside className="lg:w-1/4 space-y-8">
-          <div className="bg-zinc-800 border border-zinc-700 rounded-lg p-6">
+          <div className="dark:bg-dark-background border border-zinc-700 rounded-lg p-6">
             <h2 className="text-lg font-semibold mb-4">Popular Tags</h2>
             <div className="flex flex-wrap gap-2">
               <span className="bg-emerald-900 text-emerald-100 px-2 py-1 rounded text-sm">
@@ -115,7 +114,7 @@ export default function BlogPage() {
             </div>
           </div>
 
-          <div className="bg-zinc-800 border border-zinc-700 rounded-lg p-6">
+          <div className="dark:bg-dark-background border border-zinc-700 rounded-lg p-6">
             <h2 className="text-lg font-semibold mb-4">Top Contributors</h2>
             <ul className="space-y-4">
               <li className="flex items-center space-x-4">
@@ -149,42 +148,67 @@ export default function BlogPage() {
                 <BsX size={24} />
               </button>
             </div>
-            <form onSubmit={handleSubmit}>
-              <div className="mb-4">
-                <label htmlFor="title" className="block text-sm font-medium text-zinc-300 mb-1">
-                  Title
-                </label>
-                <input
-                  type="text"
-                  id="title"
-                  name="title"
-                  value={newPost.title}
-                  onChange={handleInputChange}
-                  className="w-full bg-zinc-700 border border-zinc-600 rounded-md py-2 px-3 text-zinc-100 focus:outline-none focus:border-emerald-500"
-                  required
-                />
-              </div>
-              <div className="mb-4">
-                <label htmlFor="content" className="block text-sm font-medium text-zinc-300 mb-1">
-                  Content
-                </label>
-                <textarea
-                  id="content"
-                  name="content"
-                  value={newPost.content}
-                  onChange={handleInputChange}
-                  rows={5}
-                  className="w-full bg-zinc-700 border border-zinc-600 rounded-md py-2 px-3 text-zinc-100 focus:outline-none focus:border-emerald-500"
-                  required
-                ></textarea>
-              </div>
-              <button
-                type="submit"
-                className="w-full bg-emerald-600 hover:bg-emerald-700 text-white py-2 px-4 rounded"
-              >
-                Publish Post
-              </button>
-            </form>
+            <Formik
+              initialValues={initialValues}
+              validationSchema={BlogSchema}
+              onSubmit={handleSubmit}
+            >
+              {({ errors, touched }) => (
+                <Form className="space-y-4">
+                  <div>
+                    <label
+                      htmlFor="title"
+                      className="block mb-2 text-sm font-medium text-gray-700 dark:text-dark-foreground"
+                    >
+                      Title
+                    </label>
+                    <Field
+                      type="text"
+                      id="title"
+                      name="title"
+                      className={`w-full px-3 py-2 text-gray-700 bg-gray-200 border rounded-lg focus:outline-none focus:border-blue-500 dark:bg-gray-700 dark:text-gray-300 dark:border-gray-600 ${
+                        errors.title && touched.title ? 'border-red-500' : ''
+                      }`}
+                    />
+                    <ErrorMessage
+                      name="title"
+                      component="div"
+                      className="mt-1 text-sm text-red-500"
+                    />
+                  </div>
+                  <div>
+                    <label
+                      htmlFor="content"
+                      className="block mb-2 text-sm font-medium text-gray-700 dark:text-dark-foreground"
+                    >
+                      Content
+                    </label>
+                    <Field
+                      as="textarea"
+                      id="content"
+                      name="content"
+                      rows={5}
+                      className={`w-full px-3 py-2 text-gray-700 bg-gray-200 border rounded-lg focus:outline-none focus:border-blue-500 dark:bg-gray-700 dark:text-gray-300 dark:border-gray-600 ${
+                        errors.content && touched.content ? 'border-red-500' : ''
+                      }`}
+                    />
+                    <ErrorMessage
+                      name="content"
+                      component="div"
+                      className="mt-1 text-sm text-red-500"
+                    />
+                  </div>
+                  <div className="flex justify-end">
+                    <button
+                      type="submit"
+                      className="bg-emerald-600 hover:bg-emerald-700 text-white py-2 px-4 rounded"
+                    >
+                      Publish
+                    </button>
+                  </div>
+                </Form>
+              )}
+            </Formik>
           </div>
         </div>
       )}
