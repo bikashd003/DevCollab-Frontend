@@ -11,6 +11,7 @@ import { LIKE_BLOG } from '../GraphQL/Mutations/Blogs/Blogs';
 import { GET_BLOGS } from '../GraphQL/Mutations/Blogs/Blogs';
 import moment from 'moment';
 import { Skeleton } from '@nextui-org/react';
+import { useNavigate } from 'react-router-dom';
 
 type FormValues = { title: string; content: string };
 interface Blog {
@@ -27,6 +28,7 @@ interface Blog {
 
 export default function BlogPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const navigate = useNavigate();
   const [likeBlog] = useMutation(LIKE_BLOG);
   const { loading, data } = useQuery(GET_BLOGS);
   const initialValues: FormValues = { title: '', content: '' };
@@ -77,7 +79,12 @@ export default function BlogPage() {
                     />
                   </div>
                   <div>
-                    <h2 className="text-lg font-semibold">{blog?.title}</h2>
+                    <h2
+                      className="text-lg font-semibold  hover:text-emerald-500 cursor-pointer"
+                      onClick={() => navigate(`/blog/${blog?.id}`)}
+                    >
+                      {blog?.title}
+                    </h2>
                     <p className="text-sm text-zinc-400">
                       by {blog?.author?.username} • {moment(parseInt(blog?.createdAt)).fromNow()}
                     </p>

@@ -19,6 +19,7 @@ import { Outlet } from 'react-router-dom';
 import Footer from './Components/Home/Footer';
 import AboutPage from './Pages/AboutPage';
 import BlogPage from './Pages/BlogPage';
+import BlogDetails from './Pages/BlogDetails';
 const MainLayout: React.FC = () => {
   return (
     <div>
@@ -44,6 +45,10 @@ const router = createBrowserRouter([
       {
         path: 'blogs',
         element: <PublicRoute element={<BlogPage />} />,
+      },
+      {
+        path: 'blog/:id',
+        element: <PublicRoute element={<BlogDetails />} />,
       },
     ],
   },

@@ -23,6 +23,20 @@ export const GET_BLOGS = gql`
     }
   }
 `;
+export const GET_BLOG_DETAILS = gql`
+  query GetBlogDetails($id: ID!) {
+    getBlogById(id: $id) {
+      id
+      title
+      content
+      author {
+        username
+        profilePicture
+      }
+      createdAt
+    }
+  }
+`;
 export const LIKE_BLOG = gql`
   mutation likeBlog($blogId: ID!, $userId: Id) {
     likeBlog(blogId: $blogId, userId: $userId) {
