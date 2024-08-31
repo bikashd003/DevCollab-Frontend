@@ -4,18 +4,51 @@ import { useState } from 'react';
 import { BsShare, BsX } from 'react-icons/bs';
 import { FaPenSquare, FaThumbsUp } from 'react-icons/fa';
 import { FiMessageSquare } from 'react-icons/fi';
+import { useQuery, useMutation } from '@apollo/client';
+import { CREATE_BLOG_MUTATION } from '../GraphQL/Mutations/Blogs/Blogs';
+import { message } from 'antd';
+import { LIKE_BLOG } from '../GraphQL/Mutations/Blogs/Blogs';
+import { GET_BLOGS } from '../GraphQL/Mutations/Blogs/Blogs';
+import moment from 'moment';
+import { Skeleton } from '@nextui-org/react';
 
 type FormValues = { title: string; content: string };
+interface Blog {
+  id: number;
+  title: string;
+  content: string;
+  likes: number;
+  author: {
+    username: string;
+    profilePicture: string;
+  };
+  createdAt: string;
+}
 
 export default function BlogPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [likeBlog] = useMutation(LIKE_BLOG);
+  const { loading, data } = useQuery(GET_BLOGS);
   const initialValues: FormValues = { title: '', content: '' };
-  const handleSubmit = (_: FormValues, { setSubmitting }: FormikHelpers<FormValues>) => {
+  const [createBlog, { error }] = useMutation(CREATE_BLOG_MUTATION, {
+    onCompleted: () => {
+      message.success('Blog created successfully');
+    },
+    onError: err => {
+      message.error(err.message);
+    },
+  });
+
+  const handleSubmit = async (value: FormValues, { setSubmitting }: FormikHelpers<FormValues>) => {
+    await createBlog({ variables: { title: value.title, content: value.content } });
+    if (error) return;
     // Handle form submission
     setSubmitting(false);
     setIsModalOpen(false);
   };
-
+  const handleLikeBlog = (id: number) => {
+    likeBlog({ variables: { blogId: id } });
+  };
   return (
     <div className="min-h-screen bg-background text-foreground dark:bg-dark-background dark:text-dark-foreground font-mono">
       <main className="container mx-auto px-4 py-8 flex flex-col lg:flex-row gap-8">
@@ -28,68 +61,51 @@ export default function BlogPage() {
             Write New Post
           </button>
 
-          {/* Blog Post Sample */}
-          <div className="dark:bg-dark-background border border-zinc-700 rounded-lg p-6">
-            <div className="flex items-center space-x-4 mb-4">
-              <div className="w-10 h-10 bg-emerald-500 rounded-full"></div>
-              <div>
-                <h2 className="text-lg font-semibold">Mastering React Hooks: A Deep Dive</h2>
-                <p className="text-sm text-zinc-400">by John Doe • 3 days ago</p>
-              </div>
-            </div>
-            <p className="text-zinc-300 mb-4">
-              React Hooks have revolutionized the way we write React components. In this post, we
-              will explore the power of useState, useEffect, and custom hooks...
-            </p>
-            <div className="flex justify-between items-center text-zinc-400">
-              <div className="flex space-x-4">
-                <button className="flex items-center hover:text-emerald-500">
-                  <FaThumbsUp size={18} className="mr-1" />
-                  124
-                </button>
-                <button className="flex items-center hover:text-emerald-500">
-                  <FiMessageSquare size={18} className="mr-1" />
-                  23
-                </button>
-              </div>
-              <button className="flex items-center hover:text-emerald-500">
-                <BsShare size={18} className="mr-1" />
-                Share
-              </button>
-            </div>
-          </div>
-
-          {/* Another Blog Post Sample */}
-          <div className="dark:bg-dark-background border border-zinc-700 rounded-lg p-6">
-            <div className="flex items-center space-x-4 mb-4">
-              <div className="w-10 h-10 bg-emerald-500 rounded-full"></div>
-              <div>
-                <h2 className="text-lg font-semibold">Building Scalable APIs with GraphQL</h2>
-                <p className="text-sm text-zinc-400">by Jane Doe • 1 week ago</p>
-              </div>
-            </div>
-            <p className="text-zinc-300 mb-4">
-              GraphQL has gained popularity for its flexibility and efficiency in API development.
-              In this article, we will dive into best practices for building scalable GraphQL
-              APIs...
-            </p>
-            <div className="flex justify-between items-center text-zinc-400">
-              <div className="flex space-x-4">
-                <button className="flex items-center hover:text-emerald-500">
-                  <FaThumbsUp size={18} className="mr-1" />
-                  89
-                </button>
-                <button className="flex items-center hover:text-emerald-500">
-                  <FiMessageSquare size={18} className="mr-1" />
-                  15
-                </button>
-              </div>
-              <button className="flex items-center hover:text-emerald-500">
-                <BsShare size={18} className="mr-1" />
-                Share
-              </button>
-            </div>
-          </div>
+          {data?.getBlogs?.map((blog: Blog) => {
+            return (
+              <Skeleton
+                isLoaded={!loading}
+                className="dark:bg-dark-background border border-zinc-700 rounded-lg p-6"
+                key={blog?.id}
+              >
+                <div className="flex items-center space-x-4 mb-4">
+                  <div className="w-10 h-10 bg-emerald-500 rounded-full">
+                    <img
+                      className="aspect-square h-full w-full"
+                      alt={blog.author.username}
+                      src={blog.author.profilePicture}
+                    />
+                  </div>
+                  <div>
+                    <h2 className="text-lg font-semibold">{blog?.title}</h2>
+                    <p className="text-sm text-zinc-400">
+                      by {blog?.author?.username} • {moment(parseInt(blog?.createdAt)).fromNow()}
+                    </p>
+                  </div>
+                </div>
+                <p className="text-zinc-300 mb-4">{blog?.content?.slice(0, 100)}...</p>
+                <div className="flex justify-between items-center text-zinc-400">
+                  <div className="flex space-x-4">
+                    <button
+                      className="flex items-center hover:text-emerald-500"
+                      onClick={() => handleLikeBlog(blog?.id)}
+                    >
+                      <FaThumbsUp size={18} className="mr-1" />
+                      124
+                    </button>
+                    <button className="flex items-center hover:text-emerald-500">
+                      <FiMessageSquare size={18} className="mr-1" />
+                      23
+                    </button>
+                  </div>
+                  <button className="flex items-center hover:text-emerald-500">
+                    <BsShare size={18} className="mr-1" />
+                    Share
+                  </button>
+                </div>
+              </Skeleton>
+            );
+          })}
         </div>
 
         <aside className="lg:w-1/4 space-y-8">
