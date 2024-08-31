@@ -39,12 +39,12 @@ const BlogDetails = () => {
       </div>
       <div className="mt-4">
         <h2 className="text-lg font-semibold">Comments</h2>
-        {blog?.comments?.map(comment => (
+        {/* {blog?.comments?.map((comment) => (
           <div key={comment.id} className="border-t border-zinc-700 mt-2 pt-2">
             <p className="text-sm text-zinc-300">{comment.content}</p>
             <p className="text-xs text-zinc-400">- {comment.author.username}</p>
           </div>
-        ))}
+        ))} */}
       </div>
     </Skeleton>
   );
