@@ -93,7 +93,7 @@ const Nav = () => {
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               className={`bg-blue-600 text-white px-4 py-1 rounded-full hover:bg-blue-700 transition duration-300 ${isAuthenticated ? 'hidden' : ''}`}
-              onClick={() => handleSignUpClick}
+              onClick={() => handleSignUpClick()}
             >
               Sign Up
             </MotionLink>
@@ -171,7 +171,12 @@ const Nav = () => {
                 href="#"
                 className={`text-foreground ${isAuthenticated ? 'hidden' : ''}`}
               >
-                <Button color="primary" variant="flat" fullWidth onClick={() => handleSignUpClick}>
+                <Button
+                  color="primary"
+                  variant="flat"
+                  fullWidth
+                  onClick={() => handleSignUpClick()}
+                >
                   Sign Up
                 </Button>
               </motion.a>

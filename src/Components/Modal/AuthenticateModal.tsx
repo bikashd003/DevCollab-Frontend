@@ -10,6 +10,7 @@ import LoginSchema from '../../Schemas/LoginSchema';
 import SignupSchema from '../../Schemas/SignupSchema';
 import { Checkbox } from '@nextui-org/react';
 import { message } from 'antd';
+import { useAuth } from '../../Secure/AuthContext';
 interface AuthModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -28,6 +29,7 @@ type FormValues =
 const AuthenticateModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
   const [isLogin, setIsLogin] = useState(true);
   const [isVisible, setIsVisible] = useState(false);
+  const { setIsAuthenticated } = useAuth();
   // const [githubAuthUrl, setGithubAuthUrl] = useState('');
   const [rememberMeChecked, setRememberMeChecked] = useState(false);
 
@@ -46,6 +48,7 @@ const AuthenticateModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
         } else if (response.status === 200) {
           message.success(response.data.message);
           localStorage.setItem('user', JSON.stringify({ isAuthenticate: true }));
+          setIsAuthenticated(true);
           onClose();
         } else {
           message.error(response.data.message);
