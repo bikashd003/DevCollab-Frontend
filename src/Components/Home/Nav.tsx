@@ -1,4 +1,12 @@
-import { Navbar, NavbarBrand, NavbarContent, NavbarItem, Button, Switch } from '@nextui-org/react';
+import {
+  Navbar,
+  NavbarBrand,
+  NavbarContent,
+  NavbarItem,
+  Button,
+  Switch,
+  User,
+} from '@nextui-org/react';
 import { useTheme } from '../../Context/ThemeProvider';
 import { BsSun } from 'react-icons/bs';
 import { IoMoonSharp } from 'react-icons/io5';
@@ -13,10 +21,13 @@ import { setIsModalOpen } from '../../Redux/OvarallSlice';
 import { RootState } from '../../Redux/Store';
 import AuthenticateModal from '../Modal/AuthenticateModal';
 import { useAuth } from '../../Secure/AuthContext';
+import { useQuery } from '@apollo/client';
+import { GET_USER_DATA } from '../../GraphQL/Queries/Users';
 
 const Nav = () => {
   const { isAuthenticated } = useAuth();
   const dispatch = useDispatch();
+  const { data } = useQuery(GET_USER_DATA);
   const isModalOpen = useSelector((state: RootState) => state.overall.isModalOpen);
   const { theme, setTheme } = useTheme();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -87,6 +98,15 @@ const Nav = () => {
               Sign Up
             </MotionLink>
           </NavbarItem>
+          {isAuthenticated && (
+            <User
+              name={data?.user?.username}
+              description={<Link to="/home/user">{data?.user?.username}</Link>}
+              avatarProps={{
+                src: `${data?.user?.profilePicture}`,
+              }}
+            />
+          )}
           <NavbarItem className="sm:hidden">
             <button
               onClick={() => setIsMenuOpen(!isMenuOpen)}
@@ -149,14 +169,9 @@ const Nav = () => {
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 href="#"
-                className="text-foreground"
+                className={`text-foreground ${isAuthenticated ? 'hidden' : ''}`}
               >
-                <Button
-                  color="primary"
-                  variant="flat"
-                  fullWidth
-                  onClick={() => dispatch(setIsModalOpen(true))}
-                >
+                <Button color="primary" variant="flat" fullWidth onClick={() => handleSignUpClick}>
                   Sign Up
                 </Button>
               </motion.a>

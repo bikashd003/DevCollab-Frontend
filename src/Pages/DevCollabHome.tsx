@@ -1,12 +1,12 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import DP from "../assets/Developers collaborating.png"
-import Footer from '../Components/Home/Footer';
+import DP from '../assets/Developers collaborating.png';
 import Commutity from '../Components/Home/Commutity';
 import { setIsModalOpen } from '../Redux/OvarallSlice';
+import { useAuth } from '../Secure/AuthContext';
 
 const DevCollabHome: React.FC = () => {
-
+  const { isAuthenticated } = useAuth();
   const MotionLink = motion.a;
 
   return (
@@ -20,13 +20,17 @@ const DevCollabHome: React.FC = () => {
               transition={{ duration: 0.5 }}
               className="md:w-1/2 mb-10 md:mb-0"
             >
-              <h1 className="text-4xl md:text-5xl font-bold mb-4">Level Up Your Coding Skills Together</h1>
+              <h1 className="text-4xl md:text-5xl font-bold mb-4">
+                Level Up Your Coding Skills Together
+              </h1>
               <p className="text-xl mb-6">Collaborative learning for developers, by developers</p>
-              <MotionLink href="#"
+              <MotionLink
+                href="#"
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
-                className="bg-white text-blue-600 px-6 py-3 rounded-full font-semibold hover:bg-blue-100 transition duration-300 inline-block"
-                onClick={() => setIsModalOpen(true)}>
+                className={`bg-white text-blue-600 px-6 py-3 rounded-full font-semibold hover:bg-blue-100 transition duration-300 inline-block ${isAuthenticated ? 'hidden' : ''}`}
+                onClick={() => setIsModalOpen(true)}
+              >
                 Get Started
               </MotionLink>
             </motion.div>
@@ -36,16 +40,16 @@ const DevCollabHome: React.FC = () => {
               transition={{ duration: 0.5 }}
               className="md:w-1/2"
             >
-              <img src={DP} alt="Developers collaborating" className="rounded-lg shadow-lg w-full" />
+              <img
+                src={DP}
+                alt="Developers collaborating"
+                className="rounded-lg shadow-lg w-full"
+              />
             </motion.div>
           </div>
-
         </section>
         <Commutity />
       </main>
-
-
-      <Footer />
     </div>
   );
 };
