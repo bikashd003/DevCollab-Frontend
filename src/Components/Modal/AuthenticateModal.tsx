@@ -8,26 +8,65 @@ import { IoCloseSharp } from 'react-icons/io5';
 import BackendApi from '../../Constant/Api';
 import LoginSchema from '../../Schemas/LoginSchema';
 import SignupSchema from '../../Schemas/SignupSchema';
+import { Checkbox } from '@nextui-org/react';
+import { message } from 'antd';
 interface AuthModalProps {
   isOpen: boolean;
   onClose: () => void;
 }
 type FormValues =
-  | { type: 'login'; email: string; password: string }
-  | { type: 'signup'; fullName: string; email: string; password: string; confirmPassword: string };
+  | { type: 'login'; email: string; password: string; rememberMeChecked: boolean }
+  | {
+      type: 'signup';
+      username: string;
+      email: string;
+      password: string;
+      confirmPassword: string;
+      rememberMeChecked: boolean;
+    };
 
 const AuthenticateModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
   const [isLogin, setIsLogin] = useState(true);
   const [isVisible, setIsVisible] = useState(false);
   const [githubAuthUrl, setGithubAuthUrl] = useState('');
+  const [rememberMeChecked, setRememberMeChecked] = useState(false);
 
-  const handleSubmit = (_: FormValues, { setSubmitting }: FormikHelpers<FormValues>) => {
-    // Handle form submission
-    setSubmitting(false);
+  const handleSubmit = async (value: FormValues, { setSubmitting }: FormikHelpers<FormValues>) => {
+    if (rememberMeChecked) {
+      value.rememberMeChecked = rememberMeChecked;
+    }
+    await axios
+      .post(`${BackendApi}/auth/${isLogin ? 'login' : 'signup'}`, value, {
+        withCredentials: true, // Include credentials (cookies) in the request
+      })
+      .then(response => {
+        if (response.status === 201) {
+          message.success(response.data.message);
+          setIsLogin(true);
+        } else if (response.status === 200) {
+          message.success(response.data.message);
+          onClose();
+        } else {
+          message.error(response.data.message);
+        }
+      })
+      .catch(error => {
+        message.error(error.response.data.message);
+      })
+      .finally(() => {
+        setSubmitting(false);
+      });
   };
   const initialValues: FormValues = isLogin
-    ? { type: 'login', email: '', password: '' }
-    : { type: 'signup', fullName: '', email: '', password: '', confirmPassword: '' };
+    ? { type: 'login', email: '', password: '', rememberMeChecked: false }
+    : {
+        type: 'signup',
+        username: '',
+        email: '',
+        password: '',
+        confirmPassword: '',
+        rememberMeChecked: false,
+      };
 
   useEffect(() => {
     axios
@@ -74,27 +113,27 @@ const AuthenticateModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
               {!isLogin && (
                 <div>
                   <label
-                    htmlFor="fullName"
+                    htmlFor="username"
                     className="block mb-2 text-sm font-medium text-gray-700 dark:text-dark-foreground"
                   >
-                    Full Name
+                    User Name
                   </label>
                   <Field
                     type="text"
-                    id="fullName"
-                    name="fullName"
+                    id="username"
+                    name="username"
                     className={`w-full px-3 py-2 text-gray-700 bg-gray-200 border rounded-lg focus:outline-none focus:border-blue-500 dark:bg-gray-700 dark:text-gray-300 dark:border-gray-600 ${
                       !isLogin &&
-                      'fullName' in errors &&
-                      'fullName' in touched &&
-                      errors.fullName &&
-                      touched.fullName
+                      'username' in errors &&
+                      'username' in touched &&
+                      errors.username &&
+                      touched.username
                         ? 'border-red-500'
                         : ''
                     }`}
                   />
                   <ErrorMessage
-                    name="fullName"
+                    name="username"
                     component="div"
                     className="mt-1 text-sm text-red-500"
                   />
@@ -180,6 +219,17 @@ const AuthenticateModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
                     className="mt-1 text-sm text-red-500"
                   />
                 </div>
+              )}
+              {isLogin && (
+                <label className="flex items-center">
+                  <Checkbox
+                    size="sm"
+                    checked={rememberMeChecked}
+                    onChange={e => setRememberMeChecked(e.target.checked)}
+                  >
+                    Remember Me
+                  </Checkbox>
+                </label>
               )}
               <button
                 type="submit"
