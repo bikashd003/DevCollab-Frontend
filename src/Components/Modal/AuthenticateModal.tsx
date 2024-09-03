@@ -28,7 +28,7 @@ type FormValues =
 const AuthenticateModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
   const [isLogin, setIsLogin] = useState(true);
   const [isVisible, setIsVisible] = useState(false);
-  const [githubAuthUrl, setGithubAuthUrl] = useState('');
+  // const [githubAuthUrl, setGithubAuthUrl] = useState('');
   const [rememberMeChecked, setRememberMeChecked] = useState(false);
 
   const handleSubmit = async (value: FormValues, { setSubmitting }: FormikHelpers<FormValues>) => {
@@ -45,6 +45,7 @@ const AuthenticateModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
           setIsLogin(true);
         } else if (response.status === 200) {
           message.success(response.data.message);
+          localStorage.setItem('user', JSON.stringify({ isAuthenticate: true }));
           onClose();
         } else {
           message.error(response.data.message);
@@ -68,11 +69,11 @@ const AuthenticateModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
         rememberMeChecked: false,
       };
 
-  useEffect(() => {
-    axios
-      .get(`${BackendApi}/auth/github/url`)
-      .then(response => setGithubAuthUrl(response.data.url));
-  }, []);
+  // useEffect(() => {
+  //   axios
+  //     .get(`${BackendApi}/auth/github/url`)
+  //     .then(response => setGithubAuthUrl(response.data.url));
+  // }, []);
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
     const code = urlParams.get('code');
@@ -84,11 +85,11 @@ const AuthenticateModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
   }, [window.location.search]);
 
   const handleGithubAuth = () => {
-    if (githubAuthUrl) {
-      window.location.href = githubAuthUrl;
-    } else {
-      // console.error('GitHub authentication URL not available');
-    }
+    // if (githubAuthUrl) {
+    //   window.location.href = githubAuthUrl;
+    // } else {
+    //   // console.error('GitHub authentication URL not available');
+    // }
   };
 
   const handleGoogleAuth = () => {

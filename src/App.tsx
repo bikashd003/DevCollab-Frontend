@@ -5,8 +5,8 @@ import './App.css';
 import { NextUIProvider } from '@nextui-org/react';
 import ProtectedRoute from './Secure/ProtectedRoute';
 import Profile from './Pages/Profile';
-import useAxiosInterceptors from './Secure/UseAxiosInterceptors';
-import PublicRoute from './Secure/PublicRoute';
+// import useAxiosInterceptors from './Secure/UseAxiosInterceptors';
+// import PublicRoute from './Secure/PublicRoute';
 import NotFound from './Pages/NotFound';
 import ErrorBoundary from './Components/ErrorBoundary';
 import HomeLayout from './Components/Profile/HomeLayout';
@@ -36,19 +36,19 @@ const router = createBrowserRouter([
     children: [
       {
         index: true,
-        element: <PublicRoute element={<DevCollabHome />} />,
+        element: <DevCollabHome />,
       },
       {
         path: 'about',
-        element: <PublicRoute element={<AboutPage />} />,
+        element: <AboutPage />,
       },
       {
         path: 'blogs',
-        element: <PublicRoute element={<BlogPage />} />,
+        element: <BlogPage />,
       },
       {
         path: 'blog/:id',
-        element: <PublicRoute element={<BlogDetails />} />,
+        element: <BlogDetails />,
       },
     ],
   },
@@ -91,8 +91,6 @@ const router = createBrowserRouter([
 ]);
 
 const App = () => {
-  useAxiosInterceptors();
-
   return (
     <NextUIProvider>
       <ThemeProvider>
