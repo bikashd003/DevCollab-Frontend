@@ -15,6 +15,7 @@ export const GET_BLOGS = gql`
       id
       title
       content
+      tags
       author {
         id
         username
@@ -30,6 +31,7 @@ export const GET_BLOG_DETAILS = gql`
       id
       title
       content
+      tags
       author {
         username
         profilePicture

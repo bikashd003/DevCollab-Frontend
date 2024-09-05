@@ -12,8 +12,9 @@ import { GET_BLOGS } from '../GraphQL/Mutations/Blogs/Blogs';
 import moment from 'moment';
 import { Skeleton } from '@nextui-org/react';
 import { useNavigate } from 'react-router-dom';
+import QuestionEditor from '../Components/Global/QuestionsEditor';
 
-type FormValues = { title: string; content: string; tags: string[]; tagInput: string };
+type FormValues = { title: string; tags: string[]; tagInput: string };
 interface Blog {
   id: number;
   title: string;
@@ -28,22 +29,32 @@ interface Blog {
 
 export default function BlogPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [content, setContent] = useState('');
   const [tags, setTags] = useState<string[]>([]);
   const navigate = useNavigate();
   const [likeBlog] = useMutation(LIKE_BLOG);
-  const { loading, data } = useQuery(GET_BLOGS);
-  const initialValues: FormValues = { title: '', content: '', tags: [], tagInput: '' };
+  const { loading, data, refetch } = useQuery(GET_BLOGS);
+  const initialValues: FormValues = { title: '', tags: [], tagInput: '' };
   const [createBlog, { error }] = useMutation(CREATE_BLOG_MUTATION, {
     onCompleted: () => {
       message.success('Blog created successfully');
+      setIsModalOpen(false);
+      setTags([]);
+      refetch();
     },
     onError: err => {
       message.error(err.message);
     },
   });
-
+  const handleInputChange = (value: string) => {
+    setContent(value);
+  };
   const handleSubmit = async (value: FormValues, { setSubmitting }: FormikHelpers<FormValues>) => {
-    await createBlog({ variables: { title: value.title, content: value.content } });
+    if (content === '') {
+      message.error('Content is required');
+      return;
+    }
+    await createBlog({ variables: { title: value.title, content: content, tags: value.tags } });
     if (error) return;
     // Handle form submission
     setSubmitting(false);
@@ -187,7 +198,10 @@ export default function BlogPage() {
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-xl font-bold">Write New Blog Post</h2>
               <button
-                onClick={() => setIsModalOpen(false)}
+                onClick={() => {
+                  setIsModalOpen(false);
+                  setTags([]);
+                }}
                 className="text-zinc-400 hover:text-zinc-100"
               >
                 <BsX size={24} />
@@ -229,16 +243,9 @@ export default function BlogPage() {
                     >
                       Content
                     </label>
-                    <Field
-                      as="textarea"
-                      id="content"
-                      name="content"
-                      rows={20}
-                      cols={30}
-                      placeholder="Write your blog post here..."
-                      className={`resize-none w-full px-3 py-2 text-gray-700 bg-gray-200 border rounded-lg focus:outline-none focus:border-blue-500 dark:bg-gray-700 dark:text-gray-300 dark:border-gray-600 ${
-                        errors.content && touched.content ? 'border-red-500' : ''
-                      }`}
+                    <QuestionEditor
+                      content={content}
+                      setContent={content => handleInputChange(content)}
                     />
                     <ErrorMessage
                       name="content"
@@ -280,7 +287,7 @@ export default function BlogPage() {
                             onClick={() => removeTag(index, setFieldValue)}
                             className="ml-2 text-emerald-300 hover:text-emerald-100"
                           >
-                            ×
+                            <BsX size={18} />
                           </button>
                         </span>
                       ))}
