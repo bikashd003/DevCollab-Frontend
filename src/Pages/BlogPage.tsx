@@ -13,7 +13,7 @@ import moment from 'moment';
 import { Skeleton } from '@nextui-org/react';
 import { useNavigate } from 'react-router-dom';
 
-type FormValues = { title: string; content: string };
+type FormValues = { title: string; content: string; tags: string[]; tagInput: string };
 interface Blog {
   id: number;
   title: string;
@@ -28,10 +28,11 @@ interface Blog {
 
 export default function BlogPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [tags, setTags] = useState<string[]>([]);
   const navigate = useNavigate();
   const [likeBlog] = useMutation(LIKE_BLOG);
   const { loading, data } = useQuery(GET_BLOGS);
-  const initialValues: FormValues = { title: '', content: '' };
+  const initialValues: FormValues = { title: '', content: '', tags: [], tagInput: '' };
   const [createBlog, { error }] = useMutation(CREATE_BLOG_MUTATION, {
     onCompleted: () => {
       message.success('Blog created successfully');
@@ -50,6 +51,27 @@ export default function BlogPage() {
   };
   const handleLikeBlog = (id: number) => {
     likeBlog({ variables: { blogId: id } });
+  };
+  const handleTagInput = (
+    e: React.KeyboardEvent<HTMLInputElement>,
+    setFieldValue: (_field: string, _value: unknown) => void
+  ) => {
+    if (e.key === 'Enter' && e.currentTarget.value.trim() !== '') {
+      e.preventDefault();
+      const newTag = e.currentTarget.value.trim();
+      setTags([...tags, newTag]);
+      setFieldValue('tags', [...tags, newTag]);
+      e.currentTarget.value = '';
+      setFieldValue('tagInput', '');
+    }
+  };
+  const removeTag = (
+    indexToRemove: number,
+    setFieldValue: (_field: string, _value: string[]) => void
+  ) => {
+    const newTags = tags.filter((_, index) => index !== indexToRemove);
+    setTags(newTags);
+    setFieldValue('tags', newTags);
   };
   return (
     <div className="min-h-screen bg-background text-foreground dark:bg-dark-background dark:text-dark-foreground font-mono">
@@ -176,7 +198,7 @@ export default function BlogPage() {
               validationSchema={BlogSchema}
               onSubmit={handleSubmit}
             >
-              {({ errors, touched }) => (
+              {({ errors, touched, setFieldValue }) => (
                 <Form className="space-y-4">
                   <div>
                     <label
@@ -223,6 +245,46 @@ export default function BlogPage() {
                       component="div"
                       className="mt-1 text-sm text-red-500"
                     />
+                  </div>
+                  <div>
+                    <label
+                      htmlFor="tags"
+                      className="block mb-2 text-sm font-medium text-gray-700 dark:text-dark-foreground"
+                    >
+                      Tags
+                    </label>
+                    <Field
+                      type="text"
+                      id="tagInput"
+                      name="tagInput"
+                      placeholder="Enter tags for your blog post"
+                      onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) =>
+                        handleTagInput(e, setFieldValue)
+                      }
+                      className={`w-full px-3 py-2 text-gray-700 bg-gray-200 border rounded-lg focus:outline-none focus:border-blue-500 dark:bg-gray-700 dark:text-gray-300 dark:border-gray-600`}
+                    />
+                    <ErrorMessage
+                      name="tags"
+                      component="div"
+                      className="mt-1 text-sm text-red-500"
+                    />
+                    <div className="flex flex-wrap gap-2 mt-2">
+                      {tags.map((tag, index) => (
+                        <span
+                          key={index}
+                          className="bg-emerald-900 text-emerald-100 px-2 py-1 rounded text-sm flex items-center"
+                        >
+                          {tag}
+                          <button
+                            type="button"
+                            onClick={() => removeTag(index, setFieldValue)}
+                            className="ml-2 text-emerald-300 hover:text-emerald-100"
+                          >
+                            ×
+                          </button>
+                        </span>
+                      ))}
+                    </div>
                   </div>
                   <div className="flex justify-end">
                     <button

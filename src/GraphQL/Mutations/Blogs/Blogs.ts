@@ -1,10 +1,11 @@
 import { gql } from '@apollo/client';
 export const CREATE_BLOG_MUTATION = gql`
-  mutation createBlog($title: String!, $content: String!) {
-    createBlog(title: $title, content: $content) {
+  mutation createBlog($title: String!, $content: String!, $tags: [String!]!) {
+    createBlog(title: $title, content: $content, tags: $tags) {
       id
       title
       content
+      tags
     }
   }
 `;
