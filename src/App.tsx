@@ -8,7 +8,7 @@ import Profile from './Pages/Profile';
 // import useAxiosInterceptors from './Secure/UseAxiosInterceptors';
 // import PublicRoute from './Secure/PublicRoute';
 import NotFound from './Pages/NotFound';
-import ErrorBoundary from './Components/ErrorBoundary';
+import RouteErrorBoundary from './Components/RouteErrorBoundary';
 import HomeLayout from './Components/Profile/HomeLayout';
 import Projects from './Pages/Projects';
 import Skills from './Pages/Skills';
@@ -20,6 +20,7 @@ import Footer from './Components/Home/Footer';
 import AboutPage from './Pages/AboutPage';
 import BlogPage from './Pages/BlogPage';
 import BlogDetails from './Pages/BlogDetails';
+import ErrorBoundary from './Components/ErrorBoundary';
 const MainLayout: React.FC = () => {
   return (
     <div>
@@ -33,6 +34,7 @@ const router = createBrowserRouter([
   {
     path: '/',
     element: <MainLayout />,
+    errorElement: <RouteErrorBoundary />,
     children: [
       {
         index: true,
@@ -92,13 +94,13 @@ const router = createBrowserRouter([
 
 const App = () => {
   return (
-    <NextUIProvider>
-      <ThemeProvider>
-        <ErrorBoundary>
+    <ErrorBoundary>
+      <NextUIProvider>
+        <ThemeProvider>
           <RouterProvider router={router} />
-        </ErrorBoundary>
-      </ThemeProvider>
-    </NextUIProvider>
+        </ThemeProvider>
+      </NextUIProvider>
+    </ErrorBoundary>
   );
 };
 
