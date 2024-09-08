@@ -26,7 +26,9 @@ const BlogDetails = () => {
     <div className="min-h-screen p-8 bg-gray-100 text-gray-900 dark:bg-gray-900 dark:text-gray-100">
       <div className="max-w-3xl mx-auto">
         <header className="mb-8">
-          <h1 className="text-4xl font-bold mb-4 text-green-600 dark:text-green-400">{blog}</h1>
+          <h1 className="text-4xl font-bold mb-4 text-green-600 dark:text-green-400">
+            {blog?.title}
+          </h1>
           <div className="flex items-center space-x-2">
             {blog?.author?.profilePicture ? (
               <Avatar size="large" src={blog?.author?.profilePicture} />
