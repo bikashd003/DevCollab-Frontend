@@ -13,13 +13,16 @@ import moment from 'moment';
 import { Skeleton } from '@nextui-org/react';
 import { useNavigate } from 'react-router-dom';
 import Editor from '../Components/Global/MarkdownEditor';
+import { GET_USER_DATA } from '../GraphQL/Queries/Users';
 
 type FormValues = { title: string; tags: string[]; tagInput: string };
 interface Blog {
   id: number;
   title: string;
   content: string;
-  likes: number;
+  likes: {
+    username: string;
+  }[];
   author: {
     username: string;
     profilePicture: string;
@@ -34,6 +37,7 @@ export default function BlogPage() {
   const navigate = useNavigate();
   const [likeBlog] = useMutation(LIKE_BLOG);
   const { loading, data, refetch } = useQuery(GET_BLOGS);
+  const { data: userData } = useQuery(GET_USER_DATA);
   const initialValues: FormValues = { title: '', tags: [], tagInput: '' };
   const [createBlog, { error }] = useMutation(CREATE_BLOG_MUTATION, {
     onCompleted: () => {
@@ -57,8 +61,9 @@ export default function BlogPage() {
     setSubmitting(false);
     setIsModalOpen(false);
   };
-  const handleLikeBlog = (id: number) => {
-    likeBlog({ variables: { blogId: id } });
+  const handleLikeBlog = async (id: number) => {
+    await likeBlog({ variables: { id: id } });
+    refetch();
   };
   const handleTagInput = (
     e: React.KeyboardEvent<HTMLInputElement>,
@@ -124,16 +129,20 @@ export default function BlogPage() {
                 <div className="flex justify-between items-center text-zinc-400">
                   <div className="flex space-x-4">
                     <button
-                      className="flex items-center hover:text-emerald-500"
+                      className={`flex items-center hover:text-emerald-500 ${
+                        blog?.likes?.some(like => like.username === userData?.user?.username)
+                          ? 'text-emerald-500'
+                          : ''
+                      }`}
                       onClick={() => handleLikeBlog(blog?.id)}
                     >
                       <FaThumbsUp size={18} className="mr-1" />
-                      124
+                      {blog?.likes?.length}
                     </button>
-                    <button className="flex items-center hover:text-emerald-500">
+                    <span className="flex items-center hover:text-emerald-500 ">
                       <FiMessageSquare size={18} className="mr-1" />
                       23
-                    </button>
+                    </span>
                   </div>
                   <button className="flex items-center hover:text-emerald-500">
                     <BsShare size={18} className="mr-1" />

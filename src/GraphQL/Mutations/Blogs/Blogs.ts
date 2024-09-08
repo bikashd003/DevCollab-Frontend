@@ -16,6 +16,11 @@ export const GET_BLOGS = gql`
       title
       content
       tags
+      likes {
+        id
+        username
+        profilePicture
+      }
       author {
         id
         username
@@ -32,6 +37,11 @@ export const GET_BLOG_DETAILS = gql`
       title
       content
       tags
+      likes {
+        id
+        username
+        profilePicture
+      }
       author {
         username
         profilePicture
@@ -41,11 +51,9 @@ export const GET_BLOG_DETAILS = gql`
   }
 `;
 export const LIKE_BLOG = gql`
-  mutation likeBlog($blogId: ID!, $userId: Id) {
-    likeBlog(blogId: $blogId, userId: $userId) {
+  mutation likeBlog($id: ID!) {
+    likeBlog(id: $id) {
       id
-      blogId
-      userId
     }
   }
 `;

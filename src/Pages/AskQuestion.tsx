@@ -47,16 +47,15 @@ const QuestionInput: React.FC = () => {
   ];
   const validateStep = async (step: number) => {
     try {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      let schemaToValidate: yup.ObjectSchema<any> = yup.object();
+      let schemaToValidate: yup.ObjectSchema<object> = yup.object();
       switch (step) {
         case 0:
           schemaToValidate = yup.object().shape({ title: questionSchema.fields.title });
           break;
         case 1:
-          schemaToValidate = yup
-            .object()
-            .shape({ content: yup.string().required('Content is required') });
+          schemaToValidate = yup.object().shape({
+            content: yup.string().required('Content is required'),
+          });
           break;
         case 2:
           schemaToValidate = yup.object().shape({ tags: questionSchema.fields.tags });
@@ -64,7 +63,11 @@ const QuestionInput: React.FC = () => {
         default:
           schemaToValidate = questionSchema;
       }
-      await schemaToValidate.validate(formData, { abortEarly: false });
+      if (step === 1) {
+        await schemaToValidate.validate({ content }, { abortEarly: false });
+      } else {
+        await schemaToValidate.validate(formData, { abortEarly: false });
+      }
       setErrors({});
       return true;
     } catch (err) {
@@ -86,7 +89,11 @@ const QuestionInput: React.FC = () => {
       if (current < 2) {
         setCurrent(current + 1);
       } else {
-        await createQuestion({ variables: { ...formData, content } });
+        try {
+          await createQuestion({ variables: { ...formData, content } });
+        } catch (error) {
+          // Handle error if needed
+        }
       }
     }
   };
