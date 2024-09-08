@@ -12,7 +12,7 @@ import { GET_BLOGS } from '../GraphQL/Mutations/Blogs/Blogs';
 import moment from 'moment';
 import { Skeleton } from '@nextui-org/react';
 import { useNavigate } from 'react-router-dom';
-import QuestionEditor from '../Components/Global/QuestionsEditor';
+import Editor from '../Components/Global/MarkdownEditor';
 
 type FormValues = { title: string; tags: string[]; tagInput: string };
 interface Blog {
@@ -46,9 +46,6 @@ export default function BlogPage() {
       message.error(err.message);
     },
   });
-  const handleInputChange = (value: string) => {
-    setContent(value);
-  };
   const handleSubmit = async (value: FormValues, { setSubmitting }: FormikHelpers<FormValues>) => {
     if (content === '') {
       message.error('Content is required');
@@ -243,9 +240,11 @@ export default function BlogPage() {
                     >
                       Content
                     </label>
-                    <QuestionEditor
-                      content={content}
-                      setContent={content => handleInputChange(content)}
+                    <Editor
+                      markdown={content}
+                      setMarkdown={setContent}
+                      height="300px"
+                      placeholder="Write your blog post here..."
                     />
                     <ErrorMessage
                       name="content"

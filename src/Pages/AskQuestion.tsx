@@ -3,13 +3,12 @@ import { useMutation } from '@apollo/client';
 import { Input, List, Steps, Tag, Tooltip, message } from 'antd';
 import React, { useState } from 'react';
 import * as yup from 'yup';
-import QuestionEditor from '../Components/Global/QuestionsEditor';
 import { ADD_QUESTION_MUTAION } from '../GraphQL/Mutations/Questions/Question';
 import questionSchema from '../Schemas/QuestionSchema';
+import Editor from '../Components/Global/MarkdownEditor';
 
 interface FormData {
   title: string;
-  content: string;
   tags: string[];
 }
 
@@ -19,11 +18,11 @@ interface FormErrors {
 
 const QuestionInput: React.FC = () => {
   const [current, setCurrent] = useState(0);
+  const [content, setContent] = useState('');
   const [createQuestion] = useMutation(ADD_QUESTION_MUTAION, {
     onCompleted: () => {
       setFormData({
         title: '',
-        content: '',
         tags: [],
       });
       setCurrent(0);
@@ -35,7 +34,6 @@ const QuestionInput: React.FC = () => {
   });
   const [formData, setFormData] = useState<FormData>({
     title: '',
-    content: '',
     tags: [],
   });
   const [errors, setErrors] = useState<FormErrors>({});
@@ -56,7 +54,9 @@ const QuestionInput: React.FC = () => {
           schemaToValidate = yup.object().shape({ title: questionSchema.fields.title });
           break;
         case 1:
-          schemaToValidate = yup.object().shape({ content: questionSchema.fields.content });
+          schemaToValidate = yup
+            .object()
+            .shape({ content: yup.string().required('Content is required') });
           break;
         case 2:
           schemaToValidate = yup.object().shape({ tags: questionSchema.fields.tags });
@@ -86,7 +86,7 @@ const QuestionInput: React.FC = () => {
       if (current < 2) {
         setCurrent(current + 1);
       } else {
-        await createQuestion({ variables: { ...formData } });
+        await createQuestion({ variables: { ...formData, content } });
       }
     }
   };
@@ -159,10 +159,11 @@ const QuestionInput: React.FC = () => {
               {current === 1 && (
                 <div className="mb-4">
                   <div className="overflow-hidden">
-                    <QuestionEditor
+                    {/* <QuestionEditor
                       content={formData.content}
                       setContent={content => handleInputChange('content', content)}
-                    />
+                    /> */}
+                    <Editor markdown={content} setMarkdown={setContent} />
                   </div>
                   {errors.content && (
                     <div className="text-red-500 text-sm mt-1">{errors.content}</div>
