@@ -1,5 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useEffect } from 'react';
 import MarkdownEditor from '@uiw/react-markdown-editor';
+import { useTheme } from '../../Context/ThemeProvider';
 
 interface MarkdownEditorProps {
   markdown: string;
@@ -14,11 +15,7 @@ const Editor: React.FC<MarkdownEditorProps> = ({
   height = '400px',
   placeholder = 'Write your content here...',
 }: MarkdownEditorProps) => {
-  const [isDarkMode, setIsDarkMode] = useState(false);
-
-  useEffect(() => {
-    setIsDarkMode(localStorage.getItem('theme') === 'dark');
-  }, []);
+  const { theme } = useTheme();
 
   useEffect(() => {
     setMarkdown(markdown);
@@ -26,7 +23,7 @@ const Editor: React.FC<MarkdownEditorProps> = ({
   }, [markdown]);
 
   return (
-    <div data-color-mode={isDarkMode ? 'dark' : 'light'}>
+    <div data-color-mode={theme === 'dark' ? 'dark' : 'light'}>
       <MarkdownEditor
         value={markdown}
         onChange={value => {

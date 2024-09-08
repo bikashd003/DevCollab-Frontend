@@ -16,7 +16,7 @@
     "@nextui-org/react": "^2.4.6",
     "@reduxjs/toolkit": "^2.2.7",
     "@uiw/react-markdown-editor": "^6.1.2",
-    "@uiw/react-md-editor": "^4.0.4",
+    "@uiw/react-markdown-preview": "^5.1.2",
     "antd": "^5.19.3",
     "axios": "^1.7.3",
     "formik": "^2.4.6",

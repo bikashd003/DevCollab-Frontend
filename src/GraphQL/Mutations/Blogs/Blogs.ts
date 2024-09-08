@@ -9,47 +9,6 @@ export const CREATE_BLOG_MUTATION = gql`
     }
   }
 `;
-export const GET_BLOGS = gql`
-  query getBlogs {
-    getBlogs {
-      id
-      title
-      content
-      tags
-      likes {
-        id
-        username
-        profilePicture
-      }
-      author {
-        id
-        username
-        profilePicture
-      }
-      createdAt
-    }
-  }
-`;
-export const GET_BLOG_DETAILS = gql`
-  query GetBlogDetails($id: ID!) {
-    getBlogById(id: $id) {
-      id
-      title
-      content
-      tags
-      likes {
-        id
-        username
-        profilePicture
-      }
-      author {
-        username
-        profilePicture
-      }
-      createdAt
-    }
-  }
-`;
 export const LIKE_BLOG = gql`
   mutation likeBlog($id: ID!) {
     likeBlog(id: $id) {
