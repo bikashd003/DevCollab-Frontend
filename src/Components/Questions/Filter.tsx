@@ -1,31 +1,102 @@
-const Filter = () => {
-    return (
-        <aside className="col-span-12 md:col-span-3 dark:bg-dark-background rounded-lg shadow-md p-4">
-            <h3 className="text-xl font-bold text-gray-800 mb-4">Filters</h3>
-            <div className="grid gap-6">
-                {/* Tags Section */}
-                <div>
-                    <h4 className="text-sm font-semibold text-gray-300 mb-3 border-b border-gray-700 pb-1">Tags</h4>
-                    <div className="flex gap-2 flex-wrap">
-                        {['React', 'JavaScript', 'Python', 'CSS', 'Node.js', 'SQL'].map((tag) => (
-                            <a
-                                key={tag}
-                                className="bg-gray-700 hover:bg-gray-600 text-white rounded-md px-3 py-1 text-xs font-mono transition-colors duration-200 ease-in-out"
-                                href="#"
-                            >
-                                {tag}
-                            </a>
-                        ))}
-                    </div>
-                </div>
-                {/* Sort By Section */}
-                <div>
-                    <h4 className="text-sm font-semibold text-gray-300 mb-3 border-b border-gray-700 pb-1">Sort By</h4>
-                    {/* Add sorting options here */}
-                </div>
-            </div>
-        </aside>
-    )
+import React, { useState, useEffect } from 'react';
+import Select, { MultiValue } from 'react-select';
+
+interface FilterOption {
+  value: string;
+  label: string;
 }
 
-export default Filter
+interface FilterProps {
+  filterType: string;
+  options: FilterOption[];
+  // eslint-disable-next-line no-unused-vars
+  onFilterChange: (selectedValues: string[]) => void;
+}
+
+const Filter: React.FC<FilterProps> = ({ filterType, options, onFilterChange }) => {
+  const handleChange = (selectedOptions: MultiValue<FilterOption>) => {
+    const values = selectedOptions.map(option => option.value);
+    onFilterChange(values);
+  };
+
+  return (
+    <div className="mb-4">
+      <label htmlFor={filterType} className="block text-sm font-medium text-gray-700 mb-1">
+        {filterType}
+      </label>
+      <Select
+        id={filterType}
+        options={options}
+        isMulti
+        onChange={handleChange}
+        className="basic-multi-select"
+        classNamePrefix="select"
+      />
+    </div>
+  );
+};
+
+interface FiltersContainerProps {
+  filters: {
+    [key: string]: FilterOption[];
+  };
+  // eslint-disable-next-line no-unused-vars
+  onFiltersChange: (filters: { [key: string]: string[] }) => void;
+}
+
+const FiltersContainer: React.FC<FiltersContainerProps> = ({ filters, onFiltersChange }) => {
+  const [selectedFilters, setSelectedFilters] = useState<{ [key: string]: string[] }>({});
+  const [selectedFilterType, setSelectedFilterType] = useState<string | null>(null);
+
+  const handleFilterChange = (filterType: string, selectedValues: string[]) => {
+    setSelectedFilters(prevFilters => ({
+      ...prevFilters,
+      [filterType]: selectedValues,
+    }));
+  };
+
+  useEffect(() => {
+    onFiltersChange(selectedFilters);
+  }, [selectedFilters, onFiltersChange]);
+
+  const filterTypeOptions = Object.keys(filters).map(filterType => ({
+    value: filterType,
+    label: filterType,
+  }));
+
+  return (
+    <div className="col-span-12 md:col-span-6 p-4 bg-background text-foreground dark:bg-dark-background dark:text-dark-foreground dark:border rounded-lg w-full">
+      <h2 className="text-lg font-semibold mb-4">Filters</h2>
+      <div className="mb-4">
+        <label htmlFor="filterType" className="block text-sm font-medium text-gray-700 mb-1">
+          Select Filter Type
+        </label>
+        <Select
+          id="filterType"
+          options={filterTypeOptions}
+          onChange={option => {
+            setSelectedFilterType(option ? option.value : null);
+            setSelectedFilters({});
+          }}
+          className="basic-single"
+          classNamePrefix="select"
+        />
+      </div>
+      {selectedFilterType && (
+        <Filter
+          key={selectedFilterType}
+          filterType={selectedFilterType}
+          options={filters[selectedFilterType]}
+          onFilterChange={selectedValues => handleFilterChange(selectedFilterType, selectedValues)}
+        />
+      )}
+      <div className="mt-4 p-3 rounded border border-gray-300">
+        <pre className="text-sm text-gray-300 font-mono">
+          {JSON.stringify(selectedFilters, null, 2)}
+        </pre>
+      </div>
+    </div>
+  );
+};
+
+export default FiltersContainer;

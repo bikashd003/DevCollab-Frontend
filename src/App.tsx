@@ -80,6 +80,7 @@ const router = createBrowserRouter([
   {
     path: '/questions',
     element: <MainLayout />,
+    errorElement: <RouteErrorBoundary />,
     children: [
       {
         index: true,
