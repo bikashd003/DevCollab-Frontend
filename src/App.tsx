@@ -21,6 +21,7 @@ import AboutPage from './Pages/AboutPage';
 import BlogPage from './Pages/BlogPage';
 import BlogDetails from './Pages/BlogDetails';
 import ErrorBoundary from './Components/ErrorBoundary';
+import CodeTogetherPage from './Pages/CodeTogetherPage';
 const MainLayout: React.FC = () => {
   return (
     <div>
@@ -69,6 +70,10 @@ const router = createBrowserRouter([
       {
         path: 'skills',
         element: <ProtectedRoute element={<Skills />} />,
+      },
+      {
+        path: 'code-together',
+        element: <ProtectedRoute element={<CodeTogetherPage />} />,
       },
     ],
   },
