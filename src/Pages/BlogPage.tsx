@@ -158,7 +158,13 @@ export default function BlogPage() {
                       23
                     </span>
                   </div>
-                  <button className="flex items-center hover:text-emerald-500">
+                  <button
+                    className="flex items-center hover:text-emerald-500"
+                    onClick={() => {
+                      navigator.clipboard.writeText(`${window.location.origin}/blog/${blog?.id}`);
+                      message.success('Link copied to clipboard');
+                    }}
+                  >
                     <BsShare size={18} className="mr-1" />
                     Share
                   </button>
