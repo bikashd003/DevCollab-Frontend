@@ -29,6 +29,10 @@ const Editor: React.FC<MarkdownEditorProps> = ({
         onChange={value => {
           setMarkdown(value);
         }}
+        onFocus={() => {
+          // Maintain focus on the editor
+          document.getElementById('markdown-editor')?.focus();
+        }}
         height={height}
         placeholder={placeholder}
         toolbars={['bold', 'italic', 'underline', 'header', 'code', 'olist', 'ulist']}

@@ -21,11 +21,10 @@ const BlogDetails = () => {
   const blog = data?.getBlogById;
   if (loading) return <Skeleton />;
   if (error) return <p className="text-center text-2xl">Error loading blog details</p>;
-
   return (
     <div className="min-h-screen p-8 bg-gray-100 text-gray-900 dark:bg-gray-900 dark:text-gray-100">
       <div className="max-w-3xl mx-auto">
-        <header className="mb-8">
+        <Skeleton isLoaded={!loading} className="mb-8">
           <h1 className="text-4xl font-bold mb-4 text-green-600 dark:text-green-400">
             {blog?.title}
           </h1>
@@ -40,7 +39,7 @@ const BlogDetails = () => {
               posted on {blog?.author?.username} • {moment(parseInt(blog?.createdAt)).fromNow()}
             </p>
           </div>
-        </header>
+        </Skeleton>
 
         <main>
           <div className="mb-8 p-6 rounded-lg bg-white dark:bg-gray-800">
@@ -117,7 +116,7 @@ const BlogDetails = () => {
             </h2>
             <Editor
               markdown={comment}
-              height="100px"
+              height="300px"
               setMarkdown={setComment}
               placeholder="Write your comment here..."
             />
