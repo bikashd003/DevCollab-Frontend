@@ -5,7 +5,7 @@ import { useState } from 'react';
 import Select, { MultiValue, StylesConfig } from 'react-select';
 import makeAnimated from 'react-select/animated';
 import SkillList from '../Constant/Skills';
-import { ADD_SKILL_MUTAION } from '../GraphQL/Mutations/Skills';
+import { ADD_SKILL_MUTAION } from '../GraphQL/Mutations/Profile/Skills';
 
 interface SkillOption {
   label: string;

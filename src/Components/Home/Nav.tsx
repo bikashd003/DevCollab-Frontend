@@ -22,7 +22,7 @@ import { RootState } from '../../Redux/Store';
 import AuthenticateModal from '../Modal/AuthenticateModal';
 import { useAuth } from '../../Secure/AuthContext';
 import { useQuery } from '@apollo/client';
-import { GET_USER_DATA } from '../../GraphQL/Queries/Users';
+import { GET_USER_DATA } from '../../GraphQL/Queries/Profile/Users';
 
 const Nav = () => {
   const { isAuthenticated } = useAuth();

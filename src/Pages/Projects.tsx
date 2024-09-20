@@ -3,7 +3,7 @@ import { Button, Input, Textarea } from '@nextui-org/react';
 import { message, UploadFile } from 'antd';
 import React, { useState } from 'react';
 import FileInput from '../Components/Global/FileInput';
-import ADD_PROJECT_MUTATION from '../GraphQL/Mutations/Projects';
+import ADD_PROJECT_MUTATION from '../GraphQL/Mutations/Profile/Projects';
 const Projects: React.FC = () => {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');

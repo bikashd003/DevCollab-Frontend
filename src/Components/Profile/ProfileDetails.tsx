@@ -6,7 +6,7 @@ import { FaSquareXTwitter } from 'react-icons/fa6';
 import { FiBriefcase } from 'react-icons/fi';
 import { IoLocate } from 'react-icons/io5';
 import { Link } from 'react-router-dom';
-import { GET_USER_DATA } from '../../GraphQL/Queries/Users';
+import { GET_USER_DATA } from '../../GraphQL/Queries/Profile/Users';
 import UserDetails from './UserDetails';
 const ProfileDetails: React.FC = () => {
   const { loading, data } = useQuery(GET_USER_DATA);

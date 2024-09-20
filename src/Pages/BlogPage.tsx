@@ -14,7 +14,7 @@ import { Skeleton } from '@nextui-org/react';
 import { useNavigate } from 'react-router-dom';
 import Editor from '../Components/Global/MarkdownEditor';
 import { GET_TOP_CONTRIBUTORS } from '../GraphQL/Queries/Blogs/Blog';
-import { GET_USER_DATA } from '../GraphQL/Queries/Users';
+import { GET_USER_DATA } from '../GraphQL/Queries/Profile/Users';
 
 type FormValues = { title: string; tags: string[]; tagInput: string };
 interface Blog {
