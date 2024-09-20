@@ -1,15 +1,24 @@
 {
-  "name": "devlearn-frontend",
+  "name": "devcollab-frontend",
+  "version": "0.1.0",
   "private": true,
-  "version": "0.0.0",
+  "description": "Frontend for DevCollab application",
+  "author": "Bikash Das <bikashd003@gmail.com>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/bikashd003/DevCollab-Frontend.git"
+  },
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
-    "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
-    "preview": "vite preview",
-    "pretty": "prettier --write \"**/*.{js,,tsx,jsx,json}\"",
-    "prepare": "husky"
+    "start": "vite preview",
+    "lint": "eslint . --ext .js,.jsx,.ts,.tsx --report-unused-disable-directives --max-warnings 0",
+    "lint:fix": "eslint . --ext .js,.jsx,.ts,.tsx --fix",
+    "format": "prettier --write \"**/*.{js,jsx,ts,tsx,json,md,html,css}\"",
+    "test": "vitest",
+    "prepare": "husky install"
   },
   "dependencies": {
     "@apollo/client": "^3.11.3",
@@ -58,6 +67,10 @@
     "vite": "^5.3.4"
   },
   "lint-staged": {
-    "*.{js,jsx,ts,tsx,md,html,css}": "prettier --write"
+    "*.{js,jsx,ts,tsx}": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "*.{json,md,html,css}": "prettier --write"
   }
 }
