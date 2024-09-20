@@ -18,7 +18,7 @@ import { useNavigate } from 'react-router-dom';
 import { Link } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { setIsModalOpen } from '../../Redux/OvarallSlice';
-import { RootState } from '../../Redux/Store';
+import type { RootState } from '../../Redux/Store';
 import AuthenticateModal from '../Modal/AuthenticateModal';
 import { useAuth } from '../../Secure/AuthContext';
 import { useQuery } from '@apollo/client';

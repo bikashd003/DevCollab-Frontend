@@ -1,4 +1,5 @@
-import { createContext, useState, useEffect, ReactNode, useContext } from 'react';
+import type { ReactNode } from 'react';
+import { createContext, useState, useEffect, useContext } from 'react';
 import axios from 'axios';
 import BackendApi from '../Constant/Api';
 

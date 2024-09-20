@@ -8,7 +8,6 @@ import BackendApi from '../../Constant/Api';
 type FileType = Parameters<GetProp<UploadProps, 'beforeUpload'>>[0];
 
 interface FileInputProps {
-  // eslint-disable-next-line no-unused-vars
   onChange?: (imageUrl: string | null) => void;
   accept?: string;
   maxSize?: number;

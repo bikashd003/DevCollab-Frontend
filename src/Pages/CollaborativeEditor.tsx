@@ -1,6 +1,8 @@
 import { useEffect, useRef } from 'react';
-import Editor, { OnMount } from '@monaco-editor/react';
-import io, { Socket } from 'socket.io-client';
+import type { OnMount } from '@monaco-editor/react';
+import Editor from '@monaco-editor/react';
+import type { Socket } from 'socket.io-client';
+import io from 'socket.io-client';
 import * as monaco from 'monaco-editor';
 import { useTheme } from '../Context/ThemeProvider';
 import { debounce } from 'lodash';

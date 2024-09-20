@@ -1,13 +1,14 @@
 import { configureStore } from '@reduxjs/toolkit';
-import profileReducer, { ProfileState } from "./ProfileSlice"
-import overallReducer, { Overrall } from "./OvarallSlice"
+import type { ProfileState } from './ProfileSlice';
+import profileReducer from './ProfileSlice';
+import type { Overrall } from './OvarallSlice';
+import overallReducer from './OvarallSlice';
 
 export const store = configureStore({
   reducer: {
     profile: profileReducer,
-    overall: overallReducer
+    overall: overallReducer,
   },
-
 });
 
 export type RootState = {

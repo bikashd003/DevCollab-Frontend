@@ -1,5 +1,6 @@
 import axios from 'axios';
-import { ErrorMessage, Field, Form, Formik, FormikHelpers } from 'formik';
+import type { FormikHelpers } from 'formik';
+import { ErrorMessage, Field, Form, Formik } from 'formik';
 import React, { useEffect, useState } from 'react';
 import { FaGithub } from 'react-icons/fa';
 import { FaRegEye, FaRegEyeSlash } from 'react-icons/fa6';

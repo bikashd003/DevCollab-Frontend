@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import Select, { MultiValue } from 'react-select';
+import type { MultiValue } from 'react-select';
+import Select from 'react-select';
 
 interface FilterOption {
   value: string;
@@ -9,7 +10,6 @@ interface FilterOption {
 interface FilterProps {
   filterType: string;
   options: FilterOption[];
-  // eslint-disable-next-line no-unused-vars
   onFilterChange: (selectedValues: string[]) => void;
 }
 
@@ -40,7 +40,6 @@ interface FiltersContainerProps {
   filters: {
     [key: string]: FilterOption[];
   };
-  // eslint-disable-next-line no-unused-vars
   onFiltersChange: (filters: { [key: string]: string[] }) => void;
 }
 
