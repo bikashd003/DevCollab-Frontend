@@ -1,9 +1,4 @@
 # DevCollab: Full-Stack Developer Collaboration Platform
-
-[![Build Status](https://img.shields.io/travis/yourusername/devcollab/master.svg?style=flat-square)](https://travis-ci.org/yourusername/devcollab)
-[![Coverage Status](https://img.shields.io/coveralls/yourusername/devcollab/master.svg?style=flat-square)](https://coveralls.io/github/yourusername/devcollab?branch=master)
-[![Dependencies](https://img.shields.io/david/yourusername/devcollab.svg?style=flat-square)](https://david-dm.org/yourusername/devcollab)
-
 DevCollab is a comprehensive web application designed to foster collaboration and knowledge sharing among developers. It provides a platform for asking and answering questions, showcasing developer profiles, connecting with peers, collaborating on code, and engaging in real-time chat.
 
 ## Table of Contents
