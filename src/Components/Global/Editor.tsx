@@ -26,7 +26,7 @@ interface ButtonConfig {
   title: string;
 }
 interface ToolbarButtonProps {
-  onClick: () => void;
+  onClick: (e: React.MouseEvent<HTMLButtonElement>) => void;
   isActive: boolean;
   icon: React.ElementType;
   disabled?: boolean;
@@ -200,18 +200,25 @@ const Editor: React.FC<EditorProps> = ({ initialContent = '', onChange }) => {
     }
   }, [editor, initialContent, isMarkdownMode]);
 
-  const togglePreview = useCallback(() => setShowPreview(prev => !prev), []);
-  const toggleMarkdownMode = useCallback(() => {
-    setIsMarkdownMode(prev => !prev);
-    if (editor) {
-      const content = isMarkdownMode ? editor.getHTML() : editor.storage.markdown.getMarkdown();
-      if (isMarkdownMode) {
-        editor.commands.setContent(content);
-      } else {
-        setMarkdownContent(content);
+  const togglePreview = useCallback((e: React.MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+    setShowPreview(prev => !prev);
+  }, []);
+  const toggleMarkdownMode = useCallback(
+    (e: React.MouseEvent<HTMLButtonElement>) => {
+      e.preventDefault();
+      setIsMarkdownMode(prev => !prev);
+      if (editor) {
+        const content = isMarkdownMode ? editor.getHTML() : editor.storage.markdown.getMarkdown();
+        if (isMarkdownMode) {
+          editor.commands.setContent(content);
+        } else {
+          setMarkdownContent(content);
+        }
       }
-    }
-  }, [editor, isMarkdownMode]);
+    },
+    [editor, isMarkdownMode]
+  );
 
   const handleMarkdownChange = useCallback(
     (e: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -225,8 +232,8 @@ const Editor: React.FC<EditorProps> = ({ initialContent = '', onChange }) => {
   if (!editor) return null;
 
   return (
-    <div className="rounded-xl w-full p-2 border-2 dark:border-gray-300 border-gray-700 overflow-y-auto max-h-[300px] h-[300px]">
-      <div className="w-full sticky top-0 z-10 mb-2">
+    <div className="custom-scrollbar rounded-xl w-full border-2 px-2 dark:border-gray-300 border-gray-700 overflow-y-auto max-h-[300px] h-[300px]">
+      <div className="w-full sticky top-0 py-2 z-10 bg-white dark:bg-dark-background mb-2">
         <div className="flex justify-between items-center">
           <MenuBar editor={editor} isMarkdownMode={isMarkdownMode} textareaRef={textareaRef} />
           <div className="flex  bg-slate-200 rounded-lg">
@@ -246,7 +253,7 @@ const Editor: React.FC<EditorProps> = ({ initialContent = '', onChange }) => {
           </div>
         </div>
       </div>
-      <div className="mt-2">
+      <div className="mt-2 px-2">
         {isMarkdownMode ? (
           <div className={`flex ${showPreview ? 'space-x-4' : ''} h-full`}>
             <textarea
