@@ -1,19 +1,30 @@
-*{
+* {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
 }
-body .w-md-editor-text-pre>code,
+body .w-md-editor-text-pre > code,
 body .w-md-editor-text-input {
   font-size: 16px !important;
   line-height: 15px !important;
 }
 /* Light mode styles */
-html body .custom-steps.ant-steps .ant-steps-item-container .ant-steps-item-content .ant-steps-item-title {
+html
+  body
+  .custom-steps.ant-steps
+  .ant-steps-item-container
+  .ant-steps-item-content
+  .ant-steps-item-title {
   color: rgba(0, 0, 0, 0.85);
 }
 
-html body .custom-steps.ant-steps .ant-steps-item-wait .ant-steps-item-container .ant-steps-item-content .ant-steps-item-title {
+html
+  body
+  .custom-steps.ant-steps
+  .ant-steps-item-wait
+  .ant-steps-item-container
+  .ant-steps-item-content
+  .ant-steps-item-title {
   color: rgba(0, 0, 0, 0.45);
 }
 
@@ -22,7 +33,12 @@ html body .custom-steps.ant-steps .ant-steps-item-container .ant-steps-item-icon
   border-color: #d9d9d9;
 }
 
-html body .custom-steps.ant-steps .ant-steps-item-container .ant-steps-item-content .ant-steps-item-description {
+html
+  body
+  .custom-steps.ant-steps
+  .ant-steps-item-container
+  .ant-steps-item-content
+  .ant-steps-item-description {
   color: rgba(0, 0, 0, 0.45);
 }
 
@@ -30,26 +46,53 @@ html body .custom-steps.ant-steps .ant-steps-item-tail::after {
   background-color: #f0f0f0;
 }
 
-html body .custom-steps.ant-steps .ant-steps-item-finish .ant-steps-item-container .ant-steps-item-icon {
+html
+  body
+  .custom-steps.ant-steps
+  .ant-steps-item-finish
+  .ant-steps-item-container
+  .ant-steps-item-icon {
   background-color: #fff;
   border-color: #1890ff;
 }
 
-html body .custom-steps.ant-steps .ant-steps-item-finish .ant-steps-item-container .ant-steps-item-icon .ant-steps-icon {
+html
+  body
+  .custom-steps.ant-steps
+  .ant-steps-item-finish
+  .ant-steps-item-container
+  .ant-steps-item-icon
+  .ant-steps-icon {
   color: #1890ff;
 }
 
-html body .custom-steps.ant-steps .ant-steps-item-process .ant-steps-item-container .ant-steps-item-icon {
+html
+  body
+  .custom-steps.ant-steps
+  .ant-steps-item-process
+  .ant-steps-item-container
+  .ant-steps-item-icon {
   background-color: #1890ff;
   border-color: #1890ff;
 }
 
 /* Dark mode styles */
-html.dark body .custom-steps.ant-steps .ant-steps-item-container .ant-steps-item-content .ant-steps-item-title {
+html.dark
+  body
+  .custom-steps.ant-steps
+  .ant-steps-item-container
+  .ant-steps-item-content
+  .ant-steps-item-title {
   color: white;
 }
 
-html.dark body .custom-steps.ant-steps .ant-steps-item-wait .ant-steps-item-container .ant-steps-item-content .ant-steps-item-title {
+html.dark
+  body
+  .custom-steps.ant-steps
+  .ant-steps-item-wait
+  .ant-steps-item-container
+  .ant-steps-item-content
+  .ant-steps-item-title {
   color: rgba(255, 255, 255, 0.45);
 }
 
@@ -58,7 +101,12 @@ html.dark body.custom-steps.ant-steps .ant-steps-item-container .ant-steps-item-
   border-color: #434343;
 }
 
-html.dark body .custom-steps.ant-steps .ant-steps-item-container .ant-steps-item-content .ant-steps-item-description {
+html.dark
+  body
+  .custom-steps.ant-steps
+  .ant-steps-item-container
+  .ant-steps-item-content
+  .ant-steps-item-description {
   color: rgba(255, 255, 255, 0.45);
 }
 
@@ -67,23 +115,37 @@ html.dark body .custom-steps.ant-steps .ant-steps-item-tail::after {
   color: #f0f0f0;
 }
 
-html.dark body.custom-steps.ant-steps .ant-steps-item-finish .ant-steps-item-container .ant-steps-item-icon {
+html.dark
+  body.custom-steps.ant-steps
+  .ant-steps-item-finish
+  .ant-steps-item-container
+  .ant-steps-item-icon {
   background-color: #141414;
   border-color: #177ddc;
 }
 
-html.dark body .custom-steps.ant-steps .ant-steps-item-finish .ant-steps-item-container .ant-steps-item-icon .ant-steps-icon {
+html.dark
+  body
+  .custom-steps.ant-steps
+  .ant-steps-item-finish
+  .ant-steps-item-container
+  .ant-steps-item-icon
+  .ant-steps-icon {
   color: #177ddc;
 }
 
-html.dark body .custom-steps.ant-steps .ant-steps-item-process .ant-steps-item-container .ant-steps-item-icon {
+html.dark
+  body
+  .custom-steps.ant-steps
+  .ant-steps-item-process
+  .ant-steps-item-container
+  .ant-steps-item-icon {
   background-color: #177ddc;
   border-color: #177ddc;
 }
 /* In your CSS file or styled-component */
 
 .custom-scrollbar {
-
   /* For Webkit-based browsers (Chrome, Safari) */
   &::-webkit-scrollbar {
     width: 10px;
@@ -105,4 +167,62 @@ html.dark body .custom-steps.ant-steps .ant-steps-item-process .ant-steps-item-c
   /* For Firefox */
   scrollbar-width: thin;
   scrollbar-color: #888 #f1f1f1;
+}
+.is-active {
+  background-color: #cbd4dd;
+  padding: 4px;
+  border-radius: 5px;
+  color: white;
+}
+
+.tiptap ul,
+.tiptap ol {
+  padding: 0 1rem;
+  margin: 1.25rem 1rem 1.25rem 0.4rem;
+}
+
+.tiptap ul li p,
+.tiptap ol li p {
+  margin-top: 0.25em;
+  margin-bottom: 0.25em;
+}
+
+.tiptap code {
+  background-color: rgb(215, 215, 215);
+  border-radius: 0.4rem;
+  color: black;
+  font-size: 0.85rem;
+  padding: 0.25em 0.3em;
+}
+
+.tiptap pre {
+  background: rgb(30, 30, 30);
+  border-radius: 0.5rem;
+  color: white;
+  font-family: 'JetBrainsMono', monospace;
+  margin: 1.5rem 0;
+  padding: 0.75rem 1rem;
+}
+
+.tiptap pre code {
+  background: none;
+  color: inherit;
+  font-size: 0.8rem;
+  padding: 0;
+}
+
+.tiptap blockquote {
+  border-left: 3px solid rgb(8, 8, 8);
+  margin: 1.5rem 0;
+  padding-left: 1rem;
+}
+
+.ProseMirror ul {
+  list-style-type: disc;
+  padding-left: 1.5em;
+}
+
+.ProseMirror ol {
+  list-style-type: decimal;
+  padding-left: 1.5em;
 }
