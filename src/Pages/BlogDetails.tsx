@@ -8,7 +8,7 @@ import { Avatar, Tag } from 'antd';
 import { LikeOutlined, CommentOutlined } from '@ant-design/icons';
 import MarkdownPreview from '@uiw/react-markdown-preview';
 import { useTheme } from '../Context/ThemeProvider';
-import Editor from '../Components/Global/MarkdownEditor';
+import Editor from '../Components/Global/Editor';
 
 const BlogDetails = () => {
   const { id } = useParams();
@@ -114,12 +114,7 @@ const BlogDetails = () => {
             <h2 className="text-2xl font-bold mb-4 text-green-600 dark:text-green-400">
               Leave a Comment
             </h2>
-            <Editor
-              markdown={comment}
-              height="300px"
-              setMarkdown={setComment}
-              placeholder="Write your comment here..."
-            />
+            <Editor initialContent={comment} onChange={content => setComment(content)} />
             <Button
               variant="solid"
               className="bg-green-500 hover:bg-green-600 dark:bg-green-600 dark:hover:bg-green-700 mt-4"

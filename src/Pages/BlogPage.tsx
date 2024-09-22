@@ -13,7 +13,7 @@ import { GET_BLOGS, GET_POPULAR_TAGS } from '../GraphQL/Queries/Blogs/Blog';
 import moment from 'moment';
 import { Skeleton } from '@nextui-org/react';
 import { useNavigate } from 'react-router-dom';
-import Editor from '../Components/Global/MarkdownEditor';
+import Editor from '../Components/Global/Editor';
 import { GET_TOP_CONTRIBUTORS } from '../GraphQL/Queries/Blogs/Blog';
 import { GET_USER_DATA } from '../GraphQL/Queries/Profile/Users';
 
@@ -218,7 +218,7 @@ export default function BlogPage() {
 
       {isModalOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
-          <div className="bg-zinc-800 p-6 rounded-lg w-full max-w-[76rem]">
+          <div className="bg-background text-foreground dark:bg-dark-background dark:text-dark-foreground p-6 rounded-lg w-full max-w-[76rem]">
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-xl font-bold">Write New Blog Post</h2>
               <button
@@ -267,12 +267,7 @@ export default function BlogPage() {
                     >
                       Content
                     </label>
-                    <Editor
-                      markdown={content}
-                      setMarkdown={setContent}
-                      height="300px"
-                      placeholder="Write your blog post here..."
-                    />
+                    <Editor initialContent={content} onChange={content => setContent(content)} />
                     <ErrorMessage
                       name="content"
                       component="div"

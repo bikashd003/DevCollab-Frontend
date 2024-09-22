@@ -4,14 +4,14 @@ import type { ChainedCommands } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import { Markdown } from 'tiptap-markdown';
 import MarkdownPreview from '@uiw/react-markdown-preview';
-import { FaBold, FaItalic, FaRegEye, FaMarkdown } from 'react-icons/fa';
+import { FaRegEye, FaMarkdown } from 'react-icons/fa';
 import { GrBlockQuote } from 'react-icons/gr';
-import { LuStrikethrough } from 'react-icons/lu';
+import { MdOutlineFormatStrikethrough } from 'react-icons/md';
 import { IoCodeSlashSharp, IoCodeWorkingOutline } from 'react-icons/io5';
 import { MdFormatListBulleted } from 'react-icons/md';
-import { VscListOrdered } from 'react-icons/vsc';
+import { RiListOrdered } from 'react-icons/ri';
 import { useTheme } from '../../Context/ThemeProvider';
-
+import { BiBold, BiItalic } from 'react-icons/bi';
 interface EditorProps {
   initialContent?: string;
   onChange?: (content: string) => void;
@@ -58,11 +58,11 @@ const MenuBar: React.FC<{
   if (!editor) return null;
 
   const buttons: ButtonConfig[] = [
-    { command: 'toggleBold', icon: FaBold, active: 'bold', markdown: '**', title: 'Bold' },
-    { command: 'toggleItalic', icon: FaItalic, active: 'italic', markdown: '_', title: 'Italic' },
+    { command: 'toggleBold', icon: BiBold, active: 'bold', markdown: '**', title: 'Bold' },
+    { command: 'toggleItalic', icon: BiItalic, active: 'italic', markdown: '_', title: 'Italic' },
     {
       command: 'toggleStrike',
-      icon: LuStrikethrough,
+      icon: MdOutlineFormatStrikethrough,
       active: 'strike',
       markdown: '~~',
       title: 'Strike',
@@ -77,7 +77,7 @@ const MenuBar: React.FC<{
     },
     {
       command: 'toggleOrderedList',
-      icon: VscListOrdered,
+      icon: RiListOrdered,
       active: 'orderedList',
       markdown: '1. ',
       title: 'Ordered List',
@@ -225,7 +225,7 @@ const Editor: React.FC<EditorProps> = ({ initialContent = '', onChange }) => {
   if (!editor) return null;
 
   return (
-    <div className="rounded-xl w-2/4 mx-auto p-2 border-2 dark:border-gray-300 border-gray-700 overflow-y-auto max-h-[300px] h-[300px]">
+    <div className="rounded-xl w-full p-2 border-2 dark:border-gray-300 border-gray-700 overflow-y-auto max-h-[300px] h-[300px]">
       <div className="w-full sticky top-0 z-10 mb-2">
         <div className="flex justify-between items-center">
           <MenuBar editor={editor} isMarkdownMode={isMarkdownMode} textareaRef={textareaRef} />
