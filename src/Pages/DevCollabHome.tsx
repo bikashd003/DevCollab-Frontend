@@ -4,6 +4,7 @@ import DP from '../assets/Developers collaborating.png';
 import Commutity from '../Components/Home/Commutity';
 import { setIsModalOpen } from '../Redux/OvarallSlice';
 import { useAuth } from '../Secure/AuthContext';
+import CookieConsent from '../Components/CookieConsent/CookieConsent';
 
 const DevCollabHome: React.FC = () => {
   const { isAuthenticated } = useAuth();
@@ -50,6 +51,7 @@ const DevCollabHome: React.FC = () => {
         </section>
         <Commutity />
       </main>
+      <CookieConsent />
     </div>
   );
 };
