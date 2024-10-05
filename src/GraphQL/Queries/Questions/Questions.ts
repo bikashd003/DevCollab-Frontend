@@ -1,4 +1,4 @@
-import { gql } from "@apollo/client";
+import { gql } from '@apollo/client';
 
 export const GET_ALL_QUESTIONS = gql`
   query getQuestions($limit: Int!, $offset: Int!) {
@@ -12,14 +12,21 @@ export const GET_ALL_QUESTIONS = gql`
           username
           profilePicture
         }
+        createdAt
       }
-     totalQuestions
+      totalQuestions
       totalPages
     }
   }
 `;
 export const SEARCH_QUESTIONS = gql`
-  query SearchQuestions($searchTerm: String, $limit: Int!, $offset: Int!, $tags: [String], $userId: ID) {
+  query SearchQuestions(
+    $searchTerm: String
+    $limit: Int!
+    $offset: Int!
+    $tags: [String]
+    $userId: ID
+  ) {
     searchQuestions(
       searchTerm: $searchTerm
       limit: $limit

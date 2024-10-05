@@ -5,7 +5,7 @@ import React, { useState } from 'react';
 import * as yup from 'yup';
 import { ADD_QUESTION_MUTAION } from '../GraphQL/Mutations/Questions/Question';
 import questionSchema from '../Schemas/QuestionSchema';
-import Editor from '../Components/Global/MarkdownEditor';
+import Editor from '../Components/Global/Editor';
 
 interface FormData {
   title: string;
@@ -166,11 +166,7 @@ const QuestionInput: React.FC = () => {
               {current === 1 && (
                 <div className="mb-4">
                   <div className="overflow-hidden">
-                    {/* <QuestionEditor
-                      content={formData.content}
-                      setContent={content => handleInputChange('content', content)}
-                    /> */}
-                    <Editor markdown={content} setMarkdown={setContent} />
+                    <Editor initialContent={content} onChange={content => setContent(content)} />
                   </div>
                   {errors.content && (
                     <div className="text-red-500 text-sm mt-1">{errors.content}</div>

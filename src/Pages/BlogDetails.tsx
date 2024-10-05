@@ -6,16 +6,14 @@ import { GET_BLOG_DETAILS } from '../GraphQL/Queries/Blogs/Blog';
 import { Skeleton, Button } from '@nextui-org/react';
 import { Avatar, Tag } from 'antd';
 import { LikeOutlined, CommentOutlined } from '@ant-design/icons';
-import MarkdownPreview from '@uiw/react-markdown-preview';
-import { useTheme } from '../Context/ThemeProvider';
 import Editor from '../Components/Global/Editor';
+import MarkdownPreviewComponent from '../Components/Global/MarkdownPreviewComponent';
 
 const BlogDetails = () => {
   const { id } = useParams();
   const { loading, error, data } = useQuery(GET_BLOG_DETAILS, {
     variables: { id },
   });
-  const { theme } = useTheme();
   const [likes, setLikes] = useState(0);
   const [comment, setComment] = useState('');
   const blog = data?.getBlogById;
@@ -44,24 +42,7 @@ const BlogDetails = () => {
         <main>
           <div className="mb-8 p-6 rounded-lg bg-white dark:bg-gray-800">
             <p className="mb-4 ">
-              <MarkdownPreview
-                style={{ padding: 16, backgroundColor: 'transparent' }}
-                className="dark:bg-transparent text-foreground"
-                source={blog?.content}
-                wrapperElement={{
-                  'data-color-mode': theme === 'dark' ? 'dark' : 'light',
-                }}
-                rehypeRewrite={(node, _, parent) => {
-                  if (
-                    node.type === 'element' &&
-                    node.tagName === 'a' &&
-                    parent?.type === 'element' &&
-                    /^h[1-6]$/.test(parent.tagName)
-                  ) {
-                    parent.children = parent.children.slice(1);
-                  }
-                }}
-              />
+              <MarkdownPreviewComponent content={blog?.content} />
             </p>
           </div>
 

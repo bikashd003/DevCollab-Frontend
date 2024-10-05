@@ -1,5 +1,7 @@
 /* eslint-disable react/prop-types */
 import { Skeleton } from '@nextui-org/react';
+import { Avatar } from 'antd';
+import moment from 'moment';
 import { FaChevronDown, FaChevronUp } from 'react-icons/fa';
 
 interface Question {
@@ -29,21 +31,25 @@ const QuestionCard: React.FC<QuestionCardProps> = ({ question, loading }) => (
       {/* Author Info */}
       <div className="flex items-center gap-3 mb-4">
         <span className="relative flex shrink-0 overflow-hidden rounded-full w-10 h-10">
-          <img
-            className="aspect-square h-full w-full"
-            alt={question.author.username}
-            src={question.author.profilePicture}
-          />
+          {question.author.profilePicture ? (
+            <Avatar
+              size="large"
+              src={question.author.profilePicture}
+              alt={question.author.username}
+            />
+          ) : (
+            <Avatar size="large">{question.author.username.charAt(0)}</Avatar>
+          )}
         </span>
         <div>
           <div className="font-semibold">{question.author.username}</div>
-          <div className="text-sm text-muted-foreground">{question.createdAt}</div>
+          <div className="text-sm text-muted-foreground">
+            {moment(parseInt(question.createdAt)).fromNow()}
+          </div>
         </div>
       </div>
       {/* Question Title */}
       <h3 className="text-lg font-semibold">{question.title}</h3>
-      {/* Question Excerpt */}
-      <p className="text-sm text-muted-foreground mt-2">{question.content}</p>
       {/* Tags */}
       <div className="flex items-center gap-2 mt-4">
         {question.tags.map(tag => (
