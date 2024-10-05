@@ -19,6 +19,7 @@ interface FormErrors {
 const QuestionInput: React.FC = () => {
   const [current, setCurrent] = useState(0);
   const [content, setContent] = useState('');
+  const [tagInput, setTagInput] = useState('');
   const [createQuestion] = useMutation(ADD_QUESTION_MUTAION, {
     onCompleted: () => {
       setFormData({
@@ -117,6 +118,7 @@ const QuestionInput: React.FC = () => {
       return;
     }
     handleInputChange('tags', [...formData.tags, tag]);
+    setTagInput(''); // Clear the input after adding the tag
   };
 
   const handleRemoveTag = (tagToRemove: string) => {
@@ -208,7 +210,12 @@ const QuestionInput: React.FC = () => {
                     ))}
                     <Input
                       placeholder="Add a tag"
-                      onPressEnter={e => handleAddTag((e.target as HTMLInputElement).value)}
+                      value={tagInput}
+                      onChange={e => setTagInput(e.target.value)}
+                      onPressEnter={e => {
+                        e.preventDefault();
+                        handleAddTag(tagInput);
+                      }}
                       className={`mr-2 mb-2 bg-background dark:bg-dark-background text-foreground dark:text-dark-foreground border-gray-300 dark:border-gray-700 ${
                         errors.tags ? 'border-red-500' : ''
                       }`}

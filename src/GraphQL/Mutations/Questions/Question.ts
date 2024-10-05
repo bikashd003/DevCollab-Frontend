@@ -17,6 +17,13 @@ export const LIKE_QUESTION = gql`
     }
   }
 `;
+export const DISLIKE_QUESTION = gql`
+  mutation dislikeQuestion($id: ID!) {
+    dislikeQuestion(id: $id) {
+      id
+    }
+  }
+`;
 export const CREATE_COMMENT = gql`
   mutation createComment($content: String!, $questionId: ID!) {
     createComment(content: $content, questionId: $questionId) {

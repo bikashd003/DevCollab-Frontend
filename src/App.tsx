@@ -22,6 +22,7 @@ import BlogPage from './Pages/BlogPage';
 import BlogDetails from './Pages/BlogDetails';
 import ErrorBoundary from './Components/ErrorBoundary';
 import CodeTogetherPage from './Pages/CodeTogetherPage';
+import QuestionDetails from './Pages/QuestionDetails';
 const MainLayout: React.FC = () => {
   return (
     <div>
@@ -85,6 +86,10 @@ const router = createBrowserRouter([
       {
         index: true,
         element: <Questions />,
+      },
+      {
+        path: ':id',
+        element: <QuestionDetails />,
       },
       {
         path: 'ask',

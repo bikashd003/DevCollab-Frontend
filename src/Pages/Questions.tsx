@@ -11,9 +11,8 @@ import FiltersContainer from '../Components/Questions/Filter';
 // import axios from 'axios';
 
 interface Question {
-  id: number;
+  id: string;
   title: string;
-  content: string;
   votes: number;
   tags: string[];
   author: {
