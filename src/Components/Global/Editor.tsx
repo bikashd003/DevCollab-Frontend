@@ -184,7 +184,7 @@ const Editor: React.FC<EditorProps> = ({ initialContent = '', onChange }) => {
         class: 'focus:outline-none mt-4 prose dark:prose-invert max-w-none',
       },
     },
-    autofocus: 'end',
+    // autofocus: 'end',
     enableInputRules: true,
     enablePasteRules: true,
   });

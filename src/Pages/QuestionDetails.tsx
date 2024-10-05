@@ -1,31 +1,71 @@
 import React, { useState } from 'react';
-import { useParams } from 'react-router-dom';
-import { useQuery } from '@apollo/client';
+import { useNavigate, useParams } from 'react-router-dom';
+import { useMutation, useQuery } from '@apollo/client';
 import {
   FaCaretUp,
   FaCaretDown,
-  FaCheck,
+  // FaCheck,
   FaBookmark,
   FaHistory,
   FaShare,
   FaEdit,
   FaUserPlus,
 } from 'react-icons/fa';
-import { Avatar, Button, Skeleton, Space, Tag, Tooltip } from 'antd';
+import { Avatar, Button, message, Skeleton, Space, Tag, Tooltip } from 'antd';
 import moment from 'moment';
 import { GET_QUESTION_BY_ID } from '../GraphQL/Queries/Questions/Questions';
 import MarkdownPreviewComponent from '../Components/Global/MarkdownPreviewComponent';
 import Editor from '../Components/Global/Editor';
+import {
+  CREATE_ANSWER,
+  DISLIKE_QUESTION,
+  LIKE_QUESTION,
+} from '../GraphQL/Mutations/Questions/Question';
 
 const QuestionDetails: React.FC = () => {
   const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
   const [content, setContent] = useState('');
   const { loading, error, data } = useQuery(GET_QUESTION_BY_ID, {
     variables: { id },
   });
+  const [postAnswer] = useMutation(CREATE_ANSWER, {
+    onCompleted: () => {
+      message.success('Answer posted successfully');
+    },
+    onError: err => {
+      message.error(err.message);
+    },
+  });
+
+  const [upvoteQuestion] = useMutation(LIKE_QUESTION, {
+    onCompleted: () => {
+      message.success('Question upvoted successfully');
+    },
+    onError: err => {
+      message.error(err.message);
+    },
+  });
+  const [downvoteQuestion] = useMutation(DISLIKE_QUESTION, {
+    onCompleted: () => {
+      message.success('Question downvoted successfully');
+    },
+    onError: err => {
+      message.error(err.message);
+    },
+  });
 
   const question = data?.getQuestionById;
+  const handlePostAnswer = () => {
+    postAnswer({ variables: { content, questionId: question?.id } });
+  };
 
+  const handleUpvoteQuestion = () => {
+    upvoteQuestion({ variables: { id: question?.id } });
+  };
+  const handleDownvoteQuestion = () => {
+    downvoteQuestion({ variables: { id: question?.id } });
+  };
   if (error)
     return <div className="text-center text-2xl text-red-500">Error loading Question details</div>;
 
@@ -36,17 +76,27 @@ const QuestionDetails: React.FC = () => {
           <h1 className="text-2xl sm:text-3xl font-bold text-gray-800 dark:text-gray-200 mb-4 sm:mb-0">
             {question?.title}
           </h1>
-          <Button type="primary" size="large" className="bg-blue-500 hover:bg-blue-600">
+          <Button
+            type="primary"
+            size="large"
+            className="bg-blue-500 hover:bg-blue-600"
+            onClick={() => navigate('/questions/ask')}
+          >
             Ask Question
           </Button>
         </div>
 
         <div className="flex flex-col md:flex-row gap-6 mb-8">
           <div className="flex md:flex-col items-center md:items-start">
-            <VoteButtons votes={42} />
+            <VoteButtons
+              votes={question?.votes || 0}
+              onUpvote={handleUpvoteQuestion}
+              onDownvote={handleDownvoteQuestion}
+            />
             <BookmarkButton />
             <HistoryButton />
           </div>
+
           <div className="flex-grow">
             <MarkdownPreviewComponent content={question?.content} />
             <Space size={[0, 8]} wrap className="mb-4">
@@ -71,12 +121,17 @@ const QuestionDetails: React.FC = () => {
       <Skeleton loading={loading} active avatar paragraph={{ rows: 4 }}>
         <h2 className="text-2xl font-bold mb-4 text-gray-800 dark:text-gray-200">2 Answers</h2>
 
-        <AnswerSection />
+        {/* <AnswerSection /> */}
 
         <div className="border-t pt-6 mt-8">
           <h3 className="text-xl font-bold mb-4 text-gray-800 dark:text-gray-200">Your Answer</h3>
           <Editor initialContent={content} onChange={setContent} />
-          <Button type="primary" size="large" className="mt-4 bg-blue-500 hover:bg-blue-600">
+          <Button
+            type="primary"
+            size="large"
+            className="mt-4 bg-blue-500 hover:bg-blue-600"
+            onClick={() => handlePostAnswer()}
+          >
             Post Your Answer
           </Button>
         </div>
@@ -85,20 +140,26 @@ const QuestionDetails: React.FC = () => {
   );
 };
 
-const VoteButtons: React.FC<{ votes: number }> = ({ votes }) => (
+const VoteButtons: React.FC<{
+  votes: number;
+  onUpvote: () => void;
+  onDownvote: () => void;
+}> = ({ votes, onUpvote, onDownvote }) => (
   <div className="flex flex-row md:flex-col items-center">
-    <Tooltip title="Upvote">
+    <Tooltip title="Upvote" placement="top">
       <Button
         type="text"
         icon={<FaCaretUp size={36} />}
+        onClick={onUpvote}
         className="text-gray-500 hover:text-orange-500"
       />
     </Tooltip>
     <span className="text-xl font-bold mx-2 md:my-2">{votes}</span>
-    <Tooltip title="Downvote">
+    <Tooltip title="Downvote" placement="bottom">
       <Button
         type="text"
         icon={<FaCaretDown size={36} />}
+        onClick={onDownvote}
         className="text-gray-500 hover:text-orange-500"
       />
     </Tooltip>
@@ -148,53 +209,30 @@ const AuthorInfo: React.FC<{
   </Space>
 );
 
-const AnswerSection: React.FC = () => (
-  <div className="border-t pt-6">
-    <div className="flex flex-col md:flex-row gap-6 mb-8">
-      <div className="flex md:flex-col items-center md:items-start">
-        <VoteButtons votes={23} />
-        <Tooltip title="Accept Answer">
-          <Button type="text" icon={<FaCheck size={18} />} className="mt-4 text-green-500" />
-        </Tooltip>
-      </div>
-      <div className="flex-grow">
-        <p className="text-lg mb-4">
-          To center a div within another div, you can use flexbox. Here's an updated CSS that will
-          center your child div:
-        </p>
-        <pre className="bg-gray-100 dark:bg-gray-800 p-4 rounded-md mb-4 overflow-x-auto">
-          {`.parent {
-  width: 300px;
-  height: 300px;
-  background-color: #f0f0f0;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
+// const AnswerSection: React.FC = () => (
+//   <div className="border-t pt-6">
+//     <div className="flex flex-col md:flex-row gap-6 mb-8">
+//       <div className="flex md:flex-col items-center md:items-start">
+//         <VoteButtons votes={23} />
+//         <Tooltip title="Accept Answer">
+//           <Button type="text" icon={<FaCheck size={18} />} className="mt-4 text-green-500" />
+//         </Tooltip>
+//       </div>
+//       <div className="flex-grow">
 
-.child {
-  width: 100px;
-  height: 100px;
-  background-color: #3498db;
-}`}
-        </pre>
-        <p className="mb-4">
-          This solution uses flexbox to center the child div both horizontally and vertically within
-          the parent div.
-        </p>
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between text-sm text-gray-500">
-          <Space size="middle">
-            <ActionButton icon={<FaShare />} text="Share" />
-            <ActionButton icon={<FaEdit />} text="Edit" />
-          </Space>
-          <AuthorInfo
-            author={{ username: 'Jane Smith', profilePicture: 'https://i.pravatar.cc/40?img=2' }}
-            createdAt={(Date.now() - 3600000).toString()}
-          />
-        </div>
-      </div>
-    </div>
-  </div>
-);
+//         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between text-sm text-gray-500">
+//           <Space size="middle">
+//             <ActionButton icon={<FaShare />} text="Share" />
+//             <ActionButton icon={<FaEdit />} text="Edit" />
+//           </Space>
+//           <AuthorInfo
+//             author={{ username: 'Jane Smith', profilePicture: 'https://i.pravatar.cc/40?img=2' }}
+//             createdAt={(Date.now() - 3600000).toString()}
+//           />
+//         </div>
+//       </div>
+//     </div>
+//   </div>
+// );
 
 export default QuestionDetails;
