@@ -2,11 +2,14 @@ import type { ReactNode } from 'react';
 import { createContext, useState, useEffect, useContext } from 'react';
 import axios from 'axios';
 import BackendApi from '../Constant/Api';
+import { GET_CURRENT_USER_ID } from '../GraphQL/Queries/Profile/Users';
+import { useQuery } from '@apollo/client';
 
 interface AuthContextType {
   isAuthenticated: boolean;
   setIsAuthenticated: React.Dispatch<React.SetStateAction<boolean>>;
   handleLogout: () => Promise<void>;
+  currentUserId: string | null;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -14,6 +17,13 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+  const { data } = useQuery(GET_CURRENT_USER_ID);
+  useEffect(() => {
+    if (data) {
+      setCurrentUserId(data.getCurrentUserId);
+    }
+  }, [data]);
   const handleLogout = async () => {
     try {
       await axios.get(`${BackendApi}/auth/logout`);
@@ -46,7 +56,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   return (
-    <AuthContext.Provider value={{ isAuthenticated, setIsAuthenticated, handleLogout }}>
+    <AuthContext.Provider
+      value={{ isAuthenticated, setIsAuthenticated, handleLogout, currentUserId }}
+    >
       {!loading && children}
     </AuthContext.Provider>
   );

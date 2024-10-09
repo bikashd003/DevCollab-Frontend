@@ -18,3 +18,9 @@ export const GET_USER_DATA = gql`
     }
   }
 `;
+
+export const GET_CURRENT_USER_ID = gql`
+  query GetCurrentUserId {
+    getCurrentUserId
+  }
+`;

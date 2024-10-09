@@ -21,10 +21,12 @@ import {
   DISLIKE_QUESTION,
   LIKE_QUESTION,
 } from '../GraphQL/Mutations/Questions/Question';
+import { useAuth } from '../Secure/AuthContext';
 interface Answer {
   id: string;
   content: string;
   author: {
+    id: string;
     username: string;
     profilePicture: string;
   };
@@ -33,6 +35,7 @@ interface Answer {
 const QuestionDetails: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const { currentUserId } = useAuth();
   const [content, setContent] = useState('');
   const { loading, error, data, refetch } = useQuery(GET_QUESTION_BY_ID, {
     variables: { id },
@@ -122,7 +125,9 @@ const QuestionDetails: React.FC = () => {
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between text-sm text-gray-500">
               <Space size="middle">
                 <ActionButton icon={<FaShare />} text="Share" />
-                <ActionButton icon={<FaEdit />} text="Edit" />
+                {question?.author?.id === currentUserId && (
+                  <ActionButton icon={<FaEdit />} text="Edit" />
+                )}
                 <ActionButton icon={<FaUserPlus />} text="Follow" />
               </Space>
               <AuthorInfo author={question?.author} createdAt={question?.createdAt} />
@@ -136,7 +141,7 @@ const QuestionDetails: React.FC = () => {
           {question?.answers?.length} Answers
         </h2>
         {question?.answers?.map((answer: Answer) => (
-          <AnswerSection key={answer.id} answer={answer} />
+          <AnswerSection key={answer.id} answer={answer} currentUserId={currentUserId || ''} />
         ))}
         <div className="border-t pt-6 mt-8">
           <h3 className="text-xl font-bold mb-4 text-gray-800 dark:text-gray-200">Your Answer</h3>
@@ -224,7 +229,10 @@ const AuthorInfo: React.FC<{
   </Space>
 );
 
-const AnswerSection: React.FC<{ answer: Answer }> = ({ answer }) => (
+const AnswerSection: React.FC<{ answer: Answer; currentUserId: string }> = ({
+  answer,
+  currentUserId,
+}) => (
   <div className="border-t pt-6">
     <div className="flex flex-col md:flex-row gap-6 mb-8">
       <div className="flex md:flex-col items-center md:items-start">
@@ -238,7 +246,7 @@ const AnswerSection: React.FC<{ answer: Answer }> = ({ answer }) => (
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between text-sm text-gray-500">
           <Space size="middle">
             <ActionButton icon={<FaShare />} text="Share" />
-            <ActionButton icon={<FaEdit />} text="Edit" />
+            {answer?.author?.id === currentUserId && <ActionButton icon={<FaEdit />} text="Edit" />}
           </Space>
           <AuthorInfo author={answer.author} createdAt={answer.createdAt} />
         </div>
