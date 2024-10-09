@@ -56,25 +56,29 @@ export const GET_QUESTION_BY_ID = gql`
       title
       content
       tags
+      views
+      upvotes {
+        id
+      }
+      downvotes {
+        id
+      }
       author {
         id
         username
         profilePicture
       }
       createdAt
-      # upvotes
-      # downvotes
-      # views
-      # answers {
-      #   id
-      #   content
-      #   author {
-      #     id
-      #     username
-      #     profilePicture
-      #   }
-      #   createdAt
-      # }
+      answers {
+        id
+        content
+        author {
+          id
+          username
+          profilePicture
+        }
+        createdAt
+      }
     }
   }
 `;

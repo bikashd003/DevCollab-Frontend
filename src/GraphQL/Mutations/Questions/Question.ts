@@ -11,15 +11,15 @@ export const ADD_QUESTION_MUTAION = gql`
   }
 `;
 export const LIKE_QUESTION = gql`
-  mutation likeQuestion($id: ID!) {
-    likeQuestion(id: $id) {
+  mutation upvoteQuestion($id: ID!) {
+    upvoteQuestion(id: $id) {
       id
     }
   }
 `;
 export const DISLIKE_QUESTION = gql`
-  mutation dislikeQuestion($id: ID!) {
-    dislikeQuestion(id: $id) {
+  mutation downvoteQuestion($id: ID!) {
+    downvoteQuestion(id: $id) {
       id
     }
   }

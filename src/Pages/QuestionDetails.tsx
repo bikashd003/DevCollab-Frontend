@@ -4,12 +4,12 @@ import { useMutation, useQuery } from '@apollo/client';
 import {
   FaCaretUp,
   FaCaretDown,
-  // FaCheck,
   FaBookmark,
   FaHistory,
   FaShare,
   FaEdit,
   FaUserPlus,
+  FaCheck,
 } from 'react-icons/fa';
 import { Avatar, Button, message, Skeleton, Space, Tag, Tooltip } from 'antd';
 import moment from 'moment';
@@ -21,12 +21,20 @@ import {
   DISLIKE_QUESTION,
   LIKE_QUESTION,
 } from '../GraphQL/Mutations/Questions/Question';
-
+interface Answer {
+  id: string;
+  content: string;
+  author: {
+    username: string;
+    profilePicture: string;
+  };
+  createdAt: string;
+}
 const QuestionDetails: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [content, setContent] = useState('');
-  const { loading, error, data } = useQuery(GET_QUESTION_BY_ID, {
+  const { loading, error, data, refetch } = useQuery(GET_QUESTION_BY_ID, {
     variables: { id },
   });
   const [postAnswer] = useMutation(CREATE_ANSWER, {
@@ -56,15 +64,20 @@ const QuestionDetails: React.FC = () => {
   });
 
   const question = data?.getQuestionById;
-  const handlePostAnswer = () => {
-    postAnswer({ variables: { content, questionId: question?.id } });
+  // console.log(question);
+  const handlePostAnswer = async () => {
+    await postAnswer({ variables: { content, questionId: question?.id } });
+    setContent('');
+    refetch();
   };
 
-  const handleUpvoteQuestion = () => {
-    upvoteQuestion({ variables: { id: question?.id } });
+  const handleUpvoteQuestion = async () => {
+    await upvoteQuestion({ variables: { id: question?.id } });
+    refetch();
   };
-  const handleDownvoteQuestion = () => {
-    downvoteQuestion({ variables: { id: question?.id } });
+  const handleDownvoteQuestion = async () => {
+    await downvoteQuestion({ variables: { id: question?.id } });
+    refetch();
   };
   if (error)
     return <div className="text-center text-2xl text-red-500">Error loading Question details</div>;
@@ -89,7 +102,7 @@ const QuestionDetails: React.FC = () => {
         <div className="flex flex-col md:flex-row gap-6 mb-8">
           <div className="flex md:flex-col items-center md:items-start">
             <VoteButtons
-              votes={question?.votes || 0}
+              votes={question?.upvotes?.length - question?.downvotes?.length || 0}
               onUpvote={handleUpvoteQuestion}
               onDownvote={handleDownvoteQuestion}
             />
@@ -119,10 +132,12 @@ const QuestionDetails: React.FC = () => {
       </Skeleton>
 
       <Skeleton loading={loading} active avatar paragraph={{ rows: 4 }}>
-        <h2 className="text-2xl font-bold mb-4 text-gray-800 dark:text-gray-200">2 Answers</h2>
-
-        {/* <AnswerSection /> */}
-
+        <h2 className="text-2xl font-bold mb-4 text-gray-800 dark:text-gray-200">
+          {question?.answers?.length} Answers
+        </h2>
+        {question?.answers?.map((answer: Answer) => (
+          <AnswerSection key={answer.id} answer={answer} />
+        ))}
         <div className="border-t pt-6 mt-8">
           <h3 className="text-xl font-bold mb-4 text-gray-800 dark:text-gray-200">Your Answer</h3>
           <Editor initialContent={content} onChange={setContent} />
@@ -209,30 +224,27 @@ const AuthorInfo: React.FC<{
   </Space>
 );
 
-// const AnswerSection: React.FC = () => (
-//   <div className="border-t pt-6">
-//     <div className="flex flex-col md:flex-row gap-6 mb-8">
-//       <div className="flex md:flex-col items-center md:items-start">
-//         <VoteButtons votes={23} />
-//         <Tooltip title="Accept Answer">
-//           <Button type="text" icon={<FaCheck size={18} />} className="mt-4 text-green-500" />
-//         </Tooltip>
-//       </div>
-//       <div className="flex-grow">
-
-//         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between text-sm text-gray-500">
-//           <Space size="middle">
-//             <ActionButton icon={<FaShare />} text="Share" />
-//             <ActionButton icon={<FaEdit />} text="Edit" />
-//           </Space>
-//           <AuthorInfo
-//             author={{ username: 'Jane Smith', profilePicture: 'https://i.pravatar.cc/40?img=2' }}
-//             createdAt={(Date.now() - 3600000).toString()}
-//           />
-//         </div>
-//       </div>
-//     </div>
-//   </div>
-// );
+const AnswerSection: React.FC<{ answer: Answer }> = ({ answer }) => (
+  <div className="border-t pt-6">
+    <div className="flex flex-col md:flex-row gap-6 mb-8">
+      <div className="flex md:flex-col items-center md:items-start">
+        <VoteButtons votes={23} onUpvote={() => {}} onDownvote={() => {}} />
+        <Tooltip title="Accept Answer">
+          <Button type="text" icon={<FaCheck size={18} />} className="mt-4 text-green-500" />
+        </Tooltip>
+      </div>
+      <div className="flex-grow">
+        <MarkdownPreviewComponent content={answer.content} />
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between text-sm text-gray-500">
+          <Space size="middle">
+            <ActionButton icon={<FaShare />} text="Share" />
+            <ActionButton icon={<FaEdit />} text="Edit" />
+          </Space>
+          <AuthorInfo author={answer.author} createdAt={answer.createdAt} />
+        </div>
+      </div>
+    </div>
+  </div>
+);
 
 export default QuestionDetails;
