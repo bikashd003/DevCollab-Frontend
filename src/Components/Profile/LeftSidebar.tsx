@@ -14,9 +14,12 @@ import type { RootState } from '../../Redux/Store';
 import { setIsCollapsed } from '../../Redux/ProfileSlice';
 import { useAuth } from '../../Secure/AuthContext';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { useQuery } from '@apollo/client';
+import { GET_USER_DATA } from '../../GraphQL/Queries/Profile/Users';
 const RightSidebar = () => {
   const { handleLogout } = useAuth();
   const dispatch = useDispatch();
+  const { data } = useQuery(GET_USER_DATA);
   const isCollapsed = useSelector((state: RootState) => state.profile.isCollapsed);
   const [activeItem, setActiveItem] = useState('Profile');
   const navigate = useNavigate();
@@ -106,13 +109,9 @@ const RightSidebar = () => {
         ))}
       </div>
 
-      <div className="flex justify-between  bg-gray-600 py-2 px-4">
+      <div className="flex justify-between  py-2 px-4">
         <div className={`flex items-center  ${isCollapsed ? 'justify-center' : 'justify-start'}`}>
-          <Avatar
-            size="sm"
-            src="https://i.pravatar.cc/150?u=a042581f4e29026024d"
-            className="border-2 border-primary"
-          />
+          <Avatar size="sm" src={data?.user?.profilePicture} className="border-2 border-primary" />
           {!isCollapsed && (
             <div className="ml-3 overflow-hidden">
               <p className="font-semibold dark:text-gray-300 whitespace-nowrap">John Doe</p>

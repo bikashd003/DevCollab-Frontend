@@ -233,7 +233,7 @@ const Editor: React.FC<EditorProps> = ({ initialContent = '', onChange }) => {
 
   return (
     <div className="custom-scrollbar rounded-xl w-full border-2 px-2 dark:border-gray-300 border-gray-700 overflow-y-auto max-h-[300px] h-[300px]">
-      <div className="w-full sticky top-0 py-2 z-10 bg-white dark:bg-dark-background mb-2">
+      <div className="w-full sticky top-0 py-2 z-10 bg-white dark:bg-dark-background rounded-xl mb-2">
         <div className="flex justify-between items-center">
           <MenuBar editor={editor} isMarkdownMode={isMarkdownMode} textareaRef={textareaRef} />
           <div className="flex  bg-slate-200 rounded-lg">

@@ -13,6 +13,7 @@ interface FileInputProps {
   maxSize?: number;
   fileList?: UploadFile[];
   setFileList?: React.Dispatch<React.SetStateAction<UploadFile[]>>;
+  listType?: 'picture-card' | 'picture-circle';
 }
 
 const getBase64 = (file: FileType): Promise<string> =>
@@ -29,6 +30,7 @@ const FileInput: React.FC<FileInputProps> = ({
   maxSize = 5 * 1024 * 1024, // 5MB default
   fileList = [],
   setFileList = () => {},
+  listType = 'picture-card',
 }) => {
   const [loading, setLoading] = useState(false);
   const [previewOpen, setPreviewOpen] = useState(false);
@@ -138,7 +140,7 @@ const FileInput: React.FC<FileInputProps> = ({
   return (
     <>
       <Upload
-        listType="picture-card"
+        listType={listType}
         fileList={fileList}
         onPreview={handlePreview}
         beforeUpload={beforeUpload}
