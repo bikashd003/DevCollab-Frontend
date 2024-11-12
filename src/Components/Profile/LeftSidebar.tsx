@@ -56,8 +56,6 @@ const RightSidebar = () => {
     const handleResize = () => {
       if (window.innerWidth < 768) {
         dispatch(setIsCollapsed(true));
-      } else {
-        dispatch(setIsCollapsed(false));
       }
     };
     window.addEventListener('resize', handleResize);

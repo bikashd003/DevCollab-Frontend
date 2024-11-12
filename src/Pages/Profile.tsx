@@ -13,6 +13,9 @@ import {
   UPDATE_USER_PROFILE_DETAILS,
   UPDATE_USER_PROFILE_PICTURE,
 } from '../GraphQL/Mutations/Profile/User';
+import BackendApi from '../Constant/Api';
+import axios from 'axios';
+import ContactForm from '../Components/Home/ContactForm';
 
 const Profile = () => {
   const { data, loading, refetch } = useQuery(GET_USER_DATA);
@@ -27,19 +30,21 @@ const Profile = () => {
   const handleProfilePictureUpdate = async (file: File) => {
     try {
       setUploading(true);
-      const formData = new FormData();
-      formData.append('file', file);
 
-      // Assuming you have an API endpoint for file upload
-      const response = await fetch('/api/upload', {
-        method: 'POST',
-        body: formData,
-      });
-      const { url } = await response.json();
+      const formData = new FormData();
+      formData.append('image', file);
+
+      const response = await axios.post<{ imageUrl: string; publicId: string }>(
+        `${BackendApi}/cloudinary/upload`,
+        formData,
+        {
+          headers: { 'Content-Type': 'multipart/form-data' },
+        }
+      );
 
       await updateUserProfilePicture({
         variables: {
-          profilePicture: url,
+          profilePicture: response.data.imageUrl,
         },
       });
 
@@ -149,8 +154,8 @@ const Profile = () => {
                 <Form.Item name="bio" label="Bio">
                   <Input.TextArea />
                 </Form.Item>
-                <Form.Item name="location" label="Location">
-                  <Input />
+                <Form.Item name="contact" label="Contacts">
+                  <ContactForm />
                 </Form.Item>
                 <Form.Item name="company" label="Company">
                   <Input />
