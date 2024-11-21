@@ -6,20 +6,23 @@ import { useParams } from 'react-router-dom';
 import { Share } from 'lucide-react';
 import { socket } from '../Utilities/Socket';
 import { Avatar } from 'antd';
+import { useAuth } from '../Secure/AuthContext';
 
 const CodeTogetherPage = () => {
   const [messages, setMessages] = useState<Array<{ id: number; user: string; text: string }>>([]);
   const [newMessage, setNewMessage] = useState('');
-  const [connectedUsers, setConnectedUsers] = useState<Array<string>>([]); // Real-time connected users
+  const [connectedUsers, setConnectedUsers] = useState<
+    Array<{ username: string; profilePicture: string }>
+  >([]); // Real-time connected users
   const { id } = useParams();
   const [shareableLink, setShareableLink] = useState('');
-
+  const { currentUserId } = useAuth();
   // Initialize socket and manage real-time events
   useEffect(() => {
     socket.connect();
     // Join the project room
-    if (id) {
-      socket.emit('joinProject', id);
+    if (id && currentUserId) {
+      socket.emit('joinProject', { projectId: id, userId: currentUserId });
       setShareableLink(`${window.location.origin}/editor/${id}`);
     }
 
@@ -29,7 +32,7 @@ const CodeTogetherPage = () => {
     });
 
     // Update the list of connected users
-    socket.on('connectedUsers', (users: Array<string>) => {
+    socket.on('connectedUsers', (users: Array<{ username: string; profilePicture: string }>) => {
       setConnectedUsers(users);
     });
 
@@ -38,6 +41,7 @@ const CodeTogetherPage = () => {
       socket.off('connectedUsers');
       socket.disconnect();
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
   const handleSendMessage = (e: React.FormEvent<HTMLFormElement>) => {
@@ -45,8 +49,7 @@ const CodeTogetherPage = () => {
     if (!newMessage.trim()) return;
 
     const message = {
-      id: Date.now(),
-      user: 'You',
+      user: currentUserId,
       text: newMessage.trim(),
     };
 
@@ -73,11 +76,12 @@ const CodeTogetherPage = () => {
             <div>
               <h2 className="text-xl font-semibold">Chat</h2>
               {connectedUsers.map(user => (
-                <p
-                  key={user}
-                  className="px-4 py-2 rounded bg-gray-100 dark:bg-gray-700 flex items-center gap-2"
-                >
-                  <Avatar size={20}>{user.charAt(0).toUpperCase()}</Avatar>
+                <p key={user.username} className=" flex items-center gap-2">
+                  {user.profilePicture ? (
+                    <Avatar size={28} src={user.profilePicture} />
+                  ) : (
+                    <Avatar size={28}>{user.username.charAt(0).toUpperCase()}</Avatar>
+                  )}
                 </p>
               ))}
             </div>
