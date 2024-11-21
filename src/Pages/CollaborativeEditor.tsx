@@ -6,7 +6,7 @@ import io from 'socket.io-client';
 import * as monaco from 'monaco-editor';
 import { useTheme } from '../Context/ThemeProvider';
 import { debounce } from 'lodash';
-
+import BackendApi from '../Constant/Api';
 interface CodeChangeData {
   range: monaco.IRange;
   text: string;
@@ -19,7 +19,7 @@ function CollaborativeEditor() {
 
   // Initialize socket and register the completion provider
   useEffect(() => {
-    socketRef.current = io('http://localhost:3001');
+    socketRef.current = io(BackendApi);
 
     socketRef.current.on('codeChange', (data: CodeChangeData) => {
       if (editorRef.current) {
@@ -116,7 +116,7 @@ function CollaborativeEditor() {
 
   return (
     <Editor
-      height="90vh"
+      height="100%"
       defaultLanguage="javascript"
       defaultValue="// Start collaborative coding here"
       onMount={handleEditorDidMount}

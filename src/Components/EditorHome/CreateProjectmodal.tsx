@@ -1,5 +1,9 @@
+import { useMutation } from '@apollo/client';
 import { Modal, ModalContent, ModalHeader, ModalBody } from '@nextui-org/react';
 import { useState } from 'react';
+import { CREATE_EDITOR } from '../../GraphQL/Mutations/Editor/Editor';
+import { message } from 'antd';
+import { useNavigate } from 'react-router-dom';
 
 const CreateProjectModal = ({
   isOpen,
@@ -9,9 +13,20 @@ const CreateProjectModal = ({
   onOpenChange: (open: boolean) => void;
 }) => {
   const [projectName, setProjectName] = useState('');
+  const navigate = useNavigate();
+  const [createEditor] = useMutation(CREATE_EDITOR, {
+    onCompleted: data => {
+      message.success('Project created successfully');
+      onOpenChange(false);
+      navigate(`/editor/${data.createEditor.id}`);
+    },
+    onError: err => {
+      message.error(err.message);
+    },
+  });
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    // console.log(projectName);
+    createEditor({ variables: { title: projectName } });
   };
   return (
     <>

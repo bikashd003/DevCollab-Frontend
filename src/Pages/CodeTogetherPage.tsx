@@ -1,132 +1,132 @@
 import { motion } from 'framer-motion';
-import { FaMicrophone, FaMicrophoneSlash, FaCog } from 'react-icons/fa';
 import { IoMdSend } from 'react-icons/io';
-import { useTheme } from '../Context/ThemeProvider';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import CollaborativeEditor from './CollaborativeEditor';
-// import { useEffect, useState } from 'react';
-// import { useParams } from 'react-router-dom';
-// import { useSubscription } from '@apollo/client';
-// import { GET_USERS, GET_MESSAGES } from '../Graphql/Queries';
-// import { SOCKET_EVENTS } from '../Utils/Constants';
-// import { useSocket } from '../Contexts/SocketContext';
+import { useParams } from 'react-router-dom';
+import { Share } from 'lucide-react';
+import { socket } from '../Utilities/Socket';
+import { Avatar } from 'antd';
 
 const CodeTogetherPage = () => {
-  const [isMuted, setIsMuted] = useState(false);
-  const { theme, setTheme } = useTheme();
   const [messages, setMessages] = useState<Array<{ id: number; user: string; text: string }>>([]);
   const [newMessage, setNewMessage] = useState('');
+  const [connectedUsers, setConnectedUsers] = useState<Array<string>>([]); // Real-time connected users
+  const { id } = useParams();
+  const [shareableLink, setShareableLink] = useState('');
 
-  const toggleMute = () => {
-    setIsMuted(!isMuted);
-  };
-  const toggleTheme = () => {
-    setTheme(theme === 'dark' ? 'light' : 'dark');
-  };
+  // Initialize socket and manage real-time events
+  useEffect(() => {
+    socket.connect();
+    // Join the project room
+    if (id) {
+      socket.emit('joinProject', id);
+      setShareableLink(`${window.location.origin}/editor/${id}`);
+    }
+
+    // Listen for real-time messages
+    socket.on('chatMessage', message => {
+      setMessages(prev => [...prev, message]);
+    });
+
+    // Update the list of connected users
+    socket.on('connectedUsers', (users: Array<string>) => {
+      setConnectedUsers(users);
+    });
+
+    return () => {
+      socket.off('chatMessage');
+      socket.off('connectedUsers');
+      socket.disconnect();
+    };
+  }, [id]);
 
   const handleSendMessage = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setMessages([...messages, { id: Date.now(), user: 'You', text: newMessage }]);
+    if (!newMessage.trim()) return;
+
+    const message = {
+      id: Date.now(),
+      user: 'You',
+      text: newMessage.trim(),
+    };
+
+    socket.emit('chatMessage', {
+      projectId: id,
+      ...message,
+    });
+
     setNewMessage('');
   };
+
   return (
-    <div className="flex flex-col h-screen bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-100 ml-16">
-      <header className="bg-indigo-600 text-white p-4 flex justify-between items-center">
-        <h1 className="text-2xl font-bold">Collaborative Coding Platform</h1>
-        <div className="flex items-center space-x-4">
-          {[
-            {
-              id: 1,
-              name: 'Alice',
-              avatar:
-                'https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80',
-              status: 'online',
-            },
-            {
-              id: 2,
-              name: 'Bob',
-              avatar:
-                'https://images.unsplash.com/photo-1519244703995-f4e0f30006d5?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80',
-              status: 'away',
-            },
-            {
-              id: 3,
-              name: 'Charlie',
-              avatar:
-                'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80',
-              status: 'offline',
-            },
-          ].map(user => (
-            <motion.div
-              key={user.id}
-              className="relative"
-              whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.95 }}
-            >
-              <img
-                src={user.avatar}
-                alt={user.name}
-                className="w-10 h-10 rounded-full border-2 border-white"
-              />
-              <span
-                className={`absolute bottom-0 right-0 w-3 h-3 rounded-full ${user.status === 'online' ? 'bg-green-500' : user.status === 'away' ? 'bg-yellow-500' : 'bg-red-500'}`}
-              ></span>
-            </motion.div>
-          ))}
-          <motion.button
-            className="p-2 rounded-full bg-indigo-700 hover:bg-indigo-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
-            onClick={toggleMute}
-            whileHover={{ scale: 1.1 }}
-            whileTap={{ scale: 0.95 }}
-          >
-            {isMuted ? <FaMicrophoneSlash /> : <FaMicrophone />}
-          </motion.button>
-          <motion.button
-            className="p-2 rounded-full bg-indigo-700 hover:bg-indigo-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
-            onClick={toggleTheme}
-            whileHover={{ scale: 1.1 }}
-            whileTap={{ scale: 0.95 }}
-          >
-            <FaCog />
-          </motion.button>
-        </div>
-      </header>
-      <main className="flex-grow flex overflow-hidden">
-        <div className="w-2/3 p-4">
+    <div className="flex flex-col h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 text-gray-900 dark:text-gray-100">
+      <main className="flex-grow flex flex-col lg:flex-row overflow-hidden p-4 gap-4">
+        {/* Editor Section */}
+        <div className="w-full lg:w-2/3 rounded-2xl backdrop-blur-sm bg-white/50 dark:bg-gray-800/50 shadow-xl">
           <CollaborativeEditor />
         </div>
-        <div className="w-1/3 p-4 flex flex-col bg-white dark:bg-gray-800 shadow-lg">
-          <div className="flex-grow overflow-y-auto mb-4">
+
+        {/* Sidebar Section */}
+        <div className="w-full lg:w-1/3 flex flex-col rounded-2xl backdrop-blur-sm bg-white/80 dark:bg-gray-800/80 shadow-xl">
+          {/* Chat Section */}
+          <div className="p-4 border-b flex gap-2 justify-between border-gray-200 dark:border-gray-700">
+            <div>
+              <h2 className="text-xl font-semibold">Chat</h2>
+              {connectedUsers.map(user => (
+                <p
+                  key={user}
+                  className="px-4 py-2 rounded bg-gray-100 dark:bg-gray-700 flex items-center gap-2"
+                >
+                  <Avatar size={20}>{user.charAt(0).toUpperCase()}</Avatar>
+                </p>
+              ))}
+            </div>
+            <Share
+              className="cursor-pointer"
+              onClick={() => navigator.clipboard.writeText(shareableLink)}
+            />
+          </div>
+          <div className="flex-grow overflow-y-auto p-4 space-y-4 scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-600">
             {messages.map((message: { id: number; user: string; text: string }) => (
               <motion.div
                 key={message.id}
-                className={`mb-2 p-2 rounded ${message.user === 'You' ? 'bg-indigo-100 dark:bg-indigo-900 ml-auto' : 'bg-gray-100 dark:bg-gray-700'}`}
+                className={`max-w-[80%] ${message.user === 'You' ? 'ml-auto' : ''}`}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.3 }}
               >
-                <p className="font-semibold">{message.user}</p>
-                <p>{message.text}</p>
+                <div
+                  className={`p-3 rounded-2xl ${
+                    message.user === 'You'
+                      ? 'bg-indigo-500 text-white'
+                      : 'bg-gray-200 dark:bg-gray-700'
+                  }`}
+                >
+                  <p className="text-sm font-medium mb-1">{message.user}</p>
+                  <p className="text-sm">{message.text}</p>
+                </div>
               </motion.div>
             ))}
           </div>
-          <form onSubmit={handleSendMessage} className="flex">
-            <input
-              type="text"
-              value={newMessage}
-              onChange={e => setNewMessage(e.target.value)}
-              placeholder="Type a message..."
-              className="flex-grow p-2 border rounded-l focus:outline-none focus:ring-2 focus:ring-indigo-500"
-            />
-            <motion.button
-              type="submit"
-              className="bg-indigo-600 text-white p-2 rounded-r hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-            >
-              <IoMdSend />
-            </motion.button>
-          </form>
+          <div className="p-4 border-t border-gray-200 dark:border-gray-700">
+            <form onSubmit={handleSendMessage} className="flex gap-2">
+              <input
+                type="text"
+                value={newMessage}
+                onChange={e => setNewMessage(e.target.value)}
+                placeholder="Type a message..."
+                className="flex-grow px-4 py-2 rounded-full bg-gray-100 dark:bg-gray-700 border-none focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:focus:ring-indigo-400 transition-all"
+              />
+              <motion.button
+                type="submit"
+                className="p-3 rounded-full bg-indigo-500 hover:bg-indigo-600 text-white shadow-lg hover:shadow-indigo-500/25 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-all"
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                <IoMdSend className="text-lg" />
+              </motion.button>
+            </form>
+          </div>
         </div>
       </main>
     </div>

@@ -33,6 +33,7 @@ const MainLayout: React.FC = () => {
     </div>
   );
 };
+
 const router = createBrowserRouter([
   {
     path: '/',
@@ -62,6 +63,11 @@ const router = createBrowserRouter([
     ],
   },
   {
+    path: '/editor/:id',
+    element: <ProtectedRoute element={<CodeTogetherPage />} />,
+    errorElement: <RouteErrorBoundary />,
+  },
+  {
     path: '/home',
     element: <ProtectedRoute element={<HomeLayout />} />,
     children: [
@@ -76,10 +82,6 @@ const router = createBrowserRouter([
       {
         path: 'skills',
         element: <ProtectedRoute element={<Skills />} />,
-      },
-      {
-        path: 'code-together',
-        element: <ProtectedRoute element={<CodeTogetherPage />} />,
       },
     ],
   },
