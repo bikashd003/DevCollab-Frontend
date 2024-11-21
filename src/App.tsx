@@ -23,6 +23,7 @@ import BlogDetails from './Pages/BlogDetails';
 import ErrorBoundary from './Components/ErrorBoundary';
 import CodeTogetherPage from './Pages/CodeTogetherPage';
 import QuestionDetails from './Pages/QuestionDetails';
+import EditorHomePage from './Pages/EditorHomePage';
 const MainLayout: React.FC = () => {
   return (
     <div>
@@ -53,6 +54,10 @@ const router = createBrowserRouter([
       {
         path: 'blog/:id',
         element: <BlogDetails />,
+      },
+      {
+        path: 'editor',
+        element: <EditorHomePage />,
       },
     ],
   },

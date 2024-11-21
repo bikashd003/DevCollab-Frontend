@@ -75,6 +75,14 @@ const Nav = () => {
               Blogs
             </Link>
           </NavbarItem>
+          <NavbarItem>
+            <Link
+              className="px-4 py-1 font-medium text-white bg-gradient-to-r from-blue-500 to-gray-600 rounded-lg hover:from-blue-600 hover:to-gray-700 transition-all duration-300 shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
+              to="/editor"
+            >
+              Editor
+            </Link>
+          </NavbarItem>
         </NavbarContent>
         <NavbarContent justify="end">
           <NavbarItem className="hidden lg:flex">
