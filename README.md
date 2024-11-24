@@ -63,6 +63,14 @@ DevCollab is a comprehensive web application designed to foster collaboration an
    ```
    MONGODB_URI=your_mongodb_connection_string
    JWT_SECRET=your_jwt_secret
+   PORT=5000
+   SESSION_SECRET = session_secret
+   JWT_SECRET= jwt_secret
+   CLIENT_URL=http://localhost:5173
+   NODE_ENV === 'development'
+   CLOUDINARY_API_KEY= your_coludinary_api_key
+   CLOUDINARY_API_SECRET=your_coludinary_api_secret
+   CLOUDINARY_CLOUD_NAME=your_coludinary_name
    ```
 
 4. Run the development server:
