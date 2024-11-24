@@ -61,7 +61,7 @@ DevCollab is a comprehensive web application designed to foster collaboration an
    Create a `.env` file in the root directory and add the following:
 
    ```
-   MONGODB_URI=your_mongodb_connection_string
+   MONGODB_URL=your_mongodb_connection_string
    JWT_SECRET=your_jwt_secret
    PORT=5000
    SESSION_SECRET = session_secret
