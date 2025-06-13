@@ -1,3 +1,4 @@
+import React from 'react';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import { ThemeProvider } from './Context/ThemeProvider';
 import DevCollabHome from './Pages/DevCollabHome';
@@ -5,8 +6,6 @@ import './App.css';
 import { NextUIProvider } from '@nextui-org/react';
 import ProtectedRoute from './Secure/ProtectedRoute';
 import Profile from './Pages/Profile';
-// import useAxiosInterceptors from './Secure/UseAxiosInterceptors';
-// import PublicRoute from './Secure/PublicRoute';
 import NotFound from './Pages/NotFound';
 import RouteErrorBoundary from './Components/RouteErrorBoundary';
 import HomeLayout from './Components/Profile/HomeLayout';

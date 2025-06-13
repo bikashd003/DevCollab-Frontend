@@ -143,27 +143,505 @@ html.dark
   background-color: #177ddc;
   border-color: #177ddc;
 }
-/* In your CSS file or styled-component */
+/* ===== SCROLLBAR STYLES ===== */
+/* Modern, sleek scrollbar design for both light and dark themes */
 
 .custom-scrollbar,
 * {
+  /* Webkit browsers (Chrome, Safari, Edge) */
   &::-webkit-scrollbar {
-    width: 12px;
+    width: 8px;
+    height: 8px;
   }
 
   &::-webkit-scrollbar-track {
     background: transparent;
-    border-radius: 100px 200px;
+    border-radius: 8px;
   }
 
   &::-webkit-scrollbar-thumb {
-    background: #888;
-    border-radius: 100px;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 8px;
+    border: 2px solid transparent;
+    background-clip: content-box;
+    transition: all 0.2s ease;
   }
 
   &::-webkit-scrollbar-thumb:hover {
-    background: #555;
+    background: rgba(0, 0, 0, 0.4);
+    background-clip: content-box;
   }
+
+  &::-webkit-scrollbar-corner {
+    background: transparent;
+  }
+}
+
+/* Dark theme scrollbar */
+html.dark * {
+  &::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.2);
+    background-clip: content-box;
+  }
+
+  &::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.4);
+    background-clip: content-box;
+  }
+}
+
+/* Firefox scrollbar */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(0, 0, 0, 0.2) transparent;
+}
+
+html.dark * {
+  scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
+}
+
+/* Thin scrollbar variant */
+.scrollbar-thin {
+  &::-webkit-scrollbar {
+    width: 4px;
+    height: 4px;
+  }
+}
+
+/* Hidden scrollbar but still scrollable */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+/* ===== REUSABLE DARK THEME UTILITY CLASSES ===== */
+/* Background utilities */
+.bg-theme-primary {
+  background-color: hsl(240, 5%, 98%);
+}
+
+html.dark .bg-theme-primary {
+  background-color: hsl(240, 5%, 6%);
+}
+
+.bg-theme-secondary {
+  background-color: hsl(240, 5%, 95%);
+}
+
+html.dark .bg-theme-secondary {
+  background-color: hsl(240, 5%, 10%);
+}
+
+.bg-theme-muted {
+  background-color: hsl(240, 5%, 85%);
+}
+
+html.dark .bg-theme-muted {
+  background-color: hsl(240, 10%, 20%);
+}
+
+.bg-theme-accent {
+  background-color: hsl(240, 70%, 40%);
+}
+
+html.dark .bg-theme-accent {
+  background-color: hsl(240, 70%, 30%);
+}
+
+/* Text color utilities */
+.text-theme-primary {
+  color: hsl(60, 5%, 10%);
+}
+
+html.dark .text-theme-primary {
+  color: hsl(60, 5%, 90%);
+}
+
+.text-theme-secondary {
+  color: hsl(60, 5%, 30%);
+}
+
+html.dark .text-theme-secondary {
+  color: hsl(60, 5%, 70%);
+}
+
+.text-theme-muted {
+  color: hsl(60, 5%, 50%);
+}
+
+html.dark .text-theme-muted {
+  color: hsl(60, 5%, 50%);
+}
+
+.text-theme-accent {
+  color: hsl(240, 70%, 40%);
+}
+
+html.dark .text-theme-accent {
+  color: hsl(240, 60%, 50%);
+}
+
+/* Border utilities */
+.border-theme-primary {
+  border-color: hsl(240, 5%, 85%);
+}
+
+html.dark .border-theme-primary {
+  border-color: hsl(240, 10%, 20%);
+}
+
+.border-theme-secondary {
+  border-color: hsl(240, 5%, 75%);
+}
+
+html.dark .border-theme-secondary {
+  border-color: hsl(240, 10%, 30%);
+}
+
+.border-theme-accent {
+  border-color: hsl(240, 70%, 40%);
+}
+
+html.dark .border-theme-accent {
+  border-color: hsl(240, 60%, 50%);
+}
+
+/* Shadow utilities */
+.shadow-theme-sm {
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+}
+
+html.dark .shadow-theme-sm {
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
+}
+
+.shadow-theme-md {
+  box-shadow:
+    0 4px 6px -1px rgba(0, 0, 0, 0.1),
+    0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+html.dark .shadow-theme-md {
+  box-shadow:
+    0 4px 6px -1px rgba(0, 0, 0, 0.4),
+    0 2px 4px -1px rgba(0, 0, 0, 0.2);
+}
+
+.shadow-theme-lg {
+  box-shadow:
+    0 10px 15px -3px rgba(0, 0, 0, 0.1),
+    0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+html.dark .shadow-theme-lg {
+  box-shadow:
+    0 10px 15px -3px rgba(0, 0, 0, 0.5),
+    0 4px 6px -2px rgba(0, 0, 0, 0.2);
+}
+
+/* Hover utilities */
+.hover-theme-bg:hover {
+  background-color: hsl(240, 5%, 90%);
+  transition: background-color 0.2s ease;
+}
+
+html.dark .hover-theme-bg:hover {
+  background-color: hsl(240, 5%, 15%);
+}
+
+.hover-theme-text:hover {
+  color: hsl(240, 70%, 40%);
+  transition: color 0.2s ease;
+}
+
+html.dark .hover-theme-text:hover {
+  color: hsl(240, 60%, 50%);
+}
+
+/* Focus utilities */
+.focus-theme-ring:focus {
+  outline: 2px solid hsl(240, 70%, 40%);
+  outline-offset: 2px;
+}
+
+html.dark .focus-theme-ring:focus {
+  outline-color: hsl(240, 60%, 50%);
+}
+
+/* ===== ADVANCED THEME UTILITIES ===== */
+/* Card and surface utilities */
+.surface-theme {
+  background-color: hsl(240, 5%, 98%);
+  border: 1px solid hsl(240, 5%, 85%);
+  border-radius: 0.5rem;
+}
+
+html.dark .surface-theme {
+  background-color: hsl(240, 5%, 8%);
+  border-color: hsl(240, 10%, 20%);
+}
+
+.surface-theme-elevated {
+  background-color: hsl(240, 5%, 100%);
+  border: 1px solid hsl(240, 5%, 85%);
+  border-radius: 0.75rem;
+  box-shadow:
+    0 4px 6px -1px rgba(0, 0, 0, 0.1),
+    0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+html.dark .surface-theme-elevated {
+  background-color: hsl(240, 5%, 10%);
+  border-color: hsl(240, 10%, 25%);
+  box-shadow:
+    0 4px 6px -1px rgba(0, 0, 0, 0.4),
+    0 2px 4px -1px rgba(0, 0, 0, 0.2);
+}
+
+/* Input and form utilities */
+.input-theme {
+  background-color: hsl(240, 5%, 98%);
+  border: 1px solid hsl(240, 5%, 75%);
+  color: hsl(60, 5%, 10%);
+  border-radius: 0.375rem;
+  transition: all 0.2s ease;
+}
+
+.input-theme:focus {
+  outline: none;
+  border-color: hsl(240, 70%, 40%);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+html.dark .input-theme {
+  background-color: hsl(240, 5%, 8%);
+  border-color: hsl(240, 10%, 30%);
+  color: hsl(60, 5%, 90%);
+}
+
+html.dark .input-theme:focus {
+  border-color: hsl(240, 60%, 50%);
+  box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.1);
+}
+
+/* Button utilities */
+.btn-theme-primary {
+  background-color: hsl(240, 70%, 40%);
+  color: white;
+  border: none;
+  border-radius: 0.375rem;
+  padding: 0.5rem 1rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.btn-theme-primary:hover {
+  background-color: hsl(240, 70%, 35%);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+html.dark .btn-theme-primary {
+  background-color: hsl(240, 60%, 50%);
+}
+
+html.dark .btn-theme-primary:hover {
+  background-color: hsl(240, 60%, 45%);
+}
+
+.btn-theme-secondary {
+  background-color: transparent;
+  color: hsl(60, 5%, 30%);
+  border: 1px solid hsl(240, 5%, 75%);
+  border-radius: 0.375rem;
+  padding: 0.5rem 1rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.btn-theme-secondary:hover {
+  background-color: hsl(240, 5%, 95%);
+  border-color: hsl(240, 5%, 65%);
+}
+
+html.dark .btn-theme-secondary {
+  color: hsl(60, 5%, 70%);
+  border-color: hsl(240, 10%, 30%);
+}
+
+html.dark .btn-theme-secondary:hover {
+  background-color: hsl(240, 5%, 12%);
+  border-color: hsl(240, 10%, 40%);
+}
+
+/* Status and state utilities */
+.status-success {
+  background-color: hsl(142, 76%, 36%);
+  color: white;
+}
+
+.status-warning {
+  background-color: hsl(38, 92%, 50%);
+  color: white;
+}
+
+.status-error {
+  background-color: hsl(0, 84%, 60%);
+  color: white;
+}
+
+.status-info {
+  background-color: hsl(217, 91%, 60%);
+  color: white;
+}
+
+/* Glassmorphism utilities */
+.glass-theme {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 0.75rem;
+}
+
+html.dark .glass-theme {
+  background: rgba(0, 0, 0, 0.2);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Gradient utilities */
+.gradient-theme-primary {
+  background: linear-gradient(135deg, hsl(240, 70%, 40%) 0%, hsl(240, 60%, 50%) 100%);
+}
+
+.gradient-theme-secondary {
+  background: linear-gradient(135deg, hsl(240, 5%, 85%) 0%, hsl(240, 5%, 95%) 100%);
+}
+
+html.dark .gradient-theme-secondary {
+  background: linear-gradient(135deg, hsl(240, 10%, 20%) 0%, hsl(240, 5%, 15%) 100%);
+}
+
+/* ===== MODERN UI PATTERNS ===== */
+/* Loading and skeleton utilities */
+.skeleton-theme {
+  background: linear-gradient(
+    90deg,
+    hsl(240, 5%, 85%) 25%,
+    hsl(240, 5%, 90%) 50%,
+    hsl(240, 5%, 85%) 75%
+  );
+  background-size: 200% 100%;
+  animation: skeleton-loading 1.5s infinite;
+  border-radius: 0.375rem;
+}
+
+html.dark .skeleton-theme {
+  background: linear-gradient(
+    90deg,
+    hsl(240, 10%, 15%) 25%,
+    hsl(240, 10%, 20%) 50%,
+    hsl(240, 10%, 15%) 75%
+  );
+  background-size: 200% 100%;
+}
+
+@keyframes skeleton-loading {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+/* Pulse animation */
+.pulse-theme {
+  animation: pulse-theme 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes pulse-theme {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+/* Fade in animation */
+.fade-in-theme {
+  animation: fade-in-theme 0.3s ease-in-out;
+}
+
+@keyframes fade-in-theme {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Slide in animation */
+.slide-in-theme {
+  animation: slide-in-theme 0.3s ease-out;
+}
+
+@keyframes slide-in-theme {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+/* Interactive utilities */
+.interactive-theme {
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.interactive-theme:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+html.dark .interactive-theme:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+/* Divider utilities */
+.divider-theme {
+  height: 1px;
+  background-color: hsl(240, 5%, 85%);
+  border: none;
+  margin: 1rem 0;
+}
+
+html.dark .divider-theme {
+  background-color: hsl(240, 10%, 20%);
+}
+
+.divider-theme-vertical {
+  width: 1px;
+  background-color: hsl(240, 5%, 85%);
+  border: none;
+  margin: 0 1rem;
+  height: 100%;
+}
+
+html.dark .divider-theme-vertical {
+  background-color: hsl(240, 10%, 20%);
 }
 .is-active {
   background-color: #cbd4dd;
@@ -222,4 +700,103 @@ html.dark
 .ProseMirror ol {
   list-style-type: decimal;
   padding-left: 1.5em;
+}
+/* styles/editor.css */
+.remote-cursor {
+  position: absolute;
+  pointer-events: none;
+  z-index: 100;
+}
+
+.cursor-label {
+  position: absolute;
+  top: -1.3em;
+  left: 0;
+  font-size: 12px;
+  padding: 2px 4px;
+  background: #007acc;
+  color: white;
+  border-radius: 2px;
+  white-space: nowrap;
+}
+
+.cursor-caret {
+  width: 2px;
+  height: 18px;
+  background: #007acc;
+}
+
+/* ===== MODERN SCROLLBAR STYLES ===== */
+/* Custom scrollbar for modern UI */
+.custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: hsl(240, 5%, 75%) transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+  border-radius: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: hsl(240, 5%, 75%);
+  border-radius: 4px;
+  transition: all 0.2s ease;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: hsl(240, 5%, 65%);
+}
+
+html.dark .custom-scrollbar {
+  scrollbar-color: hsl(240, 10%, 35%) transparent;
+}
+
+html.dark .custom-scrollbar::-webkit-scrollbar-thumb {
+  background: hsl(240, 10%, 35%);
+}
+
+html.dark .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: hsl(240, 10%, 45%);
+}
+
+/* Thin scrollbar variant */
+.custom-scrollbar-thin {
+  scrollbar-width: thin;
+  scrollbar-color: hsl(240, 5%, 80%) transparent;
+}
+
+.custom-scrollbar-thin::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+
+.custom-scrollbar-thin::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.custom-scrollbar-thin::-webkit-scrollbar-thumb {
+  background: hsl(240, 5%, 80%);
+  border-radius: 2px;
+}
+
+.custom-scrollbar-thin::-webkit-scrollbar-thumb:hover {
+  background: hsl(240, 5%, 70%);
+}
+
+html.dark .custom-scrollbar-thin {
+  scrollbar-color: hsl(240, 10%, 30%) transparent;
+}
+
+html.dark .custom-scrollbar-thin::-webkit-scrollbar-thumb {
+  background: hsl(240, 10%, 30%);
+}
+
+html.dark .custom-scrollbar-thin::-webkit-scrollbar-thumb:hover {
+  background: hsl(240, 10%, 40%);
 }

@@ -111,7 +111,7 @@ const CodeTogetherPage = () => {
       <main className="flex-grow flex flex-col lg:flex-row overflow-hidden p-4 gap-4">
         {/* Editor Section */}
         <div className="w-full lg:w-2/3 rounded-2xl backdrop-blur-sm bg-white/50 dark:bg-gray-800/50 shadow-xl">
-          <CollaborativeEditor />
+          <CollaborativeEditor projectId={id} userId={currentUserId} socket={socket} />
         </div>
 
         {/* Sidebar Section */}
