@@ -55,7 +55,7 @@ const QuestionCard: React.FC<QuestionCardProps> = ({ question, loading }) => {
       .catch(() => message.error('Failed to copy link'));
   };
   return (
-    <div className="rounded-lg border bg-background text-foreground dark:bg-dark-background dark:text-dark-foreground shadow-sm">
+    <div className="bg-theme-secondary border-theme-primary border rounded-xl shadow-theme-md hover:shadow-theme-lg transition-all duration-300 glass-theme hover-theme-bg group">
       {/* Question Details */}
       <div className="p-6">
         {/* Author Info */}
@@ -66,17 +66,20 @@ const QuestionCard: React.FC<QuestionCardProps> = ({ question, loading }) => {
                 size="large"
                 src={question.author.profilePicture}
                 alt={question.author.username}
+                className="border-2 border-theme-accent"
               />
             ) : (
-              <Avatar size="large">{question.author.username.charAt(0)}</Avatar>
+              <Avatar size="large" className="bg-theme-accent text-white">
+                {question.author.username.charAt(0)}
+              </Avatar>
             )}
           </Skeleton>
           <div>
             <Skeleton isLoaded={!loading} className="h-5 w-24 mb-1">
-              <div className="font-semibold">{question.author.username}</div>
+              <div className="font-semibold text-theme-primary">{question.author.username}</div>
             </Skeleton>
             <Skeleton isLoaded={!loading} className="h-4 w-32">
-              <div className="text-sm text-muted-foreground">
+              <div className="text-sm text-theme-muted">
                 {moment(parseInt(question.createdAt)).fromNow()}
               </div>
             </Skeleton>
@@ -85,25 +88,25 @@ const QuestionCard: React.FC<QuestionCardProps> = ({ question, loading }) => {
         {/* Question Title */}
         <Skeleton isLoaded={!loading} className="h-fit w-full mb-4">
           <h3
-            className="text-lg font-semibold text-blue-500 cursor-pointer"
+            className="text-lg font-semibold text-theme-accent cursor-pointer hover:text-theme-primary transition-colors duration-200 group-hover:translate-x-1 transform"
             onClick={() => navigate(`/questions/${question.id}`)}
           >
             {question.title}
           </h3>
         </Skeleton>
         {/* Tags */}
-        <div className="flex items-center gap-2 mt-4">
+        <div className="flex items-center gap-2 mt-4 flex-wrap">
           {loading ? (
             <>
-              <Skeleton className="h-6 w-16" />
-              <Skeleton className="h-6 w-16" />
-              <Skeleton className="h-6 w-16" />
+              <Skeleton className="h-6 w-16 rounded-full" />
+              <Skeleton className="h-6 w-16 rounded-full" />
+              <Skeleton className="h-6 w-16 rounded-full" />
             </>
           ) : (
             question.tags.map(tag => (
               <div
                 key={tag}
-                className="bg-gray-200 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-md px-2 py-1 text-xs font-mono"
+                className="bg-theme-muted text-theme-primary rounded-full px-3 py-1 text-xs font-medium border border-theme-primary hover:bg-theme-accent hover:text-white transition-all duration-200 cursor-pointer"
               >
                 {tag}
               </div>
@@ -112,32 +115,32 @@ const QuestionCard: React.FC<QuestionCardProps> = ({ question, loading }) => {
         </div>
       </div>
       {/* Footer with Vote and Share Buttons */}
-      <div className="p-6 flex items-center justify-between border-t border-gray-300 dark:border-gray-800">
+      <div className="px-6 py-4 flex items-center justify-between border-t border-theme-primary bg-theme-muted rounded-b-xl">
         {/* Voting Buttons */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-3">
           <button
             onClick={() => handleVote('up')}
-            className="text-gray-500 hover:text-blue-500 transition-colors"
+            className="text-theme-muted hover:text-theme-accent transition-all duration-200 p-2 rounded-lg hover:bg-theme-secondary transform hover:scale-110"
           >
-            <FaChevronUp />
+            <FaChevronUp size={16} />
           </button>
-          <Skeleton isLoaded={!loading} className="h-6 w-8">
-            {/* <div className="text-lg font-medium">{votes}</div> */}
+          <Skeleton isLoaded={!loading} className="h-6 w-8 rounded">
+            <div className="text-lg font-medium text-theme-primary">{question.votes || 0}</div>
           </Skeleton>
           <button
             onClick={() => handleVote('down')}
-            className="text-gray-500 hover:text-red-500 transition-colors"
+            className="text-theme-muted hover:text-red-500 transition-all duration-200 p-2 rounded-lg hover:bg-theme-secondary transform hover:scale-110"
           >
-            <FaChevronDown />
+            <FaChevronDown size={16} />
           </button>
         </div>
         {/* Share Button */}
-        <Skeleton isLoaded={!loading} className="h-9 w-24">
+        <Skeleton isLoaded={!loading} className="h-9 w-24 rounded-lg">
           <button
             onClick={handleShare}
-            className="border bg-background dark:bg-dark-background text-foreground dark:text-dark-foreground hover:bg-muted hover:text-accent-foreground h-9 rounded-md px-3 flex items-center gap-2"
+            className="bg-theme-primary border border-theme-primary text-theme-primary hover:bg-theme-accent hover:text-white h-9 rounded-lg px-4 flex items-center gap-2 font-medium transition-all duration-300 shadow-theme-sm hover:shadow-theme-md transform hover:-translate-y-0.5"
           >
-            <FaShareAlt /> Share
+            <FaShareAlt size={14} /> Share
           </button>
         </Skeleton>
       </div>

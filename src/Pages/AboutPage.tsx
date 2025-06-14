@@ -2,107 +2,137 @@ import { Accordion, AccordionItem } from '@nextui-org/react';
 import { motion } from 'framer-motion';
 import React from 'react';
 import {
-  FaCode,
-  FaComments,
-  FaGraduationCap,
-  FaLightbulb,
-  FaRocket,
-  FaUsers,
-} from 'react-icons/fa';
-const CodeBackground = () => (
-  <div className="absolute inset-0 overflow-hidden opacity-10 top-16">
-    <pre className="text-[0.6rem] leading-tight">
-      {`
-  function collaborateCode(developers) {
-    return developers.map(dev => {
-      dev.skills.improve();
-      dev.network.expand();
-      dev.projects.succeed();
-    });
-  }
-  
-  const devCollab = {
-    connect: () => "Building a global dev community",
-    code: () => "Collaborative coding environment",
-    learn: () => "Continuous learning and growth",
-    innovate: () => "Pushing the boundaries of tech"
-  };
-  
-  while (true) {
-    devCollab.connect();
-    devCollab.code();
-    devCollab.learn();
-    devCollab.innovate();
-  }
-        `}
-    </pre>
+  Code2,
+  Users,
+  MessageCircle,
+  Lightbulb,
+  Rocket,
+  GraduationCap,
+  ArrowRight,
+  CheckCircle,
+  Star,
+  Zap,
+  Target,
+  Globe,
+} from 'lucide-react';
+const HeroBackground = () => (
+  <div className="absolute inset-0 overflow-hidden opacity-5">
+    <div className="absolute -top-40 -right-40 w-80 h-80 bg-blue-400 rounded-full mix-blend-multiply filter blur-xl animate-pulse"></div>
+    <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-purple-400 rounded-full mix-blend-multiply filter blur-xl animate-pulse delay-1000"></div>
+    <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-80 h-80 bg-teal-400 rounded-full mix-blend-multiply filter blur-xl animate-pulse delay-500"></div>
   </div>
 );
-const SimulatedEditor = () => (
-  <div className="bg-gray-900 rounded-lg p-4 font-mono text-sm text-green-400 overflow-hidden md:w-[50%] w-[705] mx-auto">
-    <div className="flex items-center mb-2">
-      <div className="w-3 h-3 rounded-full bg-red-500 mr-2"></div>
-      <div className="w-3 h-3 rounded-full bg-yellow-500 mr-2"></div>
-      <div className="w-3 h-3 rounded-full bg-green-500"></div>
+const CodeShowcase = () => (
+  <div className="relative max-w-4xl mx-auto">
+    <div className="absolute -inset-4 bg-blue-100 dark:bg-blue-900/20 rounded-3xl blur-xl opacity-60"></div>
+    <div className="relative bg-gray-900 dark:bg-gray-800 rounded-2xl p-6 font-mono text-sm overflow-hidden border border-gray-200 dark:border-gray-700 shadow-2xl">
+      <div className="flex items-center mb-4">
+        <div className="w-3 h-3 rounded-full bg-red-500 mr-2"></div>
+        <div className="w-3 h-3 rounded-full bg-yellow-500 mr-2"></div>
+        <div className="w-3 h-3 rounded-full bg-green-500 mr-2"></div>
+        <span className="ml-4 text-gray-400 text-xs">DevCollab.js</span>
+      </div>
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 1, staggerChildren: 0.1 }}
+        className="space-y-1"
+      >
+        <motion.p className="text-green-400">
+          <span className="text-blue-400">import</span> DevCollab{' '}
+          <span className="text-blue-400">from</span>{' '}
+          <span className="text-yellow-300">'@devcollab/core'</span>;
+        </motion.p>
+        <motion.p></motion.p>
+        <motion.p className="text-green-400">
+          <span className="text-purple-400">const</span>{' '}
+          <span className="text-blue-300">community</span> ={' '}
+          <span className="text-blue-400">new</span> DevCollab.Community();
+        </motion.p>
+        <motion.p></motion.p>
+        <motion.p className="text-green-400">
+          community.connect(<span className="text-yellow-300">'global-developers'</span>);
+        </motion.p>
+        <motion.p className="text-green-400">
+          community.collaborate(<span className="text-yellow-300">'real-time'</span>);
+        </motion.p>
+        <motion.p className="text-green-400">
+          community.learn(<span className="text-yellow-300">'together'</span>);
+        </motion.p>
+        <motion.p className="text-green-400">
+          community.build(<span className="text-yellow-300">'amazing-projects'</span>);
+        </motion.p>
+        <motion.p></motion.p>
+        <motion.p className="text-gray-500">
+          <span className="text-green-300">{'// '}Join the future of collaborative coding</span>
+        </motion.p>
+      </motion.div>
     </div>
-    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 1 }}>
-      <p>
-        <span className="text-blue-400">import</span> DevCollab{' '}
-        <span className="text-blue-400">from</span>{' '}
-        <span className="text-yellow-300">{`'dev-collaboration'`}</span>;
-      </p>
-      <p></p>
-      <p>
-        <span className="text-purple-400">const</span> myProject ={' '}
-        <span className="text-blue-400">new</span> DevCollab.Project(
-        <span className="text-yellow-300">{`'Awesome App'`}</span>);
-      </p>
-      <p></p>
-      <p>myProject.collaborate(developers);</p>
-      <p>myProject.brainstorm(ideas);</p>
-      <p>myProject.review(code);</p>
-      <p>myProject.techeachother(code);</p>
-      <p>myProject.code(features);</p>
-      <p></p>
-      <p>
-        <span className="text-green-300">{`// DevCollab: Where code comes to life!`}</span>
-      </p>
-    </motion.div>
   </div>
 );
 const AboutPage: React.FC = () => {
   const features = [
     {
-      icon: <FaCode />,
+      icon: <Code2 className="w-8 h-8" />,
       title: 'Collaborative Coding',
-      description: 'Real-time code collaboration environment for seamless teamwork.',
+      description:
+        'Work together in real-time with developers worldwide on challenging projects and coding exercises.',
     },
     {
-      icon: <FaUsers />,
+      icon: <Users className="w-8 h-8" />,
       title: 'Developer Networking',
-      description: 'Connect with like-minded developers and expand your professional network.',
+      description:
+        'Connect with like-minded developers and expand your professional network globally.',
     },
     {
-      icon: <FaComments />,
+      icon: <MessageCircle className="w-8 h-8" />,
       title: 'Q&A Platform',
-      description: 'Ask questions, share knowledge, and grow together as a community.',
+      description: 'Ask questions, share knowledge, and grow together as a vibrant community.',
     },
     {
-      icon: <FaLightbulb />,
+      icon: <Lightbulb className="w-8 h-8" />,
       title: 'Profile Showcase',
       description: 'Highlight your skills and projects with customizable developer profiles.',
     },
     {
-      icon: <FaGraduationCap />,
+      icon: <GraduationCap className="w-8 h-8" />,
       title: 'Learning Resources',
-      description: 'Access tutorials, courses, and workshops to enhance your skills.',
+      description: 'Access tutorials, courses, and workshops to enhance your coding skills.',
     },
     {
-      icon: <FaRocket />,
-      title: 'Hackathons',
-      description: 'Participate in exciting coding challenges and competitions.',
+      icon: <Rocket className="w-8 h-8" />,
+      title: 'Hackathons & Challenges',
+      description: 'Participate in exciting coding challenges and competitive programming events.',
     },
   ];
+
+  const stats = [
+    { number: '10K+', label: 'Active Developers' },
+    { number: '50K+', label: 'Code Collaborations' },
+    { number: '1M+', label: 'Lines of Code' },
+    { number: '100+', label: 'Countries' },
+  ];
+  const upcomingFeatures = [
+    {
+      icon: <Zap className="w-6 h-6" />,
+      title: 'AI Code Assistant',
+      description:
+        'Get intelligent code suggestions and automated code generation powered by advanced AI.',
+    },
+    {
+      icon: <Target className="w-6 h-6" />,
+      title: 'Code Execution',
+      description:
+        'Integrated code execution environment supporting multiple programming languages.',
+    },
+    {
+      icon: <Globe className="w-6 h-6" />,
+      title: 'Mobile App',
+      description:
+        'Access DevCollab on-the-go with our upcoming cross-platform mobile application.',
+    },
+  ];
+
   const faqs = [
     {
       question: 'Is DevCollab free to use?',
@@ -126,138 +156,275 @@ const AboutPage: React.FC = () => {
     },
   ];
 
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: { opacity: 1, transition: { staggerChildren: 0.2 } },
-  };
-
-  const itemVariants = {
-    hidden: { y: 20, opacity: 0 },
-    visible: { y: 0, opacity: 1, transition: { duration: 0.5 } },
-  };
-
   return (
-    <div className="min-h-screen bg-background text-foreground dark:bg-dark-background dark:text-dark-foreground py-12 px-4 sm:px-6 lg:px-8">
-      <CodeBackground />
-      <div className="max-w-7xl mx-auto">
-        <motion.div
-          initial="hidden"
-          animate="visible"
-          variants={containerVariants}
-          className="text-center"
-        >
-          <motion.h1
-            className="text-5xl font-bold mb-6 bg-clip-text text-transparent bg-gradient-to-r from-blue-500 to-teal-400"
-            variants={itemVariants}
+    <div className="min-h-screen bg-white dark:bg-gray-900">
+      {/* Hero Section */}
+      <section className="relative py-20 lg:py-32 bg-white dark:bg-gray-900 overflow-hidden">
+        <HeroBackground />
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center relative z-10">
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6 }}
+              className="inline-flex items-center px-4 py-2 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-full text-sm font-medium mb-6"
+            >
+              <Star className="w-4 h-4 mr-2 text-blue-600 dark:text-blue-400" />
+              <span className="text-blue-700 dark:text-blue-300">About DevCollab</span>
+            </motion.div>
+
+            <motion.h1
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.1 }}
+              className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 leading-tight text-gray-900 dark:text-white"
+            >
+              Where Code Meets{' '}
+              <span className="text-blue-600 dark:text-blue-400">Collaboration</span>
+            </motion.h1>
+
+            <motion.p
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.2 }}
+              className="text-xl md:text-2xl mb-12 text-gray-600 dark:text-gray-300 leading-relaxed max-w-4xl mx-auto"
+            >
+              Empowering developers worldwide to learn, collaborate, and build amazing projects
+              together. Join our community and transform your coding journey.
+            </motion.p>
+          </div>
+        </div>
+      </section>
+
+      {/* Code Showcase Section */}
+      <section className="py-16 bg-gray-50 dark:bg-gray-800">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            viewport={{ once: true }}
           >
-            Welcome to DevCollab
-          </motion.h1>
-          <motion.p
-            className="text-2xl mb-12 text-gray-600 dark:text-gray-300"
-            variants={itemVariants}
+            <CodeShowcase />
+          </motion.div>
+        </div>
+      </section>
+      {/* Stats Section */}
+      <section className="py-16 bg-white dark:bg-gray-900">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            viewport={{ once: true }}
+            className="text-center mb-12"
           >
-            Where Code Meets Collaboration
-          </motion.p>
-        </motion.div>
-        <SimulatedEditor />
-        <motion.div
-          variants={containerVariants}
-          initial="hidden"
-          animate="visible"
-          className="mt-16"
-        >
-          <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
+            <h2 className="text-3xl lg:text-4xl font-bold text-gray-900 dark:text-white mb-4">
+              Trusted by Developers Worldwide
+            </h2>
+            <p className="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
+              Join thousands of developers who are already transforming their coding experience
+            </p>
+          </motion.div>
+
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+            {stats.map((stat, index) => (
+              <motion.div
+                key={index}
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: index * 0.1 }}
+                viewport={{ once: true }}
+                className="text-center"
+              >
+                <div className="text-3xl lg:text-4xl font-bold text-blue-600 dark:text-blue-400 mb-2">
+                  {stat.number}
+                </div>
+                <div className="text-gray-600 dark:text-gray-300 font-medium">{stat.label}</div>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Features Section */}
+      <section className="py-20 lg:py-32 bg-gray-50 dark:bg-gray-900">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            viewport={{ once: true }}
+            className="text-center mb-16"
+          >
+            <h2 className="text-3xl lg:text-4xl font-bold text-gray-900 dark:text-white mb-4">
+              Why Choose DevCollab?
+            </h2>
+            <p className="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
+              Experience the future of collaborative coding with our cutting-edge platform designed
+              for modern developers.
+            </p>
+          </motion.div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {features.map((feature, index) => (
               <motion.div
                 key={index}
-                variants={itemVariants}
-                className="pt-6"
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: index * 0.1 }}
+                viewport={{ once: true }}
+                className="group"
               >
-                <div className="flow-root bg-white dark:bg-gray-800  px-6 pb-8 rounded-lg shadow-lg">
-                  <div className="-mt-6">
-                    <div>
-                      <span className="inline-flex items-center justify-center p-3 bg-indigo-500 rounded-md shadow-lg">
-                        {React.cloneElement(feature.icon as React.ReactElement, {
-                          className: 'h-6 w-6 text-white',
-                        })}
-                      </span>
-                    </div>
-                    <h3 className="mt-8 text-lg font-medium tracking-tight">{feature.title}</h3>
-                    <p className="mt-5 text-base opacity-80">{feature.description}</p>
+                <div className="bg-white dark:bg-gray-800 p-8 rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-200 dark:border-gray-700 hover:border-blue-300 dark:hover:border-blue-600 h-full hover:-translate-y-1">
+                  <div className="w-16 h-16 bg-blue-50 dark:bg-blue-900/20 rounded-xl flex items-center justify-center mb-6 group-hover:bg-blue-100 dark:group-hover:bg-blue-900/30 transition-colors duration-300">
+                    <div className="text-blue-600 dark:text-blue-400">{feature.icon}</div>
                   </div>
+                  <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
+                    {feature.title}
+                  </h3>
+                  <p className="text-gray-600 dark:text-gray-300 leading-relaxed">
+                    {feature.description}
+                  </p>
                 </div>
               </motion.div>
             ))}
           </div>
-        </motion.div>
+        </div>
+      </section>
 
-        <motion.div
-          variants={containerVariants}
-          initial="hidden"
-          animate="visible"
-          className="mt-16"
-        >
-          <motion.h2 variants={itemVariants} className="text-3xl font-extrabold text-center mb-8">
-            Upcoming Features
-          </motion.h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <motion.div
-              variants={itemVariants}
-              className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-lg"
-            >
-              <h3 className="text-xl font-semibold mb-4">AI Code Assistant</h3>
-              <p className="opacity-80">
-                Get intelligent code suggestions and generating code powered by advanced AI.
-              </p>
-            </motion.div>
-            <motion.div
-              variants={itemVariants}
-              className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-lg"
-            >
-              <h3 className="text-xl font-semibold mb-4">Code Execution</h3>
-              <p className="opacity-80">Intregated code executions in various languages</p>
-            </motion.div>
-            <motion.div
-              variants={itemVariants}
-              className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-lg"
-            >
-              <h3 className="text-xl font-semibold mb-4">Cross-Platform Mobile App</h3>
-              <p className="opacity-80">
-                Access DevCollab on-the-go with our upcoming mobile application.
-              </p>
-            </motion.div>
-          </div>
-        </motion.div>
-        <motion.div
-          variants={containerVariants}
-          initial="hidden"
-          animate="visible"
-          className="mt-16 text-center"
-        >
-          <motion.h2 variants={itemVariants} className="text-3xl font-extrabold">
-            Ready to revolutionize your coding experience?
-          </motion.h2>
-          <motion.p variants={itemVariants} className="mt-4 max-w-2xl mx-auto text-xl opacity-80">
-            Join DevCollab today and become part of a community that&apos;s shaping the future of
-            software development.
-          </motion.p>
-          <motion.div variants={itemVariants} className="mt-8">
-            <p className="cursor-pointer inline-flex items-center justify-center px-5 py-3 border border-transparent text-base font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700">
-              Start Your Journey Now
+      {/* Upcoming Features Section */}
+      <section className="py-20 lg:py-32 bg-white dark:bg-gray-800">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            viewport={{ once: true }}
+            className="text-center mb-16"
+          >
+            <div className="inline-flex items-center px-4 py-2 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-full text-sm font-medium mb-6">
+              <Rocket className="w-4 h-4 mr-2 text-blue-600 dark:text-blue-400" />
+              <span className="text-blue-700 dark:text-blue-300">Coming Soon</span>
+            </div>
+            <h2 className="text-3xl lg:text-4xl font-bold text-gray-900 dark:text-white mb-4">
+              Upcoming Features
+            </h2>
+            <p className="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
+              We're constantly innovating to bring you the best collaborative coding experience
             </p>
           </motion.div>
-        </motion.div>
-        <Accordion>
-          {faqs.map((faq, index) => (
-            <AccordionItem key={index} title={faq.question}>
-              <p className="mb-4">{faq.answer}</p>
-            </AccordionItem>
-          ))}
-        </Accordion>
-      </div>
-      <hr />
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {upcomingFeatures.map((feature, index) => (
+              <motion.div
+                key={index}
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: index * 0.1 }}
+                viewport={{ once: true }}
+                className="group"
+              >
+                <div className="bg-white dark:bg-gray-900 p-8 rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-200 dark:border-gray-700 hover:border-blue-300 dark:hover:border-blue-600 h-full hover:-translate-y-1">
+                  <div className="w-12 h-12 bg-blue-50 dark:bg-blue-900/20 rounded-xl flex items-center justify-center mb-6 group-hover:bg-blue-100 dark:group-hover:bg-blue-900/30 transition-colors duration-300">
+                    <div className="text-blue-600 dark:text-blue-400">{feature.icon}</div>
+                  </div>
+                  <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
+                    {feature.title}
+                  </h3>
+                  <p className="text-gray-600 dark:text-gray-300 leading-relaxed">
+                    {feature.description}
+                  </p>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+      {/* CTA Section */}
+      <section className="py-20 lg:py-32 bg-gray-50 dark:bg-gray-900">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            viewport={{ once: true }}
+            className="max-w-4xl mx-auto"
+          >
+            <div className="inline-flex items-center px-4 py-2 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-full text-sm font-medium mb-6">
+              <Star className="w-4 h-4 mr-2 text-blue-600 dark:text-blue-400" />
+              <span className="text-blue-700 dark:text-blue-300">Join the Community</span>
+            </div>
+
+            <h2 className="text-3xl lg:text-4xl font-bold mb-6 text-gray-900 dark:text-white">
+              Ready to Transform Your Coding Journey?
+            </h2>
+            <p className="text-xl mb-8 text-gray-600 dark:text-gray-300 max-w-3xl mx-auto leading-relaxed">
+              Be among the first to experience the future of collaborative coding. Join our
+              community and help shape the platform.
+            </p>
+
+            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-4 rounded-xl font-semibold transition duration-300 flex items-center shadow-lg hover:shadow-xl"
+              >
+                Start Your Journey
+                <ArrowRight className="w-5 h-5 ml-2" />
+              </motion.button>
+
+              <div className="flex items-center text-gray-600 dark:text-gray-400">
+                <CheckCircle className="w-5 h-5 mr-2 text-green-500" />
+                <span>Free to join • No credit card required</span>
+              </div>
+            </div>
+          </motion.div>
+        </div>
+      </section>
+      {/* FAQ Section */}
+      <section className="py-20 lg:py-32 bg-white dark:bg-gray-800">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            viewport={{ once: true }}
+            className="text-center mb-16"
+          >
+            <h2 className="text-3xl lg:text-4xl font-bold text-gray-900 dark:text-white mb-4">
+              Frequently Asked Questions
+            </h2>
+            <p className="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
+              Got questions? We've got answers. Here are some common questions about DevCollab.
+            </p>
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.2 }}
+            viewport={{ once: true }}
+            className="max-w-4xl mx-auto"
+          >
+            <Accordion variant="splitted" className="gap-4">
+              {faqs.map((faq, index) => (
+                <AccordionItem
+                  key={index}
+                  title={faq.question}
+                  className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl shadow-sm hover:shadow-md transition-shadow duration-300"
+                  classNames={{
+                    title: 'text-gray-900 dark:text-white font-semibold',
+                    content: 'text-gray-600 dark:text-gray-300 leading-relaxed',
+                  }}
+                >
+                  <p className="pb-4">{faq.answer}</p>
+                </AccordionItem>
+              ))}
+            </Accordion>
+          </motion.div>
+        </div>
+      </section>
     </div>
   );
 };

@@ -143,8 +143,63 @@ html.dark
   background-color: #177ddc;
   border-color: #177ddc;
 }
+
+.editor-button {
+  --border-radius: 15px;
+  --border-width: 4px;
+  appearance: none;
+  position: relative;
+  border: 0;
+  font-family: 'Roboto', Arial, 'Segoe UI', sans-serif;
+  font-size: 18px;
+  font-weight: 500;
+  color: #fff;
+  z-index: 2;
+}
+
+.editor-button::after {
+  --m-i: linear-gradient(#000, #000);
+  --m-o: content-box, padding-box;
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  padding: var(--border-width);
+  border-radius: var(--border-radius);
+  background-image: conic-gradient(#488cfb, #29dbbc, #ddf505, #ff9f0e, #e440bb, #655adc, #488cfb);
+  -webkit-mask-image: var(--m-i), var(--m-i);
+  mask-image: var(--m-i), var(--m-i);
+  -webkit-mask-origin: var(--m-o);
+  mask-origin: var(--m-o);
+  -webkit-mask-clip: var(--m-o);
+  mask-composite: exclude;
+  -webkit-mask-composite: destination-out;
+  filter: hue-rotate(0);
+  animation: rotate-hue linear 500ms infinite;
+  animation-play-state: paused;
+}
+
+.editor-button:hover::after {
+  animation-play-state: running;
+}
+
+@keyframes rotate-hue {
+  to {
+    filter: hue-rotate(1turn);
+  }
+}
+
+.editor-button,
+.editor-button::after {
+  box-sizing: border-box;
+}
+
+.editor-button:active {
+  --border-width: 5px;
+}
 /* ===== SCROLLBAR STYLES ===== */
-/* Modern, sleek scrollbar design for both light and dark themes */
 
 .custom-scrollbar,
 * {
@@ -799,4 +854,36 @@ html.dark .custom-scrollbar-thin::-webkit-scrollbar-thumb {
 
 html.dark .custom-scrollbar-thin::-webkit-scrollbar-thumb:hover {
   background: hsl(240, 10%, 40%);
+}
+
+/* ===== PAGINATION THEME STYLES ===== */
+.pagination-theme {
+  --nextui-content1: hsl(240, 5%, 10%);
+  --nextui-content2: hsl(240, 10%, 20%);
+  --nextui-primary: hsl(240, 70%, 30%);
+  --nextui-primary-foreground: hsl(60, 5%, 90%);
+}
+
+.pagination-theme .nextui-pagination-item {
+  background-color: transparent;
+  border: 1px solid hsl(240, 10%, 20%);
+  color: hsl(60, 5%, 90%);
+  transition: all 0.2s ease;
+}
+
+.pagination-theme .nextui-pagination-item:hover {
+  background-color: hsl(240, 10%, 20%);
+  border-color: hsl(240, 70%, 30%);
+  transform: translateY(-1px);
+}
+
+.pagination-theme .nextui-pagination-item[data-active='true'] {
+  background-color: hsl(240, 70%, 30%);
+  border-color: hsl(240, 70%, 30%);
+  color: white;
+}
+
+.pagination-theme .nextui-pagination-cursor {
+  background-color: hsl(240, 70%, 30%);
+  border-color: hsl(240, 70%, 30%);
 }

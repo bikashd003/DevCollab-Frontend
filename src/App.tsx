@@ -1,5 +1,5 @@
 import React from 'react';
-import { createBrowserRouter, RouterProvider } from 'react-router-dom';
+import { createBrowserRouter, RouterProvider, ScrollRestoration } from 'react-router-dom';
 import { ThemeProvider } from './Context/ThemeProvider';
 import DevCollabHome from './Pages/DevCollabHome';
 import './App.css';
@@ -29,6 +29,7 @@ const MainLayout: React.FC = () => {
       <Nav />
       <Outlet />
       <Footer />
+      <ScrollRestoration />
     </div>
   );
 };

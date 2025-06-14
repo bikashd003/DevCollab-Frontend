@@ -33,8 +33,18 @@ export const GET_BLOG_DETAILS = gql`
         profilePicture
       }
       author {
+        id
         username
         profilePicture
+      }
+      comments {
+        id
+        content
+        author {
+          username
+          profilePicture
+        }
+        createdAt
       }
       createdAt
     }

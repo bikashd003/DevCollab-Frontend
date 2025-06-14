@@ -4,6 +4,7 @@ export const GET_USER_DATA = gql`
   query GetUser {
     user {
       username
+      email
       profilePicture
       projects {
         title

@@ -1,110 +1,624 @@
+import type { FormikHelpers } from 'formik';
 import { useParams } from 'react-router-dom';
-import { useQuery } from '@apollo/client';
-import { useState } from 'react';
+import { useQuery, useMutation } from '@apollo/client';
+import { useState, useEffect } from 'react';
 import moment from 'moment';
+import { motion } from 'framer-motion';
 import { GET_BLOG_DETAILS } from '../GraphQL/Queries/Blogs/Blog';
-import { Skeleton, Button } from '@nextui-org/react';
-import { Avatar, Tag } from 'antd';
-import { LikeOutlined, CommentOutlined } from '@ant-design/icons';
+import { CREATE_COMMENT, LIKE_BLOG, UPDATE_BLOG } from '../GraphQL/Mutations/Blogs/Blogs';
+import {
+  Skeleton,
+  Button,
+  Modal,
+  ModalContent,
+  ModalHeader,
+  ModalBody,
+  ModalFooter,
+} from '@nextui-org/react';
+import { Avatar, Tag, message } from 'antd';
+import { Heart, MessageCircle, Calendar, User, ArrowLeft, Edit } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../Secure/AuthContext';
 import Editor from '../Components/Global/Editor';
 import MarkdownPreviewComponent from '../Components/Global/MarkdownPreviewComponent';
+import { Formik, Form, Field, ErrorMessage } from 'formik';
+import BlogSchema from '../Schemas/BlogSchema';
+import { BsX } from 'react-icons/bs';
+
+// Type definitions
+interface BlogFormValues {
+  title: string;
+  tags: string[];
+  tagInput: string;
+}
+
+interface Author {
+  id: string;
+  username: string;
+  profilePicture?: string;
+}
+
+interface Comment {
+  id: string;
+  content: string;
+  createdAt: string;
+  author: Author;
+}
+
+interface Blog {
+  id: string;
+  title: string;
+  content: string;
+  tags: string[];
+  createdAt: string;
+  author: Author;
+  likes: Array<{ id: string }>;
+  comments: Comment[];
+}
 
 const BlogDetails = () => {
   const { id } = useParams();
-  const { loading, error, data } = useQuery(GET_BLOG_DETAILS, {
+  const navigate = useNavigate();
+  const { currentUserId } = useAuth();
+  const { loading, error, data, refetch } = useQuery(GET_BLOG_DETAILS, {
     variables: { id },
   });
-  const [likes, setLikes] = useState(0);
+  const [createComment] = useMutation(CREATE_COMMENT);
+  const [likeBlog] = useMutation(LIKE_BLOG);
+  const [updateBlog] = useMutation(UPDATE_BLOG);
   const [comment, setComment] = useState('');
-  const blog = data?.getBlogById;
-  if (loading) return <Skeleton />;
-  if (error) return <p className="text-center text-2xl">Error loading blog details</p>;
+  const [isSubmittingComment, setIsSubmittingComment] = useState(false);
+  const [localLikes, setLocalLikes] = useState(0);
+  const [hasLiked, setHasLiked] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [editContent, setEditContent] = useState('');
+  const [editTags, setEditTags] = useState<string[]>([]);
+
+  const blog: Blog | undefined = data?.getBlogById;
+
+  // Update local likes when data loads
+  useEffect(() => {
+    if (blog?.likes) {
+      setLocalLikes(blog.likes.length);
+    }
+  }, [blog?.likes]);
+
+  const handleLike = async () => {
+    if (!hasLiked) {
+      try {
+        await likeBlog({ variables: { id } });
+        setLocalLikes(prev => prev + 1);
+        setHasLiked(true);
+        message.success('Blog liked!');
+      } catch (error) {
+        message.error('Failed to like blog');
+      }
+    }
+  };
+
+  const handleCommentSubmit = async () => {
+    if (!comment.trim()) {
+      message.warning('Please enter a comment');
+      return;
+    }
+
+    setIsSubmittingComment(true);
+    try {
+      await createComment({
+        variables: { content: comment, blogId: id },
+        refetchQueries: [{ query: GET_BLOG_DETAILS, variables: { id } }],
+      });
+      setComment('');
+      message.success('Comment added successfully!');
+    } catch (error) {
+      message.error('Failed to add comment');
+    } finally {
+      setIsSubmittingComment(false);
+    }
+  };
+
+  // Edit functionality
+  const handleEditBlog = () => {
+    setEditContent(blog?.content || '');
+    setEditTags(blog?.tags || []);
+    setIsEditModalOpen(true);
+  };
+
+  const handleEditSubmit = async (
+    values: BlogFormValues,
+    { setSubmitting }: FormikHelpers<BlogFormValues>
+  ) => {
+    if (!editContent.trim()) {
+      message.error('Content is required');
+      setSubmitting(false);
+      return;
+    }
+
+    try {
+      await updateBlog({
+        variables: {
+          id,
+          title: values.title,
+          content: editContent,
+          tags: values.tags,
+        },
+      });
+      message.success('Blog updated successfully!');
+      setIsEditModalOpen(false);
+      refetch();
+    } catch (error) {
+      message.error('Failed to update blog');
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleEditTagInput = (
+    e: React.KeyboardEvent<HTMLInputElement>,
+    setFieldValue: (field: string, value: string[] | string) => void
+  ) => {
+    if (e.key === 'Enter' && e.currentTarget.value.trim() !== '') {
+      e.preventDefault();
+      const newTag = e.currentTarget.value.trim();
+      const newTags = [...editTags, newTag];
+      setEditTags(newTags);
+      setFieldValue('tags', newTags);
+      e.currentTarget.value = '';
+      setFieldValue('tagInput', '');
+    }
+  };
+
+  const removeEditTag = (
+    indexToRemove: number,
+    setFieldValue: (field: string, value: string[]) => void
+  ) => {
+    const newTags = editTags.filter((_, index) => index !== indexToRemove);
+    setEditTags(newTags);
+    setFieldValue('tags', newTags);
+  };
+
+  // Loading skeleton
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-theme-primary pt-24 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-4xl mx-auto">
+          {/* Back button skeleton */}
+          <Skeleton className="w-24 h-10 rounded-xl mb-8" />
+
+          {/* Header skeleton */}
+          <div className="mb-8">
+            <Skeleton className="w-full h-12 rounded-xl mb-4" />
+            <div className="flex items-center space-x-4 mb-4">
+              <Skeleton className="w-12 h-12 rounded-full" />
+              <div className="space-y-2">
+                <Skeleton className="w-32 h-4 rounded" />
+                <Skeleton className="w-48 h-3 rounded" />
+              </div>
+            </div>
+          </div>
+
+          {/* Content skeleton */}
+          <Skeleton className="w-full h-96 rounded-xl mb-8" />
+
+          {/* Actions skeleton */}
+          <div className="flex space-x-4 mb-8">
+            <Skeleton className="w-24 h-10 rounded-xl" />
+            <Skeleton className="w-32 h-10 rounded-xl" />
+          </div>
+
+          {/* Comments skeleton */}
+          <div className="space-y-4">
+            {Array.from({ length: 3 }).map((_, index) => (
+              <Skeleton key={index} className="w-full h-24 rounded-xl" />
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Error state
+  if (error) {
+    return (
+      <div className="min-h-screen bg-theme-primary pt-24 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-4xl mx-auto text-center">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl p-8"
+          >
+            <h2 className="text-2xl font-bold text-red-600 dark:text-red-400 mb-4">
+              Error Loading Blog
+            </h2>
+            <p className="text-red-500 dark:text-red-300 mb-6">
+              {error.message || 'Failed to load blog details'}
+            </p>
+            <Button
+              onClick={() => navigate('/blogs')}
+              className="bg-blue-600 hover:bg-blue-700 text-white"
+            >
+              Back to Blogs
+            </Button>
+          </motion.div>
+        </div>
+      </div>
+    );
+  }
   return (
-    <div className="min-h-screen p-8 bg-gray-100 text-gray-900 dark:bg-gray-900 dark:text-gray-100">
-      <div className="max-w-3xl mx-auto">
-        <Skeleton isLoaded={!loading} className="mb-8">
-          <h1 className="text-4xl font-bold mb-4 text-green-600 dark:text-green-400">
+    <div className="min-h-screen bg-theme-primary pt-24 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-4xl mx-auto">
+        {/* Back Button */}
+        <motion.button
+          initial={{ opacity: 0, x: -20 }}
+          animate={{ opacity: 1, x: 0 }}
+          onClick={() => navigate('/blogs')}
+          className="flex items-center space-x-2 text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 mb-8 transition-colors duration-200"
+        >
+          <ArrowLeft className="w-5 h-5" />
+          <span className="font-medium">Back to Blogs</span>
+        </motion.button>
+
+        {/* Blog Header */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+          className="mb-8"
+        >
+          <h1 className="text-4xl md:text-5xl font-bold mb-6 text-theme-primary leading-tight">
             {blog?.title}
           </h1>
-          <div className="flex items-center space-x-2">
-            {blog?.author?.profilePicture ? (
-              <Avatar size="large" src={blog?.author?.profilePicture} />
-            ) : (
-              <Avatar size="large">{blog?.author?.username?.charAt(0)}</Avatar>
-            )}
-            <span className="text-gray-600 dark:text-gray-300">{blog?.author?.username}</span>
-            <p className="text-sm text-zinc-400">
-              posted on {blog?.author?.username} • {moment(parseInt(blog?.createdAt)).fromNow()}
-            </p>
-          </div>
-        </Skeleton>
 
-        <main>
-          <div className="mb-8 p-6 rounded-lg bg-white dark:bg-gray-800">
-            <p className="mb-4 ">
-              <MarkdownPreviewComponent content={blog?.content} />
-            </p>
-          </div>
-
-          <div className="mb-8">
-            <div className="flex items-center space-x-4 mb-4">
-              <Button
-                startContent={<LikeOutlined />}
-                onClick={() => setLikes(likes + 1)}
-                className="bg-gray-200 text-gray-700 hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
-              >
-                {likes} Likes
-              </Button>
-              <Button
-                startContent={<CommentOutlined />}
-                className="bg-gray-200 text-gray-700 hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
-              >
-                10 Comments
-              </Button>
-            </div>
-            <div className="space-x-2">
-              {blog?.tags?.map((tag: string) => (
-                <Tag
-                  key={tag}
-                  className="bg-gray-200 text-gray-700 dark:bg-gray-700 dark:text-gray-300"
+          <div className="flex items-center space-x-4 mb-6">
+            <div className="flex items-center space-x-3">
+              {blog?.author?.profilePicture ? (
+                <Avatar
+                  size="large"
+                  src={blog?.author?.profilePicture}
+                  className="border-2 border-blue-200 dark:border-blue-800"
+                />
+              ) : (
+                <Avatar
+                  size="large"
+                  className="bg-blue-600 text-white border-2 border-blue-200 dark:border-blue-800"
                 >
-                  {tag}
-                </Tag>
-              ))}
-            </div>
-          </div>
-
-          <div className="mb-8 bg-white dark:bg-gray-800 p-6 rounded-lg">
-            <h2 className="text-2xl font-bold mb-4 text-green-600 dark:text-green-400">Comments</h2>
-            <div className="space-y-4">
-              {[1, 2].map(i => (
-                <div key={i} className="p-4 rounded bg-gray-100 dark:bg-gray-700">
-                  <div className="flex items-center space-x-2 mb-2">
-                    <Avatar src={`https://joeschmoe.io/api/v1/random${i}`} />
-                    <span className="font-semibold text-gray-700 dark:text-gray-300">User {i}</span>
-                  </div>
-                  <p className="text-gray-600 dark:text-gray-300">
-                    This is a great article! Thanks for sharing.
-                  </p>
+                  {blog?.author?.username?.charAt(0)?.toUpperCase()}
+                </Avatar>
+              )}
+              <div>
+                <div className="flex items-center space-x-2">
+                  <User className="w-4 h-4 text-gray-500 dark:text-gray-400" />
+                  <span className="font-semibold text-theme-primary">{blog?.author?.username}</span>
                 </div>
-              ))}
+                <div className="flex items-center space-x-2 text-sm text-gray-500 dark:text-gray-400">
+                  <Calendar className="w-4 h-4" />
+                  <span>
+                    {moment(parseInt(blog?.createdAt as string)).format('MMMM DD, YYYY')} •{' '}
+                    {moment(parseInt(blog?.createdAt as string)).fromNow()}
+                  </span>
+                </div>
+              </div>
             </div>
           </div>
 
-          <div className="bg-white dark:bg-gray-800 p-6 rounded-lg">
-            <h2 className="text-2xl font-bold mb-4 text-green-600 dark:text-green-400">
+          {/* Tags and Edit Button */}
+          <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
+            <div className="flex flex-wrap gap-2">
+              {blog?.tags &&
+                blog.tags.length > 0 &&
+                blog.tags.map((tag: string, index: number) => (
+                  <motion.div
+                    key={tag}
+                    initial={{ opacity: 0, scale: 0.8 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ duration: 0.3, delay: index * 0.1 }}
+                  >
+                    <Tag className="bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-800 px-3 py-1 rounded-full text-sm font-medium">
+                      #{tag}
+                    </Tag>
+                  </motion.div>
+                ))}
+            </div>
+
+            {/* Edit Button - only show for blog author */}
+            {blog?.author?.id === currentUserId && (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.3 }}
+              >
+                <Button
+                  onClick={handleEditBlog}
+                  className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 font-medium transition-all duration-200"
+                  startContent={<Edit className="w-4 h-4" />}
+                >
+                  Edit Blog
+                </Button>
+              </motion.div>
+            )}
+          </div>
+        </motion.div>
+
+        {/* Main Content */}
+        <motion.main
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.2 }}
+        >
+          {/* Blog Content */}
+          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700 p-8 mb-8">
+            <div className="prose prose-lg dark:prose-invert max-w-none">
+              <MarkdownPreviewComponent content={blog?.content || ''} />
+            </div>
+          </div>
+
+          {/* Action Buttons */}
+          <div className="flex items-center space-x-4 mb-8">
+            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+              <Button
+                startContent={
+                  <Heart className={`w-4 h-4 ${hasLiked ? 'fill-current text-red-500' : ''}`} />
+                }
+                onClick={handleLike}
+                disabled={hasLiked}
+                className={`${
+                  hasLiked
+                    ? 'bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 border-red-200 dark:border-red-800'
+                    : 'bg-gray-50 dark:bg-gray-800 text-gray-700 dark:text-gray-300 border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700'
+                } border transition-all duration-200`}
+              >
+                {localLikes} {localLikes === 1 ? 'Like' : 'Likes'}
+              </Button>
+            </motion.div>
+
+            <div className="flex items-center space-x-2 text-gray-600 dark:text-gray-400">
+              <MessageCircle className="w-4 h-4" />
+              <span className="font-medium">
+                {blog?.comments?.length || 0}{' '}
+                {blog?.comments?.length === 1 ? 'Comment' : 'Comments'}
+              </span>
+            </div>
+          </div>
+
+          {/* Comments Section */}
+          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700 p-8 mb-8">
+            <h2 className="text-2xl font-bold mb-6 text-theme-primary flex items-center">
+              <MessageCircle className="w-6 h-6 mr-3 text-blue-600 dark:text-blue-400" />
+              Comments ({blog?.comments?.length || 0})
+            </h2>
+
+            {blog?.comments && blog.comments.length > 0 ? (
+              <div className="space-y-6">
+                {blog.comments.map((comment: Comment, index: number) => (
+                  <motion.div
+                    key={comment.id}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.4, delay: index * 0.1 }}
+                    className="bg-gray-50 dark:bg-gray-700/50 rounded-xl p-6 border border-gray-200 dark:border-gray-600"
+                  >
+                    <div className="flex items-start space-x-4">
+                      {comment.author?.profilePicture ? (
+                        <Avatar
+                          src={comment.author.profilePicture}
+                          className="border-2 border-gray-200 dark:border-gray-600"
+                        />
+                      ) : (
+                        <Avatar className="bg-blue-600 text-white border-2 border-gray-200 dark:border-gray-600">
+                          {comment.author?.username?.charAt(0)?.toUpperCase()}
+                        </Avatar>
+                      )}
+                      <div className="flex-1">
+                        <div className="flex items-center space-x-2 mb-2">
+                          <span className="font-semibold text-theme-primary">
+                            {comment.author?.username}
+                          </span>
+                          <span className="text-sm text-gray-500 dark:text-gray-400">
+                            {moment(parseInt(comment.createdAt)).fromNow()}
+                          </span>
+                        </div>
+                        <div className="text-gray-700 dark:text-gray-300 leading-relaxed">
+                          <MarkdownPreviewComponent content={comment.content} />
+                        </div>
+                      </div>
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
+            ) : (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="text-center py-12"
+              >
+                <MessageCircle className="w-16 h-16 text-gray-300 dark:text-gray-600 mx-auto mb-4" />
+                <h3 className="text-lg font-medium text-gray-500 dark:text-gray-400 mb-2">
+                  No comments yet
+                </h3>
+                <p className="text-gray-400 dark:text-gray-500">
+                  Be the first to share your thoughts on this blog post.
+                </p>
+              </motion.div>
+            )}
+          </div>
+
+          {/* Add Comment Section */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.4 }}
+            className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700 p-8"
+          >
+            <h2 className="text-2xl font-bold mb-6 text-theme-primary flex items-center">
+              <MessageCircle className="w-6 h-6 mr-3 text-blue-600 dark:text-blue-400" />
               Leave a Comment
             </h2>
-            <Editor initialContent={comment} onChange={content => setComment(content)} />
-            <Button
-              variant="solid"
-              className="bg-green-500 hover:bg-green-600 dark:bg-green-600 dark:hover:bg-green-700 mt-4"
-            >
-              Submit Comment
-            </Button>
-          </div>
-        </main>
+
+            <div className="space-y-4">
+              <Editor
+                initialContent={comment}
+                onChange={content => setComment(content)}
+                placeholder="Share your thoughts about this blog post..."
+                minHeight="200px"
+              />
+
+              <div className="flex justify-end">
+                <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+                  <Button
+                    onClick={handleCommentSubmit}
+                    disabled={isSubmittingComment || !comment.trim()}
+                    className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 font-semibold shadow-lg hover:shadow-xl transition-all duration-200"
+                    isLoading={isSubmittingComment}
+                  >
+                    {isSubmittingComment ? 'Posting...' : 'Post Comment'}
+                  </Button>
+                </motion.div>
+              </div>
+            </div>
+          </motion.div>
+        </motion.main>
       </div>
+
+      {/* Edit Blog Modal */}
+      <Modal
+        isOpen={isEditModalOpen}
+        onOpenChange={setIsEditModalOpen}
+        size="2xl"
+        scrollBehavior="inside"
+        classNames={{
+          base: 'bg-white dark:bg-gray-900',
+          header: 'border-b border-gray-200 dark:border-gray-700',
+          body: 'py-6',
+          footer: 'border-t border-gray-200 dark:border-gray-700',
+        }}
+      >
+        <ModalContent>
+          {onClose => (
+            <>
+              <ModalHeader className="flex flex-col gap-1 px-6 py-4">
+                <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Edit Blog Post</h2>
+                <p className="text-gray-600 dark:text-gray-300 text-sm">
+                  Update your blog post content and settings
+                </p>
+              </ModalHeader>
+              <ModalBody className="px-6">
+                <Formik
+                  initialValues={{
+                    title: blog?.title || '',
+                    tags: editTags,
+                    tagInput: '',
+                  }}
+                  validationSchema={BlogSchema}
+                  onSubmit={handleEditSubmit}
+                  enableReinitialize
+                >
+                  {({ errors, touched, setFieldValue, isSubmitting }) => (
+                    <Form className="space-y-6">
+                      <div>
+                        <label
+                          htmlFor="edit-title"
+                          className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+                        >
+                          Title *
+                        </label>
+                        <Field
+                          type="text"
+                          id="edit-title"
+                          name="title"
+                          placeholder="Enter a compelling title for your blog post"
+                          className={`w-full px-4 py-3 text-gray-900 dark:text-white bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200 ${
+                            errors.title && touched.title
+                              ? 'border-red-500 focus:ring-red-500 focus:border-red-500'
+                              : ''
+                          }`}
+                        />
+                        <ErrorMessage
+                          name="title"
+                          component="div"
+                          className="mt-2 text-sm text-red-500"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+                          Tags
+                        </label>
+                        <Field
+                          type="text"
+                          name="tagInput"
+                          placeholder="Type a tag and press Enter (e.g., javascript, react, tutorial)"
+                          className="w-full px-4 py-3 text-gray-900 dark:text-white bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200"
+                          onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) =>
+                            handleEditTagInput(e, setFieldValue)
+                          }
+                        />
+                        <div className="flex flex-wrap gap-2 mt-3">
+                          {editTags.map((tag, index) => (
+                            <span
+                              key={index}
+                              className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-700"
+                            >
+                              #{tag}
+                              <button
+                                type="button"
+                                onClick={() => removeEditTag(index, setFieldValue)}
+                                className="ml-2 text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-200 transition-colors duration-200"
+                              >
+                                <BsX size={16} />
+                              </button>
+                            </span>
+                          ))}
+                        </div>
+                        {editTags.length === 0 && (
+                          <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">
+                            Add tags to help others discover your blog post
+                          </p>
+                        )}
+                      </div>
+
+                      <div>
+                        <label className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+                          Content *
+                        </label>
+                        <div className="border border-gray-300 dark:border-gray-600 rounded-lg overflow-hidden">
+                          <Editor
+                            initialContent={editContent}
+                            onChange={newContent => setEditContent(newContent)}
+                            placeholder="Write your blog content here... Use the toolbar above for formatting!"
+                            minHeight="350px"
+                            maxHeight="500px"
+                          />
+                        </div>
+                        <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">
+                          Use markdown formatting for rich text content
+                        </p>
+                      </div>
+
+                      <ModalFooter className="px-6 py-4 flex justify-end gap-3">
+                        <Button
+                          variant="bordered"
+                          onPress={onClose}
+                          className="border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
+                        >
+                          Cancel
+                        </Button>
+                        <Button
+                          type="submit"
+                          isLoading={isSubmitting}
+                          className="bg-green-600 hover:bg-green-700 text-white px-6 py-2 font-medium transition-all duration-300 shadow-lg hover:shadow-xl"
+                          startContent={!isSubmitting && <Edit className="w-4 h-4" />}
+                        >
+                          {isSubmitting ? 'Updating...' : 'Update Blog'}
+                        </Button>
+                      </ModalFooter>
+                    </Form>
+                  )}
+                </Formik>
+              </ModalBody>
+            </>
+          )}
+        </ModalContent>
+      </Modal>
     </div>
   );
 };

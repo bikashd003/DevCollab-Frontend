@@ -1,7 +1,9 @@
-import { CheckOutlined, QuestionCircleOutlined } from '@ant-design/icons';
+import { CheckOutlined } from '@ant-design/icons';
 import { useMutation } from '@apollo/client';
-import { Input, List, Steps, Tag, Tooltip, message } from 'antd';
+import { Input, Steps, Tag, message } from 'antd';
+import { motion, AnimatePresence } from 'framer-motion';
 import React, { useState } from 'react';
+import { FiHelpCircle, FiTag, FiEdit3, FiSend, FiArrowLeft, FiTrendingUp } from 'react-icons/fi';
 import * as yup from 'yup';
 import { ADD_QUESTION_MUTAION } from '../GraphQL/Mutations/Questions/Question';
 import questionSchema from '../Schemas/QuestionSchema';
@@ -20,16 +22,20 @@ const QuestionInput: React.FC = () => {
   const [current, setCurrent] = useState(0);
   const [content, setContent] = useState('');
   const [tagInput, setTagInput] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [createQuestion] = useMutation(ADD_QUESTION_MUTAION, {
     onCompleted: () => {
       setFormData({
         title: '',
         tags: [],
       });
+      setContent('');
       setCurrent(0);
+      setIsSubmitting(false);
       message.success('Question submitted successfully!');
     },
     onError: err => {
+      setIsSubmitting(false);
       message.error(err.message);
     },
   });
@@ -39,12 +45,23 @@ const QuestionInput: React.FC = () => {
   });
   const [errors, setErrors] = useState<FormErrors>({});
 
-  const mostUsedTags = ['javascript', 'react', 'css', 'node.js', 'python'];
+  const mostUsedTags = [
+    'javascript',
+    'react',
+    'css',
+    'node.js',
+    'python',
+    'typescript',
+    'html',
+    'vue',
+  ];
   const recentQuestions = [
     'How to create a responsive layout with CSS Grid?',
     'What is the difference between let and const in JavaScript?',
     'How to implement authentication in a React application?',
     'Tips for optimizing website performance',
+    'Best practices for React component optimization',
+    'How to handle state management in large applications?',
   ];
   const validateStep = async (step: number) => {
     try {
@@ -91,8 +108,10 @@ const QuestionInput: React.FC = () => {
         setCurrent(current + 1);
       } else {
         try {
+          setIsSubmitting(true);
           await createQuestion({ variables: { ...formData, content } });
         } catch (error) {
+          setIsSubmitting(false);
           // Handle error if needed
         }
       }
@@ -127,153 +146,415 @@ const QuestionInput: React.FC = () => {
       formData.tags.filter(tag => tag !== tagToRemove)
     );
   };
+  const stepVariants = {
+    hidden: { opacity: 0, x: 50 },
+    visible: { opacity: 1, x: 0 },
+    exit: { opacity: 0, x: -50 },
+  };
+
+  const containerVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: { opacity: 1, y: 0 },
+  };
+
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="flex flex-col lg:flex-row gap-8">
-        <div className="bg-background dark:bg-dark-background text-foreground dark:text-dark-foreground p-6 rounded-lg shadow-lg flex-grow lg:w-2/3">
-          <div>
-            <Steps
-              current={current}
-              items={[{ title: 'Add title' }, { title: 'Add content' }, { title: 'Add tag' }]}
-              className="custom-steps"
-            />
-            <form onSubmit={e => e.preventDefault()} className="mt-4">
-              {current === 0 && (
-                <div className="mb-4">
-                  <label htmlFor="title" className="block text-sm font-medium mb-1">
-                    Title
-                  </label>
-                  <Input
-                    type="text"
-                    id="title"
-                    value={formData.title}
-                    onChange={e => handleInputChange('title', e.target.value)}
-                    className={`w-full p-2 border rounded-md bg-background dark:bg-dark-background text-foreground dark:text-dark-foreground ${
-                      errors.title ? 'border-red-500' : 'border-gray-300 dark:border-gray-700'
-                    }`}
-                    placeholder="Enter your question title"
-                  />
-                  {errors.title && <div className="text-red-500 text-sm mt-1">{errors.title}</div>}
-                  <Tooltip
-                    title="Your title should be clear, concise, and describe the problem you're trying to solve."
-                    placement="right"
+    <div className="min-h-screen bg-white dark:bg-gray-900 transition-colors duration-300">
+      <div className="h-20"></div>
+      <motion.div
+        initial="hidden"
+        animate="visible"
+        variants={containerVariants}
+        transition={{ duration: 0.6 }}
+        className="container mx-auto px-4 py-8"
+      >
+        {/* Header Section */}
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          className="text-center mb-8"
+        >
+          <h1 className="text-3xl lg:text-4xl font-bold text-theme-primary mb-3">Ask a Question</h1>
+          <p className="text-theme-muted text-lg max-w-2xl mx-auto">
+            Get help from our community of developers. Be specific and clear about your problem.
+          </p>
+        </motion.div>
+
+        <div className="flex flex-col lg:flex-row gap-8">
+          {/* Main Form Section */}
+          <motion.div
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.6, delay: 0.2 }}
+            className="dark:bg-gray-800 rounded-lg flex-grow lg:w-2/3 p-8"
+          >
+            {/* Progress Steps */}
+            <div className="mb-8">
+              <Steps
+                current={current}
+                items={[
+                  {
+                    title: 'Title',
+                    icon: <FiEdit3 className="w-4 h-4" />,
+                    description: 'Describe your problem',
+                  },
+                  {
+                    title: 'Content',
+                    icon: <FiHelpCircle className="w-4 h-4" />,
+                    description: 'Provide details',
+                  },
+                  {
+                    title: 'Tags',
+                    icon: <FiTag className="w-4 h-4" />,
+                    description: 'Categorize your question',
+                  },
+                ]}
+                className="custom-steps"
+              />
+            </div>
+
+            <form onSubmit={e => e.preventDefault()} className="space-y-6">
+              <AnimatePresence mode="wait">
+                {current === 0 && (
+                  <motion.div
+                    key="title-step"
+                    variants={stepVariants}
+                    initial="hidden"
+                    animate="visible"
+                    exit="exit"
+                    transition={{ duration: 0.3 }}
+                    className="space-y-4"
                   >
-                    <div className="mt-2 text-gray-600 dark:text-gray-400 flex items-center">
-                      <QuestionCircleOutlined className="mr-2" />
-                      How to write a good question title
-                    </div>
-                  </Tooltip>
-                </div>
-              )}
-              {current === 1 && (
-                <div className="mb-4">
-                  <div className="overflow-hidden">
-                    <Editor initialContent={content} onChange={content => setContent(content)} />
-                  </div>
-                  {errors.content && (
-                    <div className="text-red-500 text-sm mt-1">{errors.content}</div>
-                  )}
-                  <Tooltip
-                    title="Provide a detailed description of your problem, including any relevant code snippets or errors you're encountering."
-                    placement="right"
-                  >
-                    <div className="mt-2 text-gray-600 dark:text-gray-400 flex items-center">
-                      <QuestionCircleOutlined className="mr-2" />
-                      How to write a good question body
-                    </div>
-                  </Tooltip>
-                </div>
-              )}
-              {current === 2 && (
-                <div className="mb-4">
-                  <div className="flex items-center mb-2">
-                    <label htmlFor="tags" className="block text-sm font-medium mr-2">
-                      Tags
-                    </label>
-                    <Tooltip
-                      title="Tags help categorize your question and make it easier for others to find. Add up to 5 tags that best describe your problem."
-                      placement="right"
-                    >
-                      <QuestionCircleOutlined />
-                    </Tooltip>
-                  </div>
-                  <div className="flex flex-wrap">
-                    {formData.tags.map(tag => (
-                      <Tag
-                        key={tag}
-                        closable
-                        onClose={() => handleRemoveTag(tag)}
-                        className="mr-2 mb-2 bg-gray-200 dark:bg-gray-700 text-foreground dark:text-dark-foreground"
+                    <div>
+                      <label
+                        htmlFor="title"
+                        className="block text-sm font-semibold text-theme-primary mb-3"
                       >
-                        {tag}
-                      </Tag>
-                    ))}
-                    <Input
-                      placeholder="Add a tag"
-                      value={tagInput}
-                      onChange={e => setTagInput(e.target.value)}
-                      onPressEnter={e => {
-                        e.preventDefault();
-                        handleAddTag(tagInput);
-                      }}
-                      className={`mr-2 mb-2 bg-background dark:bg-dark-background text-foreground dark:text-dark-foreground border-gray-300 dark:border-gray-700 ${
-                        errors.tags ? 'border-red-500' : ''
-                      }`}
-                    />
-                  </div>
-                  {errors.tags && <div className="text-red-500 text-sm mt-1">{errors.tags}</div>}
-                </div>
-              )}
-              <div className="flex justify-end">
-                {current > 0 && (
-                  <button
-                    type="button"
-                    onClick={() => setCurrent(current - 1)}
-                    className="px-4 py-2 mr-2 bg-gray-200 dark:bg-gray-700 text-foreground dark:text-dark-foreground rounded-md hover:bg-gray-300 dark:hover:bg-gray-600"
-                  >
-                    Previous
-                  </button>
+                        <FiEdit3 className="inline w-4 h-4 mr-2" />
+                        Question Title
+                      </label>
+                      <Input
+                        type="text"
+                        id="title"
+                        value={formData.title}
+                        onChange={e => handleInputChange('title', e.target.value)}
+                        className={`dark:bg-gray-700 w-full text-lg ${
+                          errors.title ? 'border-red-500 focus:border-red-500' : ''
+                        }`}
+                        placeholder="e.g., How to implement authentication in React?"
+                        size="large"
+                      />
+                      {errors.title && (
+                        <motion.div
+                          initial={{ opacity: 0, y: -10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          className="text-red-500 text-sm mt-2 flex items-center"
+                        >
+                          <span className="w-4 h-4 mr-1">⚠️</span>
+                          {errors.title}
+                        </motion.div>
+                      )}
+                    </div>
+
+                    <motion.div
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      transition={{ delay: 0.2 }}
+                      className="dark:bg-gray-700 border-l-4 border-theme-accent p-4 rounded-r-lg"
+                    >
+                      <div className="flex items-start">
+                        <FiHelpCircle className="w-5 h-5 text-theme-accent mr-3 mt-0.5 flex-shrink-0" />
+                        <div>
+                          <h4 className="font-semibold text-theme-primary mb-2">
+                            Tips for a great title:
+                          </h4>
+                          <ul className="text-sm text-theme-muted space-y-1">
+                            <li>• Be specific and describe the actual problem</li>
+                            <li>• Include relevant technologies (React, JavaScript, etc.)</li>
+                            <li>• Avoid vague words like "doesn't work" or "broken"</li>
+                            <li>• Keep it under 150 characters</li>
+                          </ul>
+                        </div>
+                      </div>
+                    </motion.div>
+                  </motion.div>
                 )}
-                <button
+                {current === 1 && (
+                  <motion.div
+                    key="content-step"
+                    variants={stepVariants}
+                    initial="hidden"
+                    animate="visible"
+                    exit="exit"
+                    transition={{ duration: 0.3 }}
+                    className="space-y-4"
+                  >
+                    <div>
+                      <label className="block text-sm font-semibold text-theme-primary mb-3">
+                        <FiHelpCircle className="inline w-4 h-4 mr-2" />
+                        Question Details
+                      </label>
+                      <div className="border border-theme-primary rounded-lg overflow-hidden bg-theme-secondary">
+                        <Editor
+                          initialContent={content}
+                          onChange={content => setContent(content)}
+                        />
+                      </div>
+                      {errors.content && (
+                        <motion.div
+                          initial={{ opacity: 0, y: -10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          className="text-red-500 text-sm mt-2 flex items-center"
+                        >
+                          <span className="w-4 h-4 mr-1">⚠️</span>
+                          {errors.content}
+                        </motion.div>
+                      )}
+                    </div>
+
+                    <motion.div
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      transition={{ delay: 0.2 }}
+                      className="dark:bg-gray-700 border-l-4  p-4 rounded-r-lg"
+                    >
+                      <div className="flex items-start">
+                        <FiHelpCircle className="w-5 h-5 text-theme-accent mr-3 mt-0.5 flex-shrink-0" />
+                        <div>
+                          <h4 className="font-semibold text-theme-primary mb-2">
+                            Writing a detailed question:
+                          </h4>
+                          <ul className="text-sm text-theme-muted space-y-1">
+                            <li>• Explain what you're trying to achieve</li>
+                            <li>• Include relevant code snippets</li>
+                            <li>• Describe what you've already tried</li>
+                            <li>• Mention any error messages you're seeing</li>
+                            <li>• Provide context about your environment</li>
+                          </ul>
+                        </div>
+                      </div>
+                    </motion.div>
+                  </motion.div>
+                )}
+                {current === 2 && (
+                  <motion.div
+                    key="tags-step"
+                    variants={stepVariants}
+                    initial="hidden"
+                    animate="visible"
+                    exit="exit"
+                    transition={{ duration: 0.3 }}
+                    className="space-y-4"
+                  >
+                    <div>
+                      <label className="block text-sm font-semibold text-theme-primary mb-3">
+                        <FiTag className="inline w-4 h-4 mr-2" />
+                        Tags ({formData.tags.length}/5)
+                      </label>
+
+                      {/* Selected Tags */}
+                      <div className="flex flex-wrap gap-2 mb-4">
+                        {formData.tags.map(tag => (
+                          <motion.div
+                            key={tag}
+                            initial={{ opacity: 0, scale: 0.8 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            exit={{ opacity: 0, scale: 0.8 }}
+                            transition={{ duration: 0.2 }}
+                          >
+                            <Tag
+                              closable
+                              onClose={() => handleRemoveTag(tag)}
+                              className="dark:bg-gray-700 text-white border-theme-accent px-3 py-1 text-sm font-medium hover:bg-theme-primary transition-colors"
+                            >
+                              {tag}
+                            </Tag>
+                          </motion.div>
+                        ))}
+                      </div>
+
+                      {/* Tag Input */}
+                      <Input
+                        placeholder="Type a tag and press Enter"
+                        value={tagInput}
+                        onChange={e => setTagInput(e.target.value)}
+                        onPressEnter={e => {
+                          e.preventDefault();
+                          if (tagInput.trim()) {
+                            handleAddTag(tagInput.trim());
+                          }
+                        }}
+                        className={`dark:bg-gray-700 w-full ${
+                          errors.tags ? 'border-red-500 focus:border-red-500' : ''
+                        }`}
+                        size="large"
+                        disabled={formData.tags.length >= 5}
+                      />
+
+                      {errors.tags && (
+                        <motion.div
+                          initial={{ opacity: 0, y: -10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          className="text-red-500 text-sm mt-2 flex items-center"
+                        >
+                          <span className="w-4 h-4 mr-1">⚠️</span>
+                          {errors.tags}
+                        </motion.div>
+                      )}
+                    </div>
+
+                    <motion.div
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      transition={{ delay: 0.2 }}
+                      className="dark:bg-gray-700 border-l-4 border-theme-accent p-4 rounded-r-lg"
+                    >
+                      <div className="flex items-start">
+                        <FiTag className="w-5 h-5 text-theme-accent mr-3 mt-0.5 flex-shrink-0" />
+                        <div>
+                          <h4 className="font-semibold text-theme-primary mb-2">Tag guidelines:</h4>
+                          <ul className="text-sm text-theme-muted space-y-1">
+                            <li>• Use existing tags when possible</li>
+                            <li>• Include the main technology (react, javascript, etc.)</li>
+                            <li>• Add specific frameworks or libraries</li>
+                            <li>• Maximum 5 tags per question</li>
+                          </ul>
+                        </div>
+                      </div>
+                    </motion.div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+              {/* Navigation Buttons */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.4 }}
+                className="flex justify-between items-center pt-6 border-t border-theme-primary"
+              >
+                <div>
+                  {current > 0 && (
+                    <motion.button
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                      type="button"
+                      onClick={() => setCurrent(current - 1)}
+                      className="btn-theme-secondary flex items-center px-6 py-3 rounded-lg font-medium transition-all duration-200"
+                    >
+                      <FiArrowLeft className="w-4 h-4 mr-2" />
+                      Previous
+                    </motion.button>
+                  )}
+                </div>
+
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
                   type="button"
                   onClick={handleNext}
-                  className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+                  disabled={isSubmitting}
+                  className="btn-theme-primary flex items-center px-8 py-3 rounded-lg font-semibold transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  {current < 2 ? 'Next' : 'Submit Question'}
-                  {current === 2 && <CheckOutlined className="ml-2" />}
-                </button>
-              </div>
+                  {isSubmitting ? (
+                    <>
+                      <div className="w-4 h-4 mr-2 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                      Submitting...
+                    </>
+                  ) : (
+                    <>
+                      {current < 2 ? 'Next Step' : 'Submit Question'}
+                      {current === 2 ? (
+                        <FiSend className="w-4 h-4 ml-2" />
+                      ) : (
+                        <CheckOutlined className="ml-2" />
+                      )}
+                    </>
+                  )}
+                </motion.button>
+              </motion.div>
             </form>
-          </div>
-        </div>
-        <div className="bg-background dark:bg-dark-background text-foreground dark:text-dark-foreground p-6 rounded-lg shadow-lg lg:w-1/3">
-          <h3 className="text-xl font-bold mb-4">Most Used Tags</h3>
-          <div className="flex flex-wrap">
-            {mostUsedTags.map(tag => (
-              <Tag
-                key={tag}
-                className="mr-2 mb-2 bg-gray-200 dark:bg-gray-700 text-foreground dark:text-dark-foreground"
-              >
-                {tag}
-              </Tag>
-            ))}
-          </div>
-          <h3 className="text-xl font-bold mt-6 mb-4">Recently Added Questions</h3>
-          <List
-            dataSource={recentQuestions}
-            renderItem={item => (
-              <List.Item>
-                <a
-                  href="#"
-                  className="text-sm font-medium hover:underline underline-offset-4 text-blue-600 dark:text-blue-400"
+          </motion.div>
+
+          {/* Sidebar */}
+          <motion.div
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.6, delay: 0.4 }}
+            className="lg:w-1/3 space-y-6"
+          >
+            {/* Popular Tags */}
+            <div className="dark:bg-gray-700 rounded-lg p-6">
+              <div className="flex items-center mb-4">
+                <FiTrendingUp className="w-5 h-5 text-theme-accent mr-2" />
+                <h3 className="text-lg font-bold text-theme-primary">Popular Tags</h3>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {mostUsedTags.map((tag, index) => (
+                  <motion.button
+                    key={tag}
+                    initial={{ opacity: 0, scale: 0.8 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ delay: index * 0.1 }}
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={() => {
+                      if (
+                        current === 2 &&
+                        formData.tags.length < 5 &&
+                        !formData.tags.includes(tag)
+                      ) {
+                        handleAddTag(tag);
+                      }
+                    }}
+                    className={`px-3 py-1.5 text-sm rounded-full border transition-all duration-200 ${
+                      current === 2 && !formData.tags.includes(tag) && formData.tags.length < 5
+                        ? 'border-theme-accent text-theme-accent hover:bg-theme-accent hover:text-white cursor-pointer'
+                        : 'border-theme-muted text-theme-muted cursor-default'
+                    }`}
+                  >
+                    {tag}
+                  </motion.button>
+                ))}
+              </div>
+              {current === 2 && (
+                <motion.p
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  className="text-xs text-theme-muted mt-3"
                 >
-                  {item}
-                </a>
-              </List.Item>
-            )}
-          />
+                  Click on tags to add them to your question
+                </motion.p>
+              )}
+            </div>
+
+            {/* Recent Questions */}
+            <div className="dark:bg-gray-700 rounded-lg p-6">
+              <div className="flex items-center mb-4">
+                <FiHelpCircle className="w-5 h-5 text-theme-accent mr-2" />
+                <h3 className="text-lg font-bold text-theme-primary">Recent Questions</h3>
+              </div>
+              <div className="space-y-3">
+                {recentQuestions.slice(0, 5).map((question, index) => (
+                  <motion.div
+                    key={index}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: index * 0.1 }}
+                    className="group"
+                  >
+                    <a
+                      href="#"
+                      className="block text-sm text-theme-muted hover:text-theme-accent transition-colors duration-200 line-clamp-2 group-hover:underline"
+                    >
+                      {question}
+                    </a>
+                  </motion.div>
+                ))}
+              </div>
+            </div>
+          </motion.div>
         </div>
-      </div>
+      </motion.div>
     </div>
   );
 };
