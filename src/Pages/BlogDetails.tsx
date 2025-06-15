@@ -1,3 +1,4 @@
+import React from 'react';
 import type { FormikHelpers } from 'formik';
 import { useParams } from 'react-router-dom';
 import { useQuery, useMutation } from '@apollo/client';
@@ -5,7 +6,13 @@ import { useState, useEffect } from 'react';
 import moment from 'moment';
 import { motion } from 'framer-motion';
 import { GET_BLOG_DETAILS } from '../GraphQL/Queries/Blogs/Blog';
-import { CREATE_COMMENT, LIKE_BLOG, UPDATE_BLOG } from '../GraphQL/Mutations/Blogs/Blogs';
+import {
+  CREATE_COMMENT,
+  LIKE_BLOG,
+  UPDATE_BLOG,
+  DELETE_BLOG,
+  LIKE_COMMENT,
+} from '../GraphQL/Mutations/Blogs/Blogs';
 import {
   Skeleton,
   Button,
@@ -16,11 +23,12 @@ import {
   ModalFooter,
 } from '@nextui-org/react';
 import { Avatar, Tag, message } from 'antd';
-import { Heart, MessageCircle, Calendar, User, ArrowLeft, Edit } from 'lucide-react';
+import { Heart, MessageCircle, Calendar, User, ArrowLeft, Edit, Trash2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../Secure/AuthContext';
 import Editor from '../Components/Global/Editor';
 import MarkdownPreviewComponent from '../Components/Global/MarkdownPreviewComponent';
+import { useConfirm } from '../Components/Global/ConfirmProvider';
 import { Formik, Form, Field, ErrorMessage } from 'formik';
 import BlogSchema from '../Schemas/BlogSchema';
 import { BsX } from 'react-icons/bs';
@@ -43,6 +51,7 @@ interface Comment {
   content: string;
   createdAt: string;
   author: Author;
+  likes: Array<{ id: string; username: string }>;
 }
 
 interface Blog {
@@ -60,12 +69,15 @@ const BlogDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { currentUserId } = useAuth();
+  const confirm = useConfirm();
   const { loading, error, data, refetch } = useQuery(GET_BLOG_DETAILS, {
     variables: { id },
   });
   const [createComment] = useMutation(CREATE_COMMENT);
   const [likeBlog] = useMutation(LIKE_BLOG);
   const [updateBlog] = useMutation(UPDATE_BLOG);
+  const [deleteBlog] = useMutation(DELETE_BLOG);
+  const [likeComment] = useMutation(LIKE_COMMENT);
   const [comment, setComment] = useState('');
   const [isSubmittingComment, setIsSubmittingComment] = useState(false);
   const [localLikes, setLocalLikes] = useState(0);
@@ -80,19 +92,30 @@ const BlogDetails = () => {
   useEffect(() => {
     if (blog?.likes) {
       setLocalLikes(blog.likes.length);
+      // Check if the current user has liked the blog
+      const userHasLiked = blog.likes.some(like => like.id === currentUserId);
+      setHasLiked(userHasLiked);
     }
-  }, [blog?.likes]);
+  }, [blog?.likes, currentUserId]);
 
   const handleLike = async () => {
-    if (!hasLiked) {
-      try {
-        await likeBlog({ variables: { id } });
+    try {
+      await likeBlog({
+        variables: { id },
+        refetchQueries: [{ query: GET_BLOG_DETAILS, variables: { id } }],
+      });
+
+      if (hasLiked) {
+        setLocalLikes(prev => prev - 1);
+        setHasLiked(false);
+        message.success('Blog unliked!');
+      } else {
         setLocalLikes(prev => prev + 1);
         setHasLiked(true);
         message.success('Blog liked!');
-      } catch (error) {
-        message.error('Failed to like blog');
       }
+    } catch (error) {
+      message.error('Failed to update like status');
     }
   };
 
@@ -145,7 +168,7 @@ const BlogDetails = () => {
       });
       message.success('Blog updated successfully!');
       setIsEditModalOpen(false);
-      refetch();
+      await refetch();
     } catch (error) {
       message.error('Failed to update blog');
     } finally {
@@ -175,6 +198,40 @@ const BlogDetails = () => {
     const newTags = editTags.filter((_, index) => index !== indexToRemove);
     setEditTags(newTags);
     setFieldValue('tags', newTags);
+  };
+
+  // Delete blog functionality
+  const handleDeleteBlog = async () => {
+    const confirmed = await confirm.confirm({
+      title: 'Delete Blog Post',
+      message:
+        'Are you sure you want to delete this blog post? This action cannot be undone and will permanently remove the blog along with all its comments and likes.',
+      type: 'danger',
+      confirmText: 'Delete Blog',
+      cancelText: 'Cancel',
+    });
+
+    if (confirmed) {
+      try {
+        await deleteBlog({ variables: { id } });
+        message.success('Blog deleted successfully!');
+        navigate('/blogs');
+      } catch (error) {
+        message.error('Failed to delete blog');
+      }
+    }
+  };
+
+  // Comment like functionality
+  const handleCommentLike = async (commentId: string) => {
+    try {
+      await likeComment({
+        variables: { id: commentId },
+        refetchQueries: [{ query: GET_BLOG_DETAILS, variables: { id } }],
+      });
+    } catch (error) {
+      message.error('Failed to update comment like status');
+    }
   };
 
   // Loading skeleton
@@ -320,21 +377,36 @@ const BlogDetails = () => {
                 ))}
             </div>
 
-            {/* Edit Button - only show for blog author */}
+            {/* Edit and Delete Buttons - only show for blog author */}
             {blog?.author?.id === currentUserId && (
-              <motion.div
-                initial={{ opacity: 0, scale: 0.8 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.3 }}
-              >
-                <Button
-                  onClick={handleEditBlog}
-                  className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 font-medium transition-all duration-200"
-                  startContent={<Edit className="w-4 h-4" />}
+              <div className="flex gap-3">
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ duration: 0.3 }}
                 >
-                  Edit Blog
-                </Button>
-              </motion.div>
+                  <Button
+                    onClick={handleEditBlog}
+                    className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 font-medium transition-all duration-200"
+                    startContent={<Edit className="w-4 h-4" />}
+                  >
+                    Edit Blog
+                  </Button>
+                </motion.div>
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ duration: 0.3, delay: 0.1 }}
+                >
+                  <Button
+                    onClick={handleDeleteBlog}
+                    className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 font-medium transition-all duration-200"
+                    startContent={<Trash2 className="w-4 h-4" />}
+                  >
+                    Delete Blog
+                  </Button>
+                </motion.div>
+              </div>
             )}
           </div>
         </motion.div>
@@ -360,7 +432,6 @@ const BlogDetails = () => {
                   <Heart className={`w-4 h-4 ${hasLiked ? 'fill-current text-red-500' : ''}`} />
                 }
                 onClick={handleLike}
-                disabled={hasLiked}
                 className={`${
                   hasLiked
                     ? 'bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 border-red-200 dark:border-red-800'
@@ -417,8 +488,35 @@ const BlogDetails = () => {
                             {moment(parseInt(comment.createdAt)).fromNow()}
                           </span>
                         </div>
-                        <div className="text-gray-700 dark:text-gray-300 leading-relaxed">
+                        <div className="text-gray-700 dark:text-gray-300 leading-relaxed mb-3">
                           <MarkdownPreviewComponent content={comment.content} />
+                        </div>
+
+                        {/* Comment Like Button */}
+                        <div className="flex items-center space-x-2">
+                          <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                            <Button
+                              size="sm"
+                              variant="light"
+                              startContent={
+                                <Heart
+                                  className={`w-3 h-3 ${
+                                    comment.likes?.some(like => like.id === currentUserId)
+                                      ? 'fill-current text-red-500'
+                                      : 'text-gray-500 dark:text-gray-400'
+                                  }`}
+                                />
+                              }
+                              onClick={() => handleCommentLike(comment.id)}
+                              className={`${
+                                comment.likes?.some(like => like.id === currentUserId)
+                                  ? 'text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20'
+                                  : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700'
+                              } transition-all duration-200 min-w-0 px-2 py-1`}
+                            >
+                              {comment.likes?.length || 0}
+                            </Button>
+                          </motion.div>
                         </div>
                       </div>
                     </div>

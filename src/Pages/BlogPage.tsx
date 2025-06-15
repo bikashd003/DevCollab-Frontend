@@ -191,9 +191,10 @@ export default function BlogPage() {
       }
       resetForm();
     } catch (err) {
-      // Error is handled by the onError callback in the mutation
+      message.error('Failed to submit blog');
     }
     setSubmitting(false);
+    setIsModalOpen(false);
   };
   const handleLikeBlog = async (id: number) => {
     await likeBlog({ variables: { id: id } });

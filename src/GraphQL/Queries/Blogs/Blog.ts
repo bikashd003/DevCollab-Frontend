@@ -41,8 +41,13 @@ export const GET_BLOG_DETAILS = gql`
         id
         content
         author {
+          id
           username
           profilePicture
+        }
+        likes {
+          id
+          username
         }
         createdAt
       }

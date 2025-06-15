@@ -35,16 +35,12 @@ export const UPDATE_COMMENT = gql`
 `;
 export const DELETE_COMMENT = gql`
   mutation deleteComment($id: ID!) {
-    deleteComment(id: $id) {
-      id
-    }
+    deleteComment(id: $id)
   }
 `;
 export const DELETE_BLOG = gql`
   mutation deleteBlog($id: ID!) {
-    deleteBlog(id: $id) {
-      id
-    }
+    deleteBlog(id: $id)
   }
 `;
 export const UPDATE_BLOG = gql`
@@ -54,6 +50,18 @@ export const UPDATE_BLOG = gql`
       title
       content
       tags
+    }
+  }
+`;
+
+export const LIKE_COMMENT = gql`
+  mutation likeComment($id: ID!) {
+    likeComment(id: $id) {
+      id
+      likes {
+        id
+        username
+      }
     }
   }
 `;

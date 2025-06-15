@@ -23,6 +23,7 @@ import ErrorBoundary from './Components/ErrorBoundary';
 import CodeTogetherPage from './Pages/CodeTogetherPage';
 import QuestionDetails from './Pages/QuestionDetails';
 import EditorHomePage from './Pages/EditorHomePage';
+import { ConfirmProvider } from './Components/Global/ConfirmProvider';
 const MainLayout: React.FC = () => {
   return (
     <div>
@@ -115,7 +116,9 @@ const App = () => {
     <ErrorBoundary>
       <NextUIProvider>
         <ThemeProvider>
-          <RouterProvider router={router} />
+          <ConfirmProvider>
+            <RouterProvider router={router} />
+          </ConfirmProvider>
         </ThemeProvider>
       </NextUIProvider>
     </ErrorBoundary>
