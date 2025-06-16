@@ -14,6 +14,19 @@ export const LIKE_QUESTION = gql`
   mutation upvoteQuestion($id: ID!) {
     upvoteQuestion(id: $id) {
       id
+      title
+      upvotes {
+        id
+      }
+      downvotes {
+        id
+      }
+      tags
+      author {
+        username
+        profilePicture
+      }
+      createdAt
     }
   }
 `;
@@ -21,33 +34,23 @@ export const DISLIKE_QUESTION = gql`
   mutation downvoteQuestion($id: ID!) {
     downvoteQuestion(id: $id) {
       id
+      title
+      upvotes {
+        id
+      }
+      downvotes {
+        id
+      }
+      tags
+      author {
+        username
+        profilePicture
+      }
+      createdAt
     }
   }
 `;
-export const CREATE_COMMENT = gql`
-  mutation createComment($content: String!, $questionId: ID!) {
-    createComment(content: $content, questionId: $questionId) {
-      id
-      content
-      questionId
-    }
-  }
-`;
-export const UPDATE_COMMENT = gql`
-  mutation updateComment($id: ID!, $content: String!) {
-    updateComment(id: $id, content: $content) {
-      id
-      content
-    }
-  }
-`;
-export const DELETE_COMMENT = gql`
-  mutation deleteComment($id: ID!) {
-    deleteComment(id: $id) {
-      id
-    }
-  }
-`;
+
 export const DELETE_QUESTION = gql`
   mutation deleteQuestion($id: ID!) {
     deleteQuestion(id: $id) {

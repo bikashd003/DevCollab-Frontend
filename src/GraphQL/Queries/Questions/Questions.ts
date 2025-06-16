@@ -7,6 +7,12 @@ export const GET_ALL_QUESTIONS = gql`
         id
         title
         tags
+        upvotes {
+          id
+        }
+        downvotes {
+          id
+        }
         author {
           username
           profilePicture
@@ -38,6 +44,12 @@ export const SEARCH_QUESTIONS = gql`
         title
         content
         tags
+        upvotes {
+          id
+        }
+        downvotes {
+          id
+        }
         author {
           id
           username

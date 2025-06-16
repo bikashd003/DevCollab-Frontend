@@ -268,10 +268,17 @@ const Editor: React.FC<EditorProps> = ({
   });
 
   useEffect(() => {
-    if (editor && !isMarkdownMode && initialContent !== markdownContent) {
+    if (editor && !isMarkdownMode) {
       editor.commands.setContent(initialContent || '<p></p>');
+      setMarkdownContent(initialContent);
     }
-  }, [editor, initialContent, isMarkdownMode, markdownContent]);
+  }, [editor, initialContent, isMarkdownMode]);
+
+  useEffect(() => {
+    if (isMarkdownMode) {
+      setMarkdownContent(initialContent);
+    }
+  }, [initialContent, isMarkdownMode]);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {

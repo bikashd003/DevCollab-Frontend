@@ -21,7 +21,16 @@ export const CREATE_COMMENT = gql`
     createComment(content: $content, blogId: $blogId) {
       id
       content
-      blogId
+      author {
+        id
+        username
+        profilePicture
+      }
+      likes {
+        id
+        username
+      }
+      createdAt
     }
   }
 `;

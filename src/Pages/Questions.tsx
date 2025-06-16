@@ -4,6 +4,7 @@ import { SearchOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import { Pagination, Skeleton, Button } from '@nextui-org/react';
 import { GET_ALL_QUESTIONS, SEARCH_QUESTIONS } from '../GraphQL/Queries/Questions/Questions';
+import { GET_POPULAR_TAGS } from '../GraphQL/Queries/Blogs/Blog';
 import { useQuery, useLazyQuery } from '@apollo/client';
 import { Input, Popover } from 'antd';
 import { debounce } from 'lodash';
@@ -15,7 +16,8 @@ import EmptyState from '../Components/Questions/EmptyState';
 interface Question {
   id: string;
   title: string;
-  votes: number;
+  upvotes: { id: string }[];
+  downvotes: { id: string }[];
   tags: string[];
   author: {
     username: string;
@@ -41,6 +43,10 @@ const QuestionsPage: React.FC = () => {
       offset: (page - 1) * itemsPerPage,
     },
     skip: !!searchTerm,
+    errorPolicy: 'all',
+  });
+
+  const { data: popularTagsData } = useQuery(GET_POPULAR_TAGS, {
     errorPolicy: 'all',
   });
   useEffect(() => {
@@ -112,46 +118,46 @@ const QuestionsPage: React.FC = () => {
   }, 300);
 
   const content = (
-    <div className="bg-theme-secondary border-theme-primary border rounded-lg p-4 shadow-theme-lg glass-theme">
+    <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4 shadow-lg">
       {searchResults.length === 0 ? (
-        <div className="w-[35vw] grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="w-[32vw] grid grid-cols-1 md:grid-cols-2 gap-3">
           <div className="space-y-2">
-            <p className="text-theme-secondary">
-              <strong className="text-theme-accent">[tag]</strong>{' '}
-              <span className="text-theme-muted">search by tag</span>
+            <p className="text-gray-700 dark:text-gray-300 text-sm">
+              <strong className="text-blue-600 dark:text-blue-400">[tag]</strong>{' '}
+              <span className="text-gray-500 dark:text-gray-400">search by tag</span>
             </p>
-            <p className="text-theme-secondary">
-              <strong className="text-theme-accent">title</strong>{' '}
-              <span className="text-theme-muted">search by title</span>
+            <p className="text-gray-700 dark:text-gray-300 text-sm">
+              <strong className="text-blue-600 dark:text-blue-400">title</strong>{' '}
+              <span className="text-gray-500 dark:text-gray-400">search by title</span>
             </p>
           </div>
           <div className="space-y-2">
-            <p className="text-theme-secondary">
-              <strong className="text-theme-accent">user:1234</strong>{' '}
-              <span className="text-theme-muted">search by user</span>
+            <p className="text-gray-700 dark:text-gray-300 text-sm">
+              <strong className="text-blue-600 dark:text-blue-400">user:username</strong>{' '}
+              <span className="text-gray-500 dark:text-gray-400">search by user</span>
             </p>
           </div>
         </div>
       ) : (
-        <div className="space-y-3 max-h-64 overflow-y-auto custom-scrollbar-thin">
+        <div className="space-y-2 max-h-60 overflow-y-auto custom-scrollbar-thin">
           {searchResults.map((question, index) => (
             <div
-              className="flex gap-3 items-center text-theme-primary hover-theme-bg p-2 rounded-lg transition-all duration-200 cursor-pointer"
+              className="flex gap-3 items-center text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 p-2 rounded-lg transition-all duration-200 cursor-pointer"
               key={index}
               onClick={() => navigate(`/questions/${question.id}`)}
             >
-              <SearchOutlined className="text-theme-accent" />
-              <span className="text-theme-primary hover:text-theme-accent transition-colors duration-200">
+              <SearchOutlined className="text-blue-600 dark:text-blue-400 text-sm" />
+              <span className="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors duration-200 text-sm truncate">
                 {question.title}
               </span>
             </div>
           ))}
         </div>
       )}
-      <hr className="my-4 border-theme-primary" />
+      <hr className="my-3 border-gray-200 dark:border-gray-700" />
       <div className="flex justify-end">
         <button
-          className="bg-theme-accent text-white hover-theme-bg px-4 py-2 rounded-lg font-medium transition-all duration-300 shadow-theme-md hover:shadow-theme-lg transform hover:-translate-y-0.5"
+          className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-all duration-200 text-sm shadow-sm hover:shadow-md"
           onClick={() => navigate('/questions/ask')}
         >
           Ask Question
@@ -160,30 +166,29 @@ const QuestionsPage: React.FC = () => {
     </div>
   );
   const filters = {
-    category: [
-      { value: 'electronics', label: 'Electronics' },
-      { value: 'clothing', label: 'Clothing' },
-    ],
-    price: [
-      { value: '0-50', label: '$0 - $50' },
-      { value: '51-100', label: '$51 - $100' },
+    tags:
+      popularTagsData?.getPopularTags?.map((tag: any) => ({
+        value: tag.tag,
+        label: `${tag.tag} (${tag.count})`,
+      })) || [],
+    sortBy: [
+      { value: 'newest', label: 'Newest' },
+      { value: 'oldest', label: 'Oldest' },
+      { value: 'most-voted', label: 'Most Voted' },
+      { value: 'most-answered', label: 'Most Answered' },
     ],
   };
 
   const handleFiltersChange = async () => {
-    // console.log(selectedFilters)
-    // try {
-    //   const response = await axios.get('/api/filter', { params: selectedFilters });
-    //   setData(response.data);
-    // } catch (error) {
-    //   console.error('Error fetching filtered data:', error);
+    // TODO: Implement filter functionality
+    // This would involve updating the GraphQL query with filter parameters
   };
   return (
-    <div className="min-h-screen bg-gray-50 text-gray-900 dark:bg-gray-900 dark:text-gray-100 font-mono transition-colors duration-300">
+    <div className="min-h-screen bg-gray-50 text-gray-900 dark:bg-gray-900 dark:text-gray-100 transition-colors duration-300">
       <div className="h-20"></div>
-      <main className="container mx-auto px-6 py-10 flex flex-col lg:flex-row gap-10">
+      <main className="container mx-auto px-4 py-6 flex flex-col lg:flex-row gap-6">
         {/* Main Content Area */}
-        <div className="lg:w-3/4 space-y-8">
+        <div className="lg:w-3/4 space-y-6">
           {/* Header Section */}
           <motion.div
             initial={{ opacity: 0, y: -20 }}
@@ -192,17 +197,18 @@ const QuestionsPage: React.FC = () => {
             className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4"
           >
             <div>
-              <h1 className="text-3xl lg:text-4xl font-bold text-gray-900 dark:text-gray-100 mb-2">
+              <h1 className="text-2xl lg:text-3xl font-bold text-gray-900 dark:text-gray-100 mb-1">
                 Questions
               </h1>
-              <p className="text-gray-600 dark:text-gray-400">
+              <p className="text-gray-600 dark:text-gray-400 text-sm">
                 Find answers or ask your own questions to the community
               </p>
             </div>
             <Button
               onClick={() => navigate('/questions/ask')}
-              className="bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-3 rounded-lg shadow-md flex items-center gap-2 transition-all duration-200"
-              startContent={<FiPlus size={20} />}
+              className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg shadow-sm flex items-center gap-2 transition-all duration-200"
+              startContent={<FiPlus size={16} />}
+              size="sm"
             >
               Ask Question
             </Button>
@@ -213,7 +219,7 @@ const QuestionsPage: React.FC = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.1 }}
-            className="flex flex-col sm:flex-row gap-4"
+            className="flex flex-col sm:flex-row gap-3"
           >
             <div className="flex-1">
               <Popover
@@ -233,7 +239,7 @@ const QuestionsPage: React.FC = () => {
                         setSearchTerm(e.target.value);
                         handleSearch(e.target.value);
                       }}
-                      className="w-full h-12 text-base"
+                      className="w-full h-10 text-sm"
                       style={{
                         backgroundColor: 'transparent',
                         borderColor: 'rgb(209 213 219)',
@@ -246,8 +252,9 @@ const QuestionsPage: React.FC = () => {
             <Button
               onClick={() => setIsFilterOpen(!isFilterOpen)}
               variant="bordered"
-              className="h-12 px-6 border-gray-300 dark:border-gray-600"
-              startContent={<FiFilter size={18} />}
+              className="h-10 px-4 border-gray-300 dark:border-gray-600 text-sm"
+              startContent={<FiFilter size={16} />}
+              size="sm"
             >
               Filters
             </Button>
@@ -261,7 +268,7 @@ const QuestionsPage: React.FC = () => {
                 animate={{ opacity: 1, height: 'auto' }}
                 exit={{ opacity: 0, height: 0 }}
                 transition={{ duration: 0.3 }}
-                className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-6 shadow-sm"
+                className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4 shadow-sm"
               >
                 <FiltersContainer filters={filters} onFiltersChange={handleFiltersChange} />
               </motion.div>
@@ -273,7 +280,7 @@ const QuestionsPage: React.FC = () => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.5, delay: 0.2 }}
-            className="space-y-6"
+            className="space-y-4"
           >
             {error ? (
               <EmptyState type="error" onRetry={refetch} />
@@ -282,7 +289,7 @@ const QuestionsPage: React.FC = () => {
               Array.from({ length: 5 }).map((_, index) => (
                 <Skeleton
                   key={index}
-                  className="w-full h-48 rounded-xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700"
+                  className="w-full h-40 rounded-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700"
                 />
               ))
             ) : questions?.length === 0 ? (
@@ -311,7 +318,7 @@ const QuestionsPage: React.FC = () => {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ duration: 0.5, delay: 0.3 }}
-              className="flex justify-center pt-8"
+              className="flex justify-center pt-6"
             >
               <Pagination
                 showControls
@@ -320,38 +327,31 @@ const QuestionsPage: React.FC = () => {
                 page={page}
                 onChange={newPage => setPage(newPage)}
                 className="pagination-theme"
+                size="sm"
               />
             </motion.div>
           )}
         </div>
 
         {/* Right Sidebar */}
-        <aside className="lg:w-1/4 space-y-6">
+        <aside className="lg:w-1/4 space-y-4">
           {/* Quick Stats */}
           <motion.div
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.5, delay: 0.2 }}
-            className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-6 shadow-sm"
+            className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4 shadow-sm"
           >
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4 flex items-center gap-2">
-              <FiTrendingUp className="text-emerald-600" />
+            <h3 className="text-base font-semibold text-gray-900 dark:text-gray-100 mb-3 flex items-center gap-2">
+              <FiTrendingUp className="text-blue-600 dark:text-blue-400" size={16} />
               Community Stats
             </h3>
-            <div className="space-y-4">
+            <div className="space-y-3">
               <div className="flex justify-between items-center">
-                <span className="text-gray-600 dark:text-gray-400">Total Questions</span>
-                <span className="font-semibold text-gray-900 dark:text-gray-100">
+                <span className="text-gray-600 dark:text-gray-400 text-sm">Total Questions</span>
+                <span className="font-semibold text-gray-900 dark:text-gray-100 text-sm">
                   {data?.getQuestions?.totalQuestions || 0}
                 </span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-gray-600 dark:text-gray-400">Active Users</span>
-                <span className="font-semibold text-gray-900 dark:text-gray-100">1,234</span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-gray-600 dark:text-gray-400">Answered</span>
-                <span className="font-semibold text-emerald-600">89%</span>
               </div>
             </div>
           </motion.div>
@@ -361,20 +361,37 @@ const QuestionsPage: React.FC = () => {
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.5, delay: 0.3 }}
-            className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-6 shadow-sm"
+            className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4 shadow-sm"
           >
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">
+            <h3 className="text-base font-semibold text-gray-900 dark:text-gray-100 mb-3">
               Popular Tags
             </h3>
             <div className="flex flex-wrap gap-2">
-              {['React', 'JavaScript', 'TypeScript', 'Node.js', 'CSS', 'HTML'].map(tag => (
+              {popularTagsData?.getPopularTags?.slice(0, 6).map((tag: any) => (
                 <span
-                  key={tag}
-                  className="px-3 py-1 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-full text-sm hover:bg-emerald-100 dark:hover:bg-emerald-900 hover:text-emerald-700 dark:hover:text-emerald-300 cursor-pointer transition-colors duration-200"
+                  key={tag.tag}
+                  className="px-2 py-1 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-full text-xs hover:bg-blue-100 dark:hover:bg-blue-900/30 hover:text-blue-700 dark:hover:text-blue-300 cursor-pointer transition-colors duration-200"
+                  onClick={() => {
+                    setSearchTerm(`[${tag.tag}]`);
+                    handleSearch(`[${tag.tag}]`);
+                  }}
                 >
-                  {tag}
+                  {tag.tag} ({tag.count})
                 </span>
-              ))}
+              )) ||
+                // Fallback if no data
+                ['React', 'JavaScript', 'TypeScript', 'Node.js', 'CSS', 'HTML'].map(tag => (
+                  <span
+                    key={tag}
+                    className="px-2 py-1 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-full text-xs hover:bg-blue-100 dark:hover:bg-blue-900/30 hover:text-blue-700 dark:hover:text-blue-300 cursor-pointer transition-colors duration-200"
+                    onClick={() => {
+                      setSearchTerm(`[${tag}]`);
+                      handleSearch(`[${tag}]`);
+                    }}
+                  >
+                    {tag}
+                  </span>
+                ))}
             </div>
           </motion.div>
 
@@ -383,18 +400,19 @@ const QuestionsPage: React.FC = () => {
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.5, delay: 0.4 }}
-            className="bg-gradient-to-br from-emerald-50 to-blue-50 dark:from-emerald-900/20 dark:to-blue-900/20 border border-emerald-200 dark:border-emerald-800 rounded-xl p-6"
+            className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4 shadow-sm"
           >
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-3">
+            <h3 className="text-base font-semibold text-gray-900 dark:text-gray-100 mb-2">
               Need Help?
             </h3>
-            <p className="text-gray-600 dark:text-gray-400 text-sm mb-4">
+            <p className="text-gray-600 dark:text-gray-400 text-xs mb-3">
               Learn how to ask great questions and get better answers.
             </p>
             <Button
               variant="bordered"
-              className="w-full border-emerald-300 dark:border-emerald-700 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-50 dark:hover:bg-emerald-900/30"
-              startContent={<FiMessageSquare size={16} />}
+              className="w-full border-blue-300 dark:border-blue-700 text-blue-700 dark:text-blue-300 hover:bg-blue-50 dark:hover:bg-blue-900/30 text-xs"
+              startContent={<FiMessageSquare size={14} />}
+              size="sm"
             >
               Question Guidelines
             </Button>
