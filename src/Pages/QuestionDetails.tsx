@@ -14,8 +14,10 @@ import {
   UserPlus,
   CheckCircle,
   AlertCircle,
+  Trash2,
+  History,
 } from 'lucide-react';
-import { Avatar, Button, message, Skeleton, Tooltip } from 'antd';
+import { Avatar, message, Skeleton, Tooltip } from 'antd';
 import moment from 'moment';
 import { GET_QUESTION_BY_ID } from '../GraphQL/Queries/Questions/Questions';
 import MarkdownPreviewComponent from '../Components/Global/MarkdownPreviewComponent';
@@ -24,8 +26,19 @@ import {
   CREATE_ANSWER,
   DISLIKE_QUESTION,
   LIKE_QUESTION,
+  UPVOTE_ANSWER,
+  DOWNVOTE_ANSWER,
+  ACCEPT_ANSWER,
+  DELETE_QUESTION,
+  UPDATE_QUESTION,
+  DELETE_ANSWER,
+  UPDATE_ANSWER,
 } from '../GraphQL/Mutations/Questions/Question';
 import { useAuth } from '../Secure/AuthContext';
+import ConfirmDialog from '../Components/Global/ConfirmDialog';
+import EditQuestionModal from '../Components/Questions/EditQuestionModal';
+import EditAnswerModal from '../Components/Questions/EditAnswerModal';
+import { Button } from '@nextui-org/react';
 interface Answer {
   id: string;
   content: string;
@@ -34,6 +47,9 @@ interface Answer {
     username: string;
     profilePicture: string;
   };
+  upvotes: { id: string }[];
+  downvotes: { id: string }[];
+  isAccepted: boolean;
   createdAt: string;
 }
 
@@ -57,6 +73,35 @@ const QuestionDetails: React.FC = () => {
   const navigate = useNavigate();
   const { currentUserId } = useAuth();
   const [content, setContent] = useState('');
+
+  // Modal states
+  const [deleteQuestionModal, setDeleteQuestionModal] = useState(false);
+  const [editQuestionModal, setEditQuestionModal] = useState(false);
+  const [editAnswerModal, setEditAnswerModal] = useState<{
+    isOpen: boolean;
+    answer: Answer | null;
+  }>({
+    isOpen: false,
+    answer: null,
+  });
+  const [deleteAnswerModal, setDeleteAnswerModal] = useState<{
+    isOpen: boolean;
+    answerId: string | null;
+  }>({
+    isOpen: false,
+    answerId: null,
+  });
+
+  // Edit form states
+  const [editQuestionData, setEditQuestionData] = useState({
+    title: '',
+    content: '',
+    tags: [] as string[],
+  });
+  const [editAnswerContent, setEditAnswerContent] = useState('');
+
+  // Bookmark state
+  const [isBookmarked, setIsBookmarked] = useState(false);
   const { loading, error, data, refetch } = useQuery(GET_QUESTION_BY_ID, {
     variables: { id },
   });
@@ -86,6 +131,82 @@ const QuestionDetails: React.FC = () => {
     },
   });
 
+  // Answer voting mutations
+  const [upvoteAnswer] = useMutation(UPVOTE_ANSWER, {
+    onCompleted: () => {
+      message.success('Answer upvoted successfully');
+      refetch();
+    },
+    onError: err => {
+      message.error(err.message);
+    },
+  });
+
+  const [downvoteAnswer] = useMutation(DOWNVOTE_ANSWER, {
+    onCompleted: () => {
+      message.success('Answer downvoted successfully');
+      refetch();
+    },
+    onError: err => {
+      message.error(err.message);
+    },
+  });
+
+  // Accept answer mutation
+  const [acceptAnswer] = useMutation(ACCEPT_ANSWER, {
+    onCompleted: () => {
+      message.success('Answer accepted successfully');
+      refetch();
+    },
+    onError: err => {
+      message.error(err.message);
+    },
+  });
+
+  // Delete mutations
+  const [deleteQuestion] = useMutation(DELETE_QUESTION, {
+    onCompleted: () => {
+      message.success('Question deleted successfully');
+      navigate('/questions');
+    },
+    onError: err => {
+      message.error(err.message);
+    },
+  });
+
+  const [deleteAnswerMutation] = useMutation(DELETE_ANSWER, {
+    onCompleted: () => {
+      message.success('Answer deleted successfully');
+      refetch();
+    },
+    onError: err => {
+      message.error(err.message);
+    },
+  });
+
+  // Update mutations
+  const [updateQuestion] = useMutation(UPDATE_QUESTION, {
+    onCompleted: () => {
+      message.success('Question updated successfully');
+      setEditQuestionModal(false);
+      refetch();
+    },
+    onError: err => {
+      message.error(err.message);
+    },
+  });
+
+  const [updateAnswer] = useMutation(UPDATE_ANSWER, {
+    onCompleted: () => {
+      message.success('Answer updated successfully');
+      setEditAnswerModal({ isOpen: false, answer: null });
+      refetch();
+    },
+    onError: err => {
+      message.error(err.message);
+    },
+  });
+
   const question = data?.getQuestionById;
   // console.log(question);
   const handlePostAnswer = async () => {
@@ -102,6 +223,103 @@ const QuestionDetails: React.FC = () => {
     await downvoteQuestion({ variables: { id: question?.id } });
     refetch();
   };
+
+  // Answer voting handlers
+  const handleUpvoteAnswer = async (answerId: string) => {
+    await upvoteAnswer({ variables: { id: answerId } });
+  };
+
+  const handleDownvoteAnswer = async (answerId: string) => {
+    await downvoteAnswer({ variables: { id: answerId } });
+  };
+
+  const handleAcceptAnswer = async (answerId: string) => {
+    await acceptAnswer({ variables: { id: answerId } });
+  };
+
+  // Share functionality
+  const handleShare = () => {
+    const url = window.location.href;
+    navigator.clipboard
+      .writeText(url)
+      .then(() => {
+        message.success('Link copied to clipboard!');
+      })
+      .catch(() => {
+        message.error('Failed to copy link');
+      });
+  };
+
+  // Bookmark functionality
+  const handleBookmark = () => {
+    setIsBookmarked(!isBookmarked);
+    message.success(isBookmarked ? 'Bookmark removed' : 'Question bookmarked');
+  };
+
+  // History functionality
+  const handleHistory = () => {
+    // For now, just show a message. In a real app, this would show edit history
+    message.info('Question history feature coming soon!');
+  };
+
+  // Edit question handlers
+  const handleEditQuestion = () => {
+    setEditQuestionData({
+      title: question?.title || '',
+      content: question?.content || '',
+      tags: question?.tags || [],
+    });
+    setEditQuestionModal(true);
+  };
+
+  const handleUpdateQuestion = async () => {
+    if (!editQuestionData.title.trim() || !editQuestionData.content.trim()) {
+      message.error('Title and content are required');
+      return;
+    }
+
+    await updateQuestion({
+      variables: {
+        id: question?.id,
+        title: editQuestionData.title,
+        content: editQuestionData.content,
+        tags: editQuestionData.tags,
+      },
+    });
+  };
+
+  // Edit answer handlers
+  const handleEditAnswer = (answer: Answer) => {
+    setEditAnswerContent(answer.content);
+    setEditAnswerModal({ isOpen: true, answer });
+  };
+
+  const handleUpdateAnswer = async () => {
+    if (!editAnswerContent.trim()) {
+      message.error('Answer content is required');
+      return;
+    }
+
+    await updateAnswer({
+      variables: {
+        id: editAnswerModal.answer?.id,
+        content: editAnswerContent,
+      },
+    });
+  };
+
+  // Delete handlers
+  const handleDeleteQuestion = async () => {
+    await deleteQuestion({ variables: { id: question?.id } });
+  };
+
+  const handleDeleteAnswer = async () => {
+    if (deleteAnswerModal.answerId) {
+      await deleteAnswerMutation({ variables: { id: deleteAnswerModal.answerId } });
+      setDeleteAnswerModal({ isOpen: false, answerId: null });
+    }
+  };
+
   if (error) {
     return (
       <div className="min-h-screen bg-white dark:bg-gray-900 transition-colors duration-300">
@@ -179,15 +397,6 @@ const QuestionDetails: React.FC = () => {
                     </div>
                   </div>
                 </div>
-                <motion.button
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  onClick={() => navigate('/questions/ask')}
-                  className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 flex items-center gap-2"
-                >
-                  <Edit3 className="w-4 h-4" />
-                  Ask Question
-                </motion.button>
               </div>
             </motion.div>
 
@@ -200,13 +409,16 @@ const QuestionDetails: React.FC = () => {
                 {/* Vote Section */}
                 <div className="flex lg:flex-col items-center lg:items-start gap-2 lg:gap-4">
                   <VoteButtons
-                    votes={question?.upvotes?.length - question?.downvotes?.length || 0}
+                    votes={(question?.upvotes?.length || 0) - (question?.downvotes?.length || 0)}
                     onUpvote={handleUpvoteQuestion}
                     onDownvote={handleDownvoteQuestion}
+                    upvotes={question?.upvotes}
+                    downvotes={question?.downvotes}
+                    currentUserId={currentUserId || undefined}
                   />
                   <div className="flex lg:flex-col gap-2">
-                    <BookmarkButton />
-                    <HistoryButton />
+                    <BookmarkButton isBookmarked={isBookmarked} onClick={handleBookmark} />
+                    <HistoryButton onClick={handleHistory} />
                   </div>
                 </div>
 
@@ -234,11 +446,23 @@ const QuestionDetails: React.FC = () => {
                   {/* Actions and Author */}
                   <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between pt-4 border-t border-gray-200 dark:border-gray-700">
                     <div className="flex flex-wrap gap-3 mb-4 sm:mb-0">
-                      <ActionButton icon={<Share2 />} text="Share" />
+                      <ActionButton icon={<Share2 />} text="Share" onClick={handleShare} />
                       {question?.author?.id === currentUserId && (
-                        <ActionButton icon={<Edit3 />} text="Edit" />
+                        <>
+                          <ActionButton icon={<Edit3 />} text="Edit" onClick={handleEditQuestion} />
+                          <ActionButton
+                            icon={<Trash2 />}
+                            text="Delete"
+                            onClick={() => setDeleteQuestionModal(true)}
+                            variant="danger"
+                          />
+                        </>
                       )}
-                      <ActionButton icon={<UserPlus />} text="Follow" />
+                      <ActionButton
+                        icon={<UserPlus />}
+                        text="Follow"
+                        onClick={() => message.info('Follow feature coming soon!')}
+                      />
                     </div>
                     <AuthorInfo author={question?.author} createdAt={question?.createdAt} />
                   </div>
@@ -264,7 +488,17 @@ const QuestionDetails: React.FC = () => {
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ duration: 0.5, delay: index * 0.1 }}
                     >
-                      <AnswerSection answer={answer} currentUserId={currentUserId || ''} />
+                      <AnswerSection
+                        answer={answer}
+                        currentUserId={currentUserId || ''}
+                        questionAuthorId={question?.author?.id || ''}
+                        onUpvote={handleUpvoteAnswer}
+                        onDownvote={handleDownvoteAnswer}
+                        onAccept={handleAcceptAnswer}
+                        onEdit={handleEditAnswer}
+                        onDelete={answerId => setDeleteAnswerModal({ isOpen: true, answerId })}
+                        onShare={handleShare}
+                      />
                     </motion.div>
                   ))}
                 </div>
@@ -281,7 +515,12 @@ const QuestionDetails: React.FC = () => {
             >
               <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-6">Your Answer</h3>
               <div className="space-y-4">
-                <Editor initialContent={content} onChange={setContent} />
+                <Editor
+                  initialContent={content}
+                  onChange={setContent}
+                  minHeight="150px"
+                  maxHeight="300px"
+                />
                 <motion.button
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
@@ -297,6 +536,46 @@ const QuestionDetails: React.FC = () => {
           </motion.div>
         )}
       </main>
+
+      {/* Delete Question Modal */}
+      <ConfirmDialog
+        isOpen={deleteQuestionModal}
+        onClose={() => setDeleteQuestionModal(false)}
+        onConfirm={handleDeleteQuestion}
+        title="Delete Question"
+        message="Are you sure you want to delete this question? This action cannot be undone and will also delete all associated answers."
+        type="danger"
+        confirmText="Delete Question"
+      />
+
+      {/* Delete Answer Modal */}
+      <ConfirmDialog
+        isOpen={deleteAnswerModal.isOpen}
+        onClose={() => setDeleteAnswerModal({ isOpen: false, answerId: null })}
+        onConfirm={handleDeleteAnswer}
+        title="Delete Answer"
+        message="Are you sure you want to delete this answer? This action cannot be undone."
+        type="danger"
+        confirmText="Delete Answer"
+      />
+
+      {/* Edit Question Modal */}
+      <EditQuestionModal
+        editQuestionModal={editQuestionModal}
+        setEditQuestionModal={setEditQuestionModal}
+        editQuestionData={editQuestionData}
+        setEditQuestionData={setEditQuestionData}
+        handleUpdateQuestion={handleUpdateQuestion}
+      />
+
+      {/* Edit Answer Modal */}
+      <EditAnswerModal
+        isOpen={editAnswerModal.isOpen}
+        onClose={() => setEditAnswerModal({ isOpen: false, answer: null })}
+        editAnswerContent={editAnswerContent}
+        setEditAnswerContent={setEditAnswerContent}
+        handleUpdateAnswer={handleUpdateAnswer}
+      />
     </div>
   );
 };
@@ -305,68 +584,108 @@ const VoteButtons: React.FC<{
   votes: number;
   onUpvote: () => void;
   onDownvote: () => void;
-}> = ({ votes, onUpvote, onDownvote }) => (
-  <div className="flex flex-row lg:flex-col items-center gap-2">
-    <Tooltip title="Upvote" placement="top">
-      <motion.button
-        whileHover={{ scale: 1.1 }}
-        whileTap={{ scale: 0.9 }}
-        onClick={onUpvote}
-        className="p-2 rounded-lg text-gray-500 dark:text-gray-400 hover:text-green-600 dark:hover:text-green-400 hover:bg-green-50 dark:hover:bg-green-900/20 transition-all duration-200"
-      >
-        <ArrowUp size={24} />
-      </motion.button>
-    </Tooltip>
-    <div className="px-3 py-1 bg-gray-100 dark:bg-gray-700 rounded-lg">
-      <span className="text-lg font-bold text-gray-900 dark:text-white">{votes}</span>
-    </div>
-    <Tooltip title="Downvote" placement="bottom">
-      <motion.button
-        whileHover={{ scale: 1.1 }}
-        whileTap={{ scale: 0.9 }}
-        onClick={onDownvote}
-        className="p-2 rounded-lg text-gray-500 dark:text-gray-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-all duration-200"
-      >
-        <ArrowDown size={24} />
-      </motion.button>
-    </Tooltip>
-  </div>
-);
+  upvotes?: { id: string }[];
+  downvotes?: { id: string }[];
+  currentUserId?: string;
+}> = ({ votes, onUpvote, onDownvote, upvotes = [], downvotes = [], currentUserId }) => {
+  const hasUpvoted = currentUserId ? upvotes.some(vote => vote.id === currentUserId) : false;
+  const hasDownvoted = currentUserId ? downvotes.some(vote => vote.id === currentUserId) : false;
 
-const BookmarkButton: React.FC = () => (
-  <Tooltip title="Bookmark">
+  return (
+    <div className="flex flex-row lg:flex-col items-center gap-2">
+      <Tooltip title="Upvote" placement="top">
+        <motion.button
+          whileHover={{ scale: 1.1 }}
+          whileTap={{ scale: 0.9 }}
+          onClick={onUpvote}
+          className={`p-2 rounded-lg transition-all duration-200 ${
+            hasUpvoted
+              ? 'text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-900/20'
+              : 'text-gray-500 dark:text-gray-400 hover:text-green-600 dark:hover:text-green-400 hover:bg-green-50 dark:hover:bg-green-900/20'
+          }`}
+        >
+          <ArrowUp size={24} />
+        </motion.button>
+      </Tooltip>
+      <div className="px-3 py-1 bg-gray-100 dark:bg-gray-700 rounded-lg">
+        <span className="text-lg font-bold text-gray-900 dark:text-white">{votes}</span>
+      </div>
+      <Tooltip title="Downvote" placement="bottom">
+        <motion.button
+          whileHover={{ scale: 1.1 }}
+          whileTap={{ scale: 0.9 }}
+          onClick={onDownvote}
+          className={`p-2 rounded-lg transition-all duration-200 ${
+            hasDownvoted
+              ? 'text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20'
+              : 'text-gray-500 dark:text-gray-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20'
+          }`}
+        >
+          <ArrowDown size={24} />
+        </motion.button>
+      </Tooltip>
+    </div>
+  );
+};
+
+const BookmarkButton: React.FC<{ isBookmarked: boolean; onClick: () => void }> = ({
+  isBookmarked,
+  onClick,
+}) => (
+  <Tooltip title={isBookmarked ? 'Remove Bookmark' : 'Bookmark'}>
     <motion.button
       whileHover={{ scale: 1.1 }}
       whileTap={{ scale: 0.9 }}
-      className="p-2 rounded-lg text-gray-500 dark:text-gray-400 hover:text-yellow-600 dark:hover:text-yellow-400 hover:bg-yellow-50 dark:hover:bg-yellow-900/20 transition-all duration-200"
+      onClick={onClick}
+      className={`p-2 rounded-lg transition-all duration-200 ${
+        isBookmarked
+          ? 'text-yellow-600 dark:text-yellow-400 bg-yellow-50 dark:bg-yellow-900/20'
+          : 'text-gray-500 dark:text-gray-400 hover:text-yellow-600 dark:hover:text-yellow-400 hover:bg-yellow-50 dark:hover:bg-yellow-900/20'
+      }`}
     >
-      <Bookmark size={18} />
+      <Bookmark size={18} fill={isBookmarked ? 'currentColor' : 'none'} />
     </motion.button>
   </Tooltip>
 );
 
-const HistoryButton: React.FC = () => (
+const HistoryButton: React.FC<{ onClick: () => void }> = ({ onClick }) => (
   <Tooltip title="History">
     <motion.button
       whileHover={{ scale: 1.1 }}
       whileTap={{ scale: 0.9 }}
+      onClick={onClick}
       className="p-2 rounded-lg text-gray-500 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-all duration-200"
     >
-      <Clock size={18} />
+      <History size={18} />
     </motion.button>
   </Tooltip>
 );
 
-const ActionButton: React.FC<{ icon: React.ReactNode; text: string }> = ({ icon, text }) => (
-  <motion.button
-    whileHover={{ scale: 1.02 }}
-    whileTap={{ scale: 0.98 }}
-    className="flex items-center gap-2 px-3 py-2 text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-all duration-200 text-sm font-medium"
-  >
-    {icon}
-    {text}
-  </motion.button>
-);
+const ActionButton: React.FC<{
+  icon: React.ReactNode;
+  text: string;
+  onClick?: () => void;
+  variant?: 'default' | 'danger';
+}> = ({ icon, text, onClick, variant = 'default' }) => {
+  const baseClasses =
+    'flex items-center gap-2 px-3 py-2 rounded-lg transition-all duration-200 text-sm font-medium';
+  const variantClasses =
+    variant === 'danger'
+      ? 'text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 hover:bg-red-50 dark:hover:bg-red-900/20'
+      : 'text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20';
+
+  return (
+    <motion.button
+      whileHover={{ scale: 1.02 }}
+      whileTap={{ scale: 0.98 }}
+      onClick={onClick}
+      className={`${baseClasses} ${variantClasses}`}
+    >
+      {icon}
+      {text}
+    </motion.button>
+  );
+};
 
 const AuthorInfo: React.FC<{
   author: { username: string; profilePicture: string };
@@ -402,44 +721,94 @@ const AuthorInfo: React.FC<{
   </motion.div>
 );
 
-const AnswerSection: React.FC<{ answer: Answer; currentUserId: string }> = ({
+const AnswerSection: React.FC<{
+  answer: Answer;
+  currentUserId: string;
+  questionAuthorId: string;
+  onUpvote: (answerId: string) => void;
+  onDownvote: (answerId: string) => void;
+  onAccept: (answerId: string) => void;
+  onEdit: (answer: Answer) => void;
+  onDelete: (answerId: string) => void;
+  onShare: () => void;
+}> = ({
   answer,
   currentUserId,
-}) => (
-  <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-6 shadow-sm hover:shadow-lg transition-all duration-300">
-    <div className="flex flex-col lg:flex-row gap-6">
-      {/* Vote Section */}
-      <div className="flex lg:flex-col items-center lg:items-start gap-2 lg:gap-4">
-        <VoteButtons votes={23} onUpvote={() => {}} onDownvote={() => {}} />
-        <Tooltip title="Accept Answer">
-          <motion.button
-            whileHover={{ scale: 1.1 }}
-            whileTap={{ scale: 0.9 }}
-            className="p-2 rounded-lg text-gray-500 dark:text-gray-400 hover:text-green-600 dark:hover:text-green-400 hover:bg-green-50 dark:hover:bg-green-900/20 transition-all duration-200"
-          >
-            <CheckCircle size={18} />
-          </motion.button>
-        </Tooltip>
-      </div>
+  questionAuthorId,
+  onUpvote,
+  onDownvote,
+  onAccept,
+  onEdit,
+  onDelete,
+  onShare,
+}) => {
+  const votes = (answer.upvotes?.length || 0) - (answer.downvotes?.length || 0);
+  const isQuestionAuthor = currentUserId === questionAuthorId;
+  const isAnswerAuthor = currentUserId === answer.author.id;
 
-      {/* Content Section */}
-      <div className="flex-1 space-y-4">
-        <div className="prose prose-gray dark:prose-invert max-w-none">
-          <MarkdownPreviewComponent content={answer.content} />
+  return (
+    <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-6 shadow-sm hover:shadow-lg transition-all duration-300">
+      <div className="flex flex-col lg:flex-row gap-6">
+        {/* Vote Section */}
+        <div className="flex lg:flex-col items-center lg:items-start gap-2 lg:gap-4">
+          <VoteButtons
+            votes={votes}
+            onUpvote={() => onUpvote(answer.id)}
+            onDownvote={() => onDownvote(answer.id)}
+            upvotes={answer.upvotes}
+            downvotes={answer.downvotes}
+            currentUserId={currentUserId}
+          />
+          {isQuestionAuthor && !answer.isAccepted && (
+            <Tooltip title="Accept Answer">
+              <motion.button
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.9 }}
+                onClick={() => onAccept(answer.id)}
+                className="p-2 rounded-lg text-gray-500 dark:text-gray-400 hover:text-green-600 dark:hover:text-green-400 hover:bg-green-50 dark:hover:bg-green-900/20 transition-all duration-200"
+              >
+                <CheckCircle size={18} />
+              </motion.button>
+            </Tooltip>
+          )}
+          {answer.isAccepted && (
+            <Tooltip title="Accepted Answer">
+              <div className="p-2 rounded-lg text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-900/20">
+                <CheckCircle size={18} fill="currentColor" />
+              </div>
+            </Tooltip>
+          )}
         </div>
 
-        {/* Actions and Author */}
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between pt-4 border-t border-gray-200 dark:border-gray-700">
-          <div className="flex flex-wrap gap-3 mb-4 sm:mb-0">
-            <ActionButton icon={<Share2 />} text="Share" />
-            {answer?.author?.id === currentUserId && <ActionButton icon={<Edit3 />} text="Edit" />}
+        {/* Content Section */}
+        <div className="flex-1 space-y-4">
+          <div className="prose prose-gray dark:prose-invert max-w-none">
+            <MarkdownPreviewComponent content={answer.content} />
           </div>
-          <AuthorInfo author={answer.author} createdAt={answer.createdAt} />
+
+          {/* Actions and Author */}
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between pt-4 border-t border-gray-200 dark:border-gray-700">
+            <div className="flex flex-wrap gap-3 mb-4 sm:mb-0">
+              <ActionButton icon={<Share2 />} text="Share" onClick={onShare} />
+              {isAnswerAuthor && (
+                <>
+                  <ActionButton icon={<Edit3 />} text="Edit" onClick={() => onEdit(answer)} />
+                  <ActionButton
+                    icon={<Trash2 />}
+                    text="Delete"
+                    onClick={() => onDelete(answer.id)}
+                    variant="danger"
+                  />
+                </>
+              )}
+            </div>
+            <AuthorInfo author={answer.author} createdAt={answer.createdAt} />
+          </div>
         </div>
       </div>
     </div>
-  </div>
-);
+  );
+};
 
 // Empty state component for when there are no answers
 const AnswerEmptyState: React.FC = () => (

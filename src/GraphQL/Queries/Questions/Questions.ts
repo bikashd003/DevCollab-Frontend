@@ -89,6 +89,13 @@ export const GET_QUESTION_BY_ID = gql`
           username
           profilePicture
         }
+        upvotes {
+          id
+        }
+        downvotes {
+          id
+        }
+        isAccepted
         createdAt
       }
     }
