@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useMutation, useQuery } from '@apollo/client';
 import { motion } from 'framer-motion';
@@ -18,7 +18,7 @@ import {
 } from 'lucide-react';
 import { Avatar, message, Skeleton, Tooltip } from 'antd';
 import moment from 'moment';
-import { GET_QUESTION_BY_ID } from '../GraphQL/Queries/Questions/Questions';
+import { GET_QUESTION_BY_ID, IS_QUESTION_BOOKMARKED } from '../GraphQL/Queries/Questions/Questions';
 import MarkdownPreviewComponent from '../Components/Global/MarkdownPreviewComponent';
 import Editor from '../Components/Global/Editor';
 import {
@@ -124,6 +124,12 @@ const QuestionDetails: React.FC = () => {
   const { loading, error, data, refetch } = useQuery<QuestionData>(GET_QUESTION_BY_ID, {
     variables: { id },
   });
+  const { data: bookmarkData } = useQuery<{ isQuestionBookmarked: boolean }>(
+    IS_QUESTION_BOOKMARKED,
+    {
+      variables: { questionId: id },
+    }
+  );
   const [postAnswer] = useMutation(CREATE_ANSWER, {
     onCompleted: () => {
       message.success('Answer posted successfully');
@@ -234,26 +240,12 @@ const QuestionDetails: React.FC = () => {
     onError: err => {
       message.error(err.message);
     },
-    update: cache => {
-      // Update the cache directly
-      const questionData = cache.readQuery<QuestionData>({
-        query: GET_QUESTION_BY_ID,
-        variables: { id },
-      });
-
-      if (questionData && questionData.getQuestionById) {
-        cache.writeQuery({
-          query: GET_QUESTION_BY_ID,
-          variables: { id },
-          data: {
-            getQuestionById: {
-              ...questionData.getQuestionById,
-              isBookmarked: true,
-            },
-          },
-        });
-      }
-    },
+    refetchQueries: [
+      {
+        query: IS_QUESTION_BOOKMARKED,
+        variables: { questionId: id },
+      },
+    ],
   });
 
   const [removeBookmark] = useMutation(REMOVE_BOOKMARK, {
@@ -263,30 +255,15 @@ const QuestionDetails: React.FC = () => {
     onError: err => {
       message.error(err.message);
     },
-    update: cache => {
-      // Update the cache directly
-      const questionData = cache.readQuery<QuestionData>({
-        query: GET_QUESTION_BY_ID,
-        variables: { id },
-      });
-
-      if (questionData && questionData.getQuestionById) {
-        cache.writeQuery({
-          query: GET_QUESTION_BY_ID,
-          variables: { id },
-          data: {
-            getQuestionById: {
-              ...questionData.getQuestionById,
-              isBookmarked: false,
-            },
-          },
-        });
-      }
-    },
+    refetchQueries: [
+      {
+        query: IS_QUESTION_BOOKMARKED,
+        variables: { questionId: id },
+      },
+    ],
   });
 
   const question = data?.getQuestionById;
-  // console.log(question);
   const handlePostAnswer = async () => {
     await postAnswer({ variables: { content, questionId: question?.id } });
     setContent('');
@@ -340,9 +317,9 @@ const QuestionDetails: React.FC = () => {
     }
 
     try {
-      if (question?.isBookmarked) {
+      if (bookmarkData?.isQuestionBookmarked) {
         await removeBookmark({
-          variables: { questionId: question.id },
+          variables: { questionId: question?.id },
           optimisticResponse: {
             removeBookmark: true,
           },
@@ -359,8 +336,8 @@ const QuestionDetails: React.FC = () => {
           },
         });
       }
-    } catch (error) {
-      // Error handling is done in mutation onError callbacks
+    } catch (error: any) {
+      message.error(error.message);
     }
   };
   // Edit question handlers
@@ -519,7 +496,7 @@ const QuestionDetails: React.FC = () => {
                   />
                   <div className="flex lg:flex-col gap-2">
                     <BookmarkButton
-                      isBookmarked={question?.isBookmarked || false}
+                      isBookmarked={bookmarkData?.isQuestionBookmarked || false}
                       onClick={handleBookmark}
                     />
                   </div>
@@ -738,34 +715,23 @@ const BookmarkButton: React.FC<{ isBookmarked: boolean; onClick: () => void }> =
   isBookmarked,
   onClick,
 }) => {
-  // Use local state for immediate UI feedback
-  const [optimisticBookmarked, setOptimisticBookmarked] = useState(isBookmarked);
-
-  // Update optimistic state when props change
-  useEffect(() => {
-    setOptimisticBookmarked(isBookmarked);
-  }, [isBookmarked]);
-
   const handleClick = () => {
-    // Toggle the local state immediately for instant feedback
-    setOptimisticBookmarked(!optimisticBookmarked);
-    // Then trigger the actual API call
     onClick();
   };
 
   return (
-    <Tooltip title={optimisticBookmarked ? 'Remove Bookmark' : 'Bookmark'}>
+    <Tooltip title={isBookmarked ? 'Remove Bookmark' : 'Bookmark'}>
       <motion.button
         whileHover={{ scale: 1.1 }}
         whileTap={{ scale: 0.9 }}
         onClick={handleClick}
         className={`p-2 rounded-lg transition-all duration-200 ${
-          optimisticBookmarked
+          isBookmarked
             ? 'text-yellow-600 dark:text-yellow-400 bg-yellow-50 dark:bg-yellow-900/20'
             : 'text-gray-500 dark:text-gray-400 hover:text-yellow-600 dark:hover:text-yellow-400 hover:bg-yellow-50 dark:hover:bg-yellow-900/20'
         }`}
       >
-        <Bookmark size={18} fill={optimisticBookmarked ? 'currentColor' : 'none'} />
+        <Bookmark size={18} fill={isBookmarked ? 'currentColor' : 'none'} />
       </motion.button>
     </Tooltip>
   );
