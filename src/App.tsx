@@ -57,16 +57,16 @@ const router = createBrowserRouter([
         path: 'blog/:id',
         element: <BlogDetails />,
       },
-      {
-        path: 'editor',
-        element: <EditorHomePage />,
-      },
     ],
   },
   {
     path: '/editor/:id',
     element: <ProtectedRoute element={<CodeTogetherPage />} />,
     errorElement: <RouteErrorBoundary />,
+  },
+  {
+    path: 'editor',
+    element: <EditorHomePage />,
   },
   {
     path: '/home',
