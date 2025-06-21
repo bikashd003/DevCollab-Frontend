@@ -113,3 +113,18 @@ export const ACCEPT_ANSWER = gql`
     }
   }
 `;
+
+export const BOOKMARK_QUESTION = gql`
+  mutation bookmarkQuestion($questionId: ID!) {
+    bookmarkQuestion(questionId: $questionId) {
+      id
+      createdAt
+    }
+  }
+`;
+
+export const REMOVE_BOOKMARK = gql`
+  mutation removeBookmark($questionId: ID!) {
+    removeBookmark(questionId: $questionId)
+  }
+`;

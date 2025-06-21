@@ -39,7 +39,6 @@ const CustomPopover: React.FC<CustomPopoverProps> = ({
   const [position, setPosition] = useState({ top: 0, left: 0 });
   const triggerRef = useRef<HTMLDivElement>(null);
   const popoverRef = useRef<HTMLDivElement>(null);
-  // @ts-expect-error - setTimeout returns NodeJS.Timeout in Node environment but number in browser
   const timeoutRef = useRef<number>();
 
   const isOpen = controlledOpen !== undefined ? controlledOpen : internalOpen;

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useMutation, useQuery } from '@apollo/client';
 import { motion } from 'framer-motion';
@@ -15,7 +15,6 @@ import {
   CheckCircle,
   AlertCircle,
   Trash2,
-  History,
 } from 'lucide-react';
 import { Avatar, message, Skeleton, Tooltip } from 'antd';
 import moment from 'moment';
@@ -33,6 +32,8 @@ import {
   UPDATE_QUESTION,
   DELETE_ANSWER,
   UPDATE_ANSWER,
+  BOOKMARK_QUESTION,
+  REMOVE_BOOKMARK,
 } from '../GraphQL/Mutations/Questions/Question';
 import { useAuth } from '../Secure/AuthContext';
 import ConfirmDialog from '../Components/Global/ConfirmDialog';
@@ -51,6 +52,26 @@ interface Answer {
   downvotes: { id: string }[];
   isAccepted: boolean;
   createdAt: string;
+}
+
+interface QuestionData {
+  getQuestionById: {
+    id: string;
+    title: string;
+    content: string;
+    tags: string[];
+    views: number;
+    isBookmarked: boolean;
+    upvotes: { id: string }[];
+    downvotes: { id: string }[];
+    author: {
+      id: string;
+      username: string;
+      profilePicture: string;
+    };
+    createdAt: string;
+    answers: Answer[];
+  };
 }
 
 // Animation variants
@@ -100,9 +121,7 @@ const QuestionDetails: React.FC = () => {
   });
   const [editAnswerContent, setEditAnswerContent] = useState('');
 
-  // Bookmark state
-  const [isBookmarked, setIsBookmarked] = useState(false);
-  const { loading, error, data, refetch } = useQuery(GET_QUESTION_BY_ID, {
+  const { loading, error, data, refetch } = useQuery<QuestionData>(GET_QUESTION_BY_ID, {
     variables: { id },
   });
   const [postAnswer] = useMutation(CREATE_ANSWER, {
@@ -207,6 +226,65 @@ const QuestionDetails: React.FC = () => {
     },
   });
 
+  // Bookmark mutations
+  const [bookmarkQuestion] = useMutation(BOOKMARK_QUESTION, {
+    onCompleted: () => {
+      message.success('Question bookmarked successfully');
+    },
+    onError: err => {
+      message.error(err.message);
+    },
+    update: cache => {
+      // Update the cache directly
+      const questionData = cache.readQuery<QuestionData>({
+        query: GET_QUESTION_BY_ID,
+        variables: { id },
+      });
+
+      if (questionData && questionData.getQuestionById) {
+        cache.writeQuery({
+          query: GET_QUESTION_BY_ID,
+          variables: { id },
+          data: {
+            getQuestionById: {
+              ...questionData.getQuestionById,
+              isBookmarked: true,
+            },
+          },
+        });
+      }
+    },
+  });
+
+  const [removeBookmark] = useMutation(REMOVE_BOOKMARK, {
+    onCompleted: () => {
+      message.success('Bookmark removed successfully');
+    },
+    onError: err => {
+      message.error(err.message);
+    },
+    update: cache => {
+      // Update the cache directly
+      const questionData = cache.readQuery<QuestionData>({
+        query: GET_QUESTION_BY_ID,
+        variables: { id },
+      });
+
+      if (questionData && questionData.getQuestionById) {
+        cache.writeQuery({
+          query: GET_QUESTION_BY_ID,
+          variables: { id },
+          data: {
+            getQuestionById: {
+              ...questionData.getQuestionById,
+              isBookmarked: false,
+            },
+          },
+        });
+      }
+    },
+  });
+
   const question = data?.getQuestionById;
   // console.log(question);
   const handlePostAnswer = async () => {
@@ -234,7 +312,11 @@ const QuestionDetails: React.FC = () => {
   };
 
   const handleAcceptAnswer = async (answerId: string) => {
-    await acceptAnswer({ variables: { id: answerId } });
+    if (currentUserId === question?.author?.id) {
+      await acceptAnswer({ variables: { id: answerId } });
+    } else {
+      message.error('Only the question author can accept answers');
+    }
   };
 
   // Share functionality
@@ -251,17 +333,36 @@ const QuestionDetails: React.FC = () => {
   };
 
   // Bookmark functionality
-  const handleBookmark = () => {
-    setIsBookmarked(!isBookmarked);
-    message.success(isBookmarked ? 'Bookmark removed' : 'Question bookmarked');
-  };
+  const handleBookmark = async () => {
+    if (!currentUserId) {
+      message.error('Please login to bookmark questions');
+      return;
+    }
 
-  // History functionality
-  const handleHistory = () => {
-    // For now, just show a message. In a real app, this would show edit history
-    message.info('Question history feature coming soon!');
+    try {
+      if (question?.isBookmarked) {
+        await removeBookmark({
+          variables: { questionId: question.id },
+          optimisticResponse: {
+            removeBookmark: true,
+          },
+        });
+      } else {
+        await bookmarkQuestion({
+          variables: { questionId: question?.id },
+          optimisticResponse: {
+            bookmarkQuestion: {
+              id: Math.random().toString(36).substring(2, 9),
+              createdAt: new Date().toString(),
+              __typename: 'Bookmark',
+            },
+          },
+        });
+      }
+    } catch (error) {
+      // Error handling is done in mutation onError callbacks
+    }
   };
-
   // Edit question handlers
   const handleEditQuestion = () => {
     setEditQuestionData({
@@ -385,7 +486,7 @@ const QuestionDetails: React.FC = () => {
                   <div className="flex flex-wrap items-center gap-4 text-sm text-gray-600 dark:text-gray-400">
                     <div className="flex items-center gap-1">
                       <Clock className="w-4 h-4" />
-                      <span>Asked {moment(parseInt(question?.createdAt)).fromNow()}</span>
+                      <span>Asked {moment(parseInt(question?.createdAt || '')).fromNow()}</span>
                     </div>
                     <div className="flex items-center gap-1">
                       <MessageSquare className="w-4 h-4" />
@@ -393,7 +494,7 @@ const QuestionDetails: React.FC = () => {
                     </div>
                     <div className="flex items-center gap-1">
                       <Eye className="w-4 h-4" />
-                      <span>123 views</span>
+                      <span>{question?.views || 0} views</span>
                     </div>
                   </div>
                 </div>
@@ -417,15 +518,17 @@ const QuestionDetails: React.FC = () => {
                     currentUserId={currentUserId || undefined}
                   />
                   <div className="flex lg:flex-col gap-2">
-                    <BookmarkButton isBookmarked={isBookmarked} onClick={handleBookmark} />
-                    <HistoryButton onClick={handleHistory} />
+                    <BookmarkButton
+                      isBookmarked={question?.isBookmarked || false}
+                      onClick={handleBookmark}
+                    />
                   </div>
                 </div>
 
                 {/* Content Section */}
                 <div className="flex-1 space-y-6">
                   <div className="prose prose-gray dark:prose-invert max-w-none">
-                    <MarkdownPreviewComponent content={question?.content} />
+                    <MarkdownPreviewComponent content={question?.content || ''} />
                   </div>
 
                   {/* Tags */}
@@ -464,7 +567,10 @@ const QuestionDetails: React.FC = () => {
                         onClick={() => message.info('Follow feature coming soon!')}
                       />
                     </div>
-                    <AuthorInfo author={question?.author} createdAt={question?.createdAt} />
+                    <AuthorInfo
+                      author={question?.author || { username: 'Unknown', profilePicture: '' }}
+                      createdAt={question?.createdAt || ''}
+                    />
                   </div>
                 </div>
               </div>
@@ -631,35 +737,39 @@ const VoteButtons: React.FC<{
 const BookmarkButton: React.FC<{ isBookmarked: boolean; onClick: () => void }> = ({
   isBookmarked,
   onClick,
-}) => (
-  <Tooltip title={isBookmarked ? 'Remove Bookmark' : 'Bookmark'}>
-    <motion.button
-      whileHover={{ scale: 1.1 }}
-      whileTap={{ scale: 0.9 }}
-      onClick={onClick}
-      className={`p-2 rounded-lg transition-all duration-200 ${
-        isBookmarked
-          ? 'text-yellow-600 dark:text-yellow-400 bg-yellow-50 dark:bg-yellow-900/20'
-          : 'text-gray-500 dark:text-gray-400 hover:text-yellow-600 dark:hover:text-yellow-400 hover:bg-yellow-50 dark:hover:bg-yellow-900/20'
-      }`}
-    >
-      <Bookmark size={18} fill={isBookmarked ? 'currentColor' : 'none'} />
-    </motion.button>
-  </Tooltip>
-);
+}) => {
+  // Use local state for immediate UI feedback
+  const [optimisticBookmarked, setOptimisticBookmarked] = useState(isBookmarked);
 
-const HistoryButton: React.FC<{ onClick: () => void }> = ({ onClick }) => (
-  <Tooltip title="History">
-    <motion.button
-      whileHover={{ scale: 1.1 }}
-      whileTap={{ scale: 0.9 }}
-      onClick={onClick}
-      className="p-2 rounded-lg text-gray-500 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-all duration-200"
-    >
-      <History size={18} />
-    </motion.button>
-  </Tooltip>
-);
+  // Update optimistic state when props change
+  useEffect(() => {
+    setOptimisticBookmarked(isBookmarked);
+  }, [isBookmarked]);
+
+  const handleClick = () => {
+    // Toggle the local state immediately for instant feedback
+    setOptimisticBookmarked(!optimisticBookmarked);
+    // Then trigger the actual API call
+    onClick();
+  };
+
+  return (
+    <Tooltip title={optimisticBookmarked ? 'Remove Bookmark' : 'Bookmark'}>
+      <motion.button
+        whileHover={{ scale: 1.1 }}
+        whileTap={{ scale: 0.9 }}
+        onClick={handleClick}
+        className={`p-2 rounded-lg transition-all duration-200 ${
+          optimisticBookmarked
+            ? 'text-yellow-600 dark:text-yellow-400 bg-yellow-50 dark:bg-yellow-900/20'
+            : 'text-gray-500 dark:text-gray-400 hover:text-yellow-600 dark:hover:text-yellow-400 hover:bg-yellow-50 dark:hover:bg-yellow-900/20'
+        }`}
+      >
+        <Bookmark size={18} fill={optimisticBookmarked ? 'currentColor' : 'none'} />
+      </motion.button>
+    </Tooltip>
+  );
+};
 
 const ActionButton: React.FC<{
   icon: React.ReactNode;
@@ -744,7 +854,7 @@ const AnswerSection: React.FC<{
 }) => {
   const votes = (answer.upvotes?.length || 0) - (answer.downvotes?.length || 0);
   const isQuestionAuthor = currentUserId === questionAuthorId;
-  const isAnswerAuthor = currentUserId === answer.author.id;
+  const isAnswerAuthor = currentUserId === answer.author?.id;
 
   return (
     <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-6 shadow-sm hover:shadow-lg transition-all duration-300">
@@ -802,7 +912,10 @@ const AnswerSection: React.FC<{
                 </>
               )}
             </div>
-            <AuthorInfo author={answer.author} createdAt={answer.createdAt} />
+            <AuthorInfo
+              author={answer.author || { username: 'Unknown', profilePicture: '' }}
+              createdAt={answer.createdAt}
+            />
           </div>
         </div>
       </div>

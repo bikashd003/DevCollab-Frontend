@@ -69,6 +69,7 @@ export const GET_QUESTION_BY_ID = gql`
       content
       tags
       views
+      isBookmarked
       upvotes {
         id
       }
@@ -99,5 +100,37 @@ export const GET_QUESTION_BY_ID = gql`
         createdAt
       }
     }
+  }
+`;
+
+export const GET_USER_BOOKMARKS = gql`
+  query getUserBookmarks($limit: Int!, $offset: Int!) {
+    getUserBookmarks(limit: $limit, offset: $offset) {
+      bookmarks {
+        id
+        createdAt
+        question {
+          id
+          title
+          content
+          tags
+          views
+          author {
+            id
+            username
+            profilePicture
+          }
+          createdAt
+        }
+      }
+      totalBookmarks
+      totalPages
+    }
+  }
+`;
+
+export const IS_QUESTION_BOOKMARKED = gql`
+  query isQuestionBookmarked($questionId: ID!) {
+    isQuestionBookmarked(questionId: $questionId)
   }
 `;
