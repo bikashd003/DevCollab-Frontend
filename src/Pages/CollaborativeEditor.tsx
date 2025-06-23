@@ -17,7 +17,7 @@ import { debounce } from 'lodash';
 import { defaultKeymap, indentWithTab } from '@codemirror/commands';
 import { oneDark } from '@codemirror/theme-one-dark';
 import BackendApi from '../Constant/Api';
-import { ChevronDown, ChevronUp } from 'lucide-react';
+import { ChevronDown, ChevronUp, Download } from 'lucide-react';
 
 interface CodeChange {
   from: number;
@@ -122,6 +122,18 @@ const languageExtensions = {
   go: go(),
 };
 
+const languageFileExtensions: Record<Language, string> = {
+  javascript: 'js',
+  python: 'py',
+  java: 'java',
+  cpp: 'cpp',
+  html: 'html',
+  css: 'css',
+  php: 'php',
+  rust: 'rs',
+  go: 'go',
+};
+
 const CollaborativeEditor = ({
   projectId,
   userId,
@@ -194,6 +206,22 @@ const CollaborativeEditor = ({
       userColors.set(userId, colors[colorIndex]);
     }
     return userColors.get(userId)!;
+  };
+
+  const handleDownloadCode = () => {
+    if (!editorRef.current) return;
+
+    const code = editorRef.current.state.doc.toString();
+    const extension = languageFileExtensions[language];
+    const filename = `code.${extension}`;
+
+    const element = document.createElement('a');
+    const file = new Blob([code], { type: 'text/plain' });
+    element.href = URL.createObjectURL(file);
+    element.download = filename;
+    document.body.appendChild(element);
+    element.click();
+    document.body.removeChild(element);
   };
 
   const executeCode = async () => {
@@ -422,6 +450,13 @@ const CollaborativeEditor = ({
                 </option>
               ))}
             </select>
+            <button
+              onClick={handleDownloadCode}
+              title="Download Code"
+              className="ml-2 p-1.5 rounded hover:bg-gray-700 text-gray-300 hover:text-white transition-colors"
+            >
+              <Download size={16} />
+            </button>
           </div>
         </div>
         <div className="flex items-center space-x-4">

@@ -6,7 +6,6 @@ import { useParams } from 'react-router-dom';
 import {
   Share,
   Users,
-  Settings,
   Maximize2,
   Minimize2,
   MessageCircle,
@@ -252,16 +251,6 @@ const CodeTogetherPage = () => {
                 whileTap={{ scale: 0.95 }}
               >
                 {isFullscreen ? <Minimize2 size={16} /> : <Maximize2 size={16} />}
-              </motion.button>
-            </Tooltip>
-
-            <Tooltip title="Settings">
-              <motion.button
-                className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-400 transition-colors"
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-              >
-                <Settings size={16} />
               </motion.button>
             </Tooltip>
           </div>

@@ -49,6 +49,7 @@
     "react-router-dom": "^6.25.1",
     "react-select": "^5.8.0",
     "socket.io-client": "^4.7.5",
+    "sonner": "^2.0.5",
     "styled-components": "^6.1.19",
     "tiptap-markdown": "^0.8.10",
     "yup": "^1.4.0"
