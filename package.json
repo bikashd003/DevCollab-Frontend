@@ -29,6 +29,7 @@
     "@tiptap/pm": "^2.14.0",
     "@tiptap/react": "^2.14.0",
     "@tiptap/starter-kit": "^2.14.0",
+    "@types/styled-components": "^5.1.34",
     "@uiw/react-markdown-editor": "^6.1.2",
     "@uiw/react-markdown-preview": "^5.1.2",
     "antd": "^5.19.3",
@@ -48,6 +49,7 @@
     "react-router-dom": "^6.25.1",
     "react-select": "^5.8.0",
     "socket.io-client": "^4.7.5",
+    "styled-components": "^6.1.19",
     "tiptap-markdown": "^0.8.10",
     "yup": "^1.4.0"
   },

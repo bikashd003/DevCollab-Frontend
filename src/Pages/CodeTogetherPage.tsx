@@ -14,8 +14,6 @@ import {
   Bell,
   BellOff,
   Code,
-  GitBranch,
-  Activity,
 } from 'lucide-react';
 import { socket } from '../Utilities/Socket';
 import { Avatar, message, Tooltip } from 'antd';
@@ -277,28 +275,14 @@ const CodeTogetherPage = () => {
         <div
           className={`transition-all duration-300 ${isSidebarCollapsed ? 'w-full' : 'w-full lg:w-3/4'} flex flex-col`}
         >
-          {/* Editor Toolbar */}
-          <div className="flex items-center justify-between px-4 py-2 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
-            <div className="flex items-center gap-4">
-              <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
-                <GitBranch size={14} />
-                <span>main</span>
-              </div>
-              <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-500">
-                <Activity size={14} />
-                <span>JavaScript</span>
-              </div>
-            </div>
-            <div className="flex items-center gap-4">
-              <div className="text-xs text-gray-500 dark:text-gray-400">
-                Session: {id?.slice(-8)}
-              </div>
-            </div>
-          </div>
-
           {/* Collaborative Editor */}
           <div className="flex-1 bg-white dark:bg-gray-800 overflow-hidden">
-            <CollaborativeEditor projectId={id} userId={currentUserId} socket={socket} />
+            <CollaborativeEditor
+              projectId={id}
+              userId={currentUserId}
+              socket={socket}
+              username={''}
+            />
           </div>
         </div>
 
