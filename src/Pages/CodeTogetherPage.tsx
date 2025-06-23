@@ -174,8 +174,6 @@ const CodeTogetherPage = () => {
               <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
                 <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
                 <span>Live Session</span>
-                <span>•</span>
-                <span>Auto-saved</span>
               </div>
             </div>
           </div>
@@ -438,13 +436,6 @@ const CodeTogetherPage = () => {
                       <h3 className="text-sm font-medium text-gray-900 dark:text-white">
                         Connected Users
                       </h3>
-                      <Tooltip title="Copy share link">
-                        <Share
-                          size={16}
-                          className="cursor-pointer text-gray-500 hover:text-blue-500 transition-colors"
-                          onClick={handleShareLink}
-                        />
-                      </Tooltip>
                     </div>
 
                     {connectedUsers.map((user, index) => (

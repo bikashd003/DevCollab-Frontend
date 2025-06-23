@@ -1,4 +1,3 @@
-// src/components/CollaborativeEditor.tsx
 import { useEffect, useRef, useState } from 'react';
 import { EditorState, StateEffect, StateField } from '@codemirror/state';
 import type { ViewUpdate } from '@codemirror/view';
@@ -18,8 +17,8 @@ import { debounce } from 'lodash';
 import { defaultKeymap, indentWithTab } from '@codemirror/commands';
 import { oneDark } from '@codemirror/theme-one-dark';
 import BackendApi from '../Constant/Api';
+import { ChevronDown, ChevronUp } from 'lucide-react';
 
-// Add types for your changes
 interface CodeChange {
   from: number;
   to: number;
@@ -146,9 +145,24 @@ const CollaborativeEditor = ({
   const [remoteCursors, setRemoteCursors] = useState<CursorPosition[]>([]);
   const [userColors] = useState<Map<string, string>>(new Map());
   const [isConnected, setIsConnected] = useState(false);
-  const [connectedUsers, setConnectedUsers] = useState<
+  const [_connectedUsers, setConnectedUsers] = useState<
     Array<{ id: string; username: string; color: string }>
   >([]);
+  const [isPanelOpen, setIsPanelOpen] = useState(true);
+  const [activeTab, setActiveTab] = useState<'output'>('output');
+
+  // Toggle panel with Ctrl+` (or Cmd+` on macOS)
+  useEffect(() => {
+    const handleGlobalKey = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === '`') {
+        e.preventDefault();
+        setIsPanelOpen(prev => !prev);
+        setActiveTab('output');
+      }
+    };
+    document.addEventListener('keydown', handleGlobalKey);
+    return () => document.removeEventListener('keydown', handleGlobalKey);
+  }, []);
 
   // Generate a consistent color for each user
   const getUserColor = (userId: string): string => {
@@ -395,7 +409,6 @@ const CollaborativeEditor = ({
     <div className="flex flex-col h-screen bg-gray-900 text-white">
       <div className="flex items-center justify-between p-2 bg-gray-800 border-b border-gray-700">
         <div className="flex items-center space-x-4">
-          <h1 className="text-xl font-bold">Collaborative Code Editor</h1>
           <div className="flex items-center space-x-2">
             <span className="text-sm text-gray-400">Language:</span>
             <select
@@ -432,48 +445,119 @@ const CollaborativeEditor = ({
         </div>
       </div>
 
-      <div className="flex flex-1 overflow-hidden">
-        <div id="editor-container" className="flex-1 overflow-auto" onKeyDown={handleKeyDown} />
-        <div className="w-1/2 bg-gray-800 border-l border-gray-700 flex flex-col">
-          <div className="p-2 border-b border-gray-700 font-medium">Output</div>
-          <div className="flex-1 p-4 overflow-auto font-mono text-sm bg-gray-900">
-            {output.error ? (
-              <div className="text-red-400">{output.error}</div>
-            ) : (
-              <div className="whitespace-pre-wrap">
-                {output.output || 'No output yet. Run your code to see results.'}
-              </div>
-            )}
-            {output.executionTime > 0 && (
-              <div className="mt-2 text-xs text-gray-500">
-                Execution time: {output.executionTime.toFixed(2)}ms
-              </div>
-            )}
+      <div style={{ display: 'flex', flexDirection: 'column', height: '100%', width: '100%' }}>
+        {/* Editor Pane */}
+        <div style={{ flex: 1, minHeight: '200px', overflow: 'hidden' }}>
+          <div
+            id="editor-container"
+            style={{ height: '100%', width: '100%', overflow: 'auto' }}
+            onKeyDown={handleKeyDown}
+          />
+        </div>
+
+        {/* Resizable Splitter Handle */}
+        <div
+          style={{
+            height: '4px',
+            background: '#212121',
+            cursor: 'row-resize',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+          onMouseDown={e => {
+            e.preventDefault();
+            const startY = e.clientY;
+            const startHeight = document.getElementById('output-panel')?.offsetHeight || 200;
+
+            const onMouseMove = (e: MouseEvent) => {
+              const newHeight = startHeight + (startY - e.clientY);
+              const panel = document.getElementById('output-panel');
+              if (panel) {
+                panel.style.height = `${Math.max(200, newHeight)}px`;
+              }
+            };
+
+            const onMouseUp = () => {
+              document.removeEventListener('mousemove', onMouseMove);
+              document.removeEventListener('mouseup', onMouseUp);
+            };
+
+            document.addEventListener('mousemove', onMouseMove);
+            document.addEventListener('mouseup', onMouseUp);
+          }}
+        >
+          <div style={{ width: '40px', height: '2px', background: '#666' }} />
+        </div>
+
+        {/* Output Panel */}
+        <div
+          id="output-panel"
+          style={{
+            height: '30%',
+            minHeight: '200px',
+            maxHeight: '70%',
+            display: isPanelOpen ? 'flex' : 'none',
+            flexDirection: 'column',
+            background: '#212121',
+            borderTop: '1px solid #303030',
+          }}
+        >
+          {/* Panel Header */}
+          <div className="flex items-center justify-between px-3 py-2 border-b border-gray-700 text-sm select-none">
+            <div className="flex items-center space-x-4">
+              <button
+                onClick={() => setActiveTab('output')}
+                className={`px-3 py-1.5 rounded-md font-medium transition-colors ${
+                  activeTab === 'output'
+                    ? 'bg-gray-700 text-white'
+                    : 'text-gray-400 hover:text-white'
+                }`}
+              >
+                Output
+              </button>
+            </div>
+            <button
+              onClick={() => setIsPanelOpen(false)}
+              className="p-1.5 rounded hover:bg-gray-700 text-gray-400 hover:text-white"
+              title="Minimize Panel"
+            >
+              <ChevronDown size={16} />
+            </button>
           </div>
 
-          <div className="p-2 border-t border-gray-700">
-            <div className="text-sm font-medium mb-2">Active Users</div>
-            <div className="flex flex-wrap gap-2">
-              {connectedUsers.map(user => (
-                <div
-                  key={user.id}
-                  className="flex items-center px-2 py-1 rounded text-xs"
-                  style={{
-                    backgroundColor: `${user.color}20`,
-                    borderLeft: `3px solid ${user.color}`,
-                  }}
-                >
-                  <div
-                    className="w-2 h-2 rounded-full mr-2"
-                    style={{ backgroundColor: user.color }}
-                  />
-                  {user.username}
-                </div>
-              ))}
-            </div>
+          {/* Panel Content */}
+          <div className="flex-1 overflow-auto font-mono text-sm p-4">
+            {activeTab === 'output' ? (
+              <>
+                {output.error ? (
+                  <div className="text-red-400">{output.error}</div>
+                ) : (
+                  <div className="whitespace-pre-wrap">
+                    {output.output || 'No output yet. Run your code to see results.'}
+                  </div>
+                )}
+                {output.executionTime > 0 && (
+                  <div className="mt-2 text-xs text-gray-500">
+                    Execution time: {output.executionTime.toFixed(2)}ms
+                  </div>
+                )}
+              </>
+            ) : (
+              <div className="text-gray-400 italic">Interactive terminal coming soon...</div>
+            )}
           </div>
         </div>
       </div>
+      {!isPanelOpen && (
+        <button
+          onClick={() => setIsPanelOpen(true)}
+          className="absolute bottom-2 right-2 bg-gray-800/60 hover:bg-gray-700 text-gray-200 rounded-full p-2 backdrop-blur-md z-10"
+          title="Show Output Panel"
+        >
+          <ChevronUp size={16} />
+        </button>
+      )}
     </div>
   );
 };
