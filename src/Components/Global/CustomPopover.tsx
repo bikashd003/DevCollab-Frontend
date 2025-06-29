@@ -39,7 +39,7 @@ const CustomPopover: React.FC<CustomPopoverProps> = ({
   const [position, setPosition] = useState({ top: 0, left: 0 });
   const triggerRef = useRef<HTMLDivElement>(null);
   const popoverRef = useRef<HTMLDivElement>(null);
-  const timeoutRef = useRef<number>();
+  const timeoutRef = useRef<number | ReturnType<typeof setTimeout>>();
 
   const isOpen = controlledOpen !== undefined ? controlledOpen : internalOpen;
 
