@@ -17,6 +17,8 @@ import {
 import { socket } from '../Utilities/Socket';
 import { Avatar, message, Tooltip } from 'antd';
 import { useAuth } from '../Secure/AuthContext';
+import { useQuery } from '@apollo/client';
+import { GET_USER_DATA } from '../GraphQL/Queries/Profile/Users';
 
 const CodeTogetherPage = () => {
   interface username {
@@ -50,6 +52,7 @@ const CodeTogetherPage = () => {
   const [shareableLink, setShareableLink] = useState('');
   const { currentUserId } = useAuth();
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const { data } = useQuery(GET_USER_DATA);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -256,7 +259,7 @@ const CodeTogetherPage = () => {
               projectId={id}
               userId={currentUserId}
               socket={socket}
-              username={''}
+              username={data?.user?.username}
             />
           </div>
         </div>
