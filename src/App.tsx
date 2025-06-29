@@ -25,6 +25,7 @@ import QuestionDetails from './Pages/QuestionDetails';
 import EditorHomePage from './Pages/EditorHomePage';
 import { ConfirmProvider } from './Components/Global/ConfirmProvider';
 import { TipsProvider } from './Components/Tips/Tips';
+import { Toaster } from 'sonner';
 
 const MainLayout: React.FC = () => {
   return (
@@ -117,6 +118,7 @@ const App = () => {
   return (
     <ErrorBoundary>
       <NextUIProvider>
+        <Toaster richColors closeButton />
         <TipsProvider>
           <ThemeProvider>
             <ConfirmProvider>

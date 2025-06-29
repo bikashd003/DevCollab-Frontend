@@ -18,7 +18,8 @@ import { defaultKeymap, indentWithTab } from '@codemirror/commands';
 
 import { oneDark } from '@codemirror/theme-one-dark';
 import BackendApi from '../Constant/Api';
-import { ChevronDown, ChevronUp, Download } from 'lucide-react';
+import { ChevronDown, ChevronUp, Download, Wifi, WifiOff } from 'lucide-react';
+import { Button } from 'antd';
 
 interface CodeChange {
   from: number;
@@ -349,19 +350,20 @@ const CollaborativeEditor = ({
             {isExecuting ? 'Running...' : 'Run'}
           </button>
 
-          <button
+          <Button
             onClick={handleDownloadCode}
-            className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded flex items-center space-x-1"
-          >
-            <Download size={16} />
-            <span>Download</span>
-          </button>
+            type="text"
+            className="text-blue-400"
+            icon={<Download size={16} />}
+          />
         </div>
 
         <div className="flex items-center space-x-2">
-          <div
-            className={`w-2 h-2 rounded-full ${isConnected ? 'bg-green-500' : 'bg-red-500'}`}
-          ></div>
+          {isConnected ? (
+            <Wifi className="w-4 h-4 text-emerald-400" />
+          ) : (
+            <WifiOff className="w-4 h-4 text-red-400" />
+          )}
           <span className="text-sm text-gray-300">
             {isConnected ? 'Connected' : 'Disconnected'}
           </span>
