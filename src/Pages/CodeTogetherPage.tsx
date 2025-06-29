@@ -19,18 +19,29 @@ import { Avatar, message, Tooltip } from 'antd';
 import { useAuth } from '../Secure/AuthContext';
 
 const CodeTogetherPage = () => {
-  const [messages, setMessages] = useState<
-    Array<{
-      username: { _id: string; username: string };
-      message: string;
-      timestamp: Date;
-    }>
-  >([]);
+  interface username {
+    _id: string;
+    username: string;
+  }
+  interface Message {
+    id: string;
+    userId: string;
+    username: username;
+    content: string;
+    timestamp: Date;
+    message: string;
+  }
+
+  interface User {
+    id: string;
+    username: string;
+    profilePicture?: string;
+  }
+
+  const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState('');
   const [typingUsers, setTypingUsers] = useState<string[]>([]);
-  const [connectedUsers, setConnectedUsers] = useState<
-    Array<{ username: string; profilePicture: string }>
-  >([]);
+  const [connectedUsers, setConnectedUsers] = useState<User[]>([]);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [notifications, setNotifications] = useState(true);
@@ -48,17 +59,14 @@ const CodeTogetherPage = () => {
     scrollToBottom();
   }, [messages]);
 
-  // Handle responsive sidebar collapse for mobile
   useEffect(() => {
     if (window.innerWidth <= 768) {
       setIsSidebarCollapsed(true);
     } else {
       setIsSidebarCollapsed(false);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [window.innerWidth]);
+  }, []);
 
-  // Socket connection and event management
   useEffect(() => {
     socket.connect();
 
@@ -67,20 +75,18 @@ const CodeTogetherPage = () => {
       setShareableLink(`${window.location.origin}/editor/${id}`);
     }
 
-    // Listen for real-time messages
     socket.on('chatMessage', message => {
       setMessages(prev => [...prev, message]);
     });
 
-    socket.on('userTyping', (username: string) => {
+    socket.on('userTyping', username => {
       setTypingUsers(prev => [...new Set([...prev, username])]);
     });
 
-    socket.on('userStoppedTyping', (username: string) => {
+    socket.on('userStoppedTyping', username => {
       setTypingUsers(prev => prev.filter(user => user !== username));
     });
 
-    // Update the list of connected users
     socket.on('connectedUsers', users => {
       setConnectedUsers(users);
       message.success(`${users.length} users connected`);
@@ -102,11 +108,8 @@ const CodeTogetherPage = () => {
     };
   }, [currentUserId, id]);
 
-  const handleSendMessage = (e: React.FormEvent<HTMLFormElement> | React.KeyboardEvent) => {
-    if ('preventDefault' in e) {
-      e.preventDefault();
-    }
-    if ('key' in e && e.key !== 'Enter') return;
+  const handleSendMessage = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
     if (!newMessage.trim()) return;
 
     const messageData = {
@@ -122,17 +125,12 @@ const CodeTogetherPage = () => {
     setNewMessage('');
   };
 
-  let typingTimeout: ReturnType<typeof setTimeout>;
+  let typingTimeout: NodeJS.Timeout;
   const handleTyping = (e: React.ChangeEvent<HTMLInputElement>) => {
     setNewMessage(e.target.value);
-
-    // Emit typing event
     socket.emit('typing', { projectId: id });
 
-    // Clear existing timeout
     clearTimeout(typingTimeout);
-
-    // Set new timeout to emit stopped typing
     typingTimeout = setTimeout(() => {
       socket.emit('stopTyping', { projectId: id });
     }, 1000);
@@ -161,7 +159,6 @@ const CodeTogetherPage = () => {
 
   return (
     <div className="flex flex-col h-screen bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 overflow-hidden">
-      {/* Modern Header */}
       <header className="flex items-center justify-between px-6 py-3 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 shadow-sm z-50">
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-3">
@@ -177,9 +174,7 @@ const CodeTogetherPage = () => {
             </div>
           </div>
         </div>
-
         <div className="flex items-center gap-2">
-          {/* Connected Users Display */}
           <Tooltip title={`${connectedUsers.length} connected users`}>
             <div className="flex items-center gap-2 px-3 py-1.5 bg-gray-100 dark:bg-gray-700 rounded-lg">
               <div className="flex -space-x-2">
@@ -218,8 +213,6 @@ const CodeTogetherPage = () => {
               </span>
             </div>
           </Tooltip>
-
-          {/* Action Buttons */}
           <div className="flex items-center gap-1">
             <Tooltip title={notifications ? 'Disable notifications' : 'Enable notifications'}>
               <motion.button
@@ -231,7 +224,6 @@ const CodeTogetherPage = () => {
                 {notifications ? <Bell size={16} /> : <BellOff size={16} />}
               </motion.button>
             </Tooltip>
-
             <Tooltip title="Share session">
               <motion.button
                 onClick={handleShareLink}
@@ -242,7 +234,6 @@ const CodeTogetherPage = () => {
                 <Share size={16} />
               </motion.button>
             </Tooltip>
-
             <Tooltip title={isFullscreen ? 'Exit fullscreen' : 'Enter fullscreen'}>
               <motion.button
                 onClick={toggleFullscreen}
@@ -256,13 +247,10 @@ const CodeTogetherPage = () => {
           </div>
         </div>
       </header>
-
       <main className="flex flex-1 overflow-hidden">
-        {/* Editor Section */}
         <div
           className={`transition-all duration-300 ${isSidebarCollapsed ? 'w-full' : 'w-full lg:w-3/4'} flex flex-col`}
         >
-          {/* Collaborative Editor */}
           <div className="flex-1 bg-white dark:bg-gray-800 overflow-hidden">
             <CollaborativeEditor
               projectId={id}
@@ -272,8 +260,6 @@ const CodeTogetherPage = () => {
             />
           </div>
         </div>
-
-        {/* Sidebar Section */}
         <AnimatePresence>
           {!isSidebarCollapsed && (
             <motion.div
@@ -283,7 +269,6 @@ const CodeTogetherPage = () => {
               exit={{ x: '100%' }}
               transition={{ type: 'spring', stiffness: 300, damping: 30 }}
             >
-              {/* Sidebar Header */}
               <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
                 <div className="flex items-center gap-2">
                   <div className="flex bg-gray-100 dark:bg-gray-700 rounded-lg p-1">
@@ -320,11 +305,8 @@ const CodeTogetherPage = () => {
                   </motion.button>
                 </Tooltip>
               </div>
-
-              {/* Chat Tab */}
               {activeTab === 'chat' && (
                 <>
-                  {/* Messages */}
                   <div className="flex-1 overflow-y-auto p-4 space-y-4 scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-600">
                     {messages.length === 0 && (
                       <div className="flex flex-col items-center justify-center h-full text-center">
@@ -338,7 +320,6 @@ const CodeTogetherPage = () => {
                         </p>
                       </div>
                     )}
-
                     {messages.map((msg, index) => (
                       <motion.div
                         key={`${msg.username._id}-${index}`}
@@ -369,7 +350,6 @@ const CodeTogetherPage = () => {
                         </div>
                       </motion.div>
                     ))}
-
                     {typingUsers.length > 0 && (
                       <div className="text-sm text-gray-500 dark:text-gray-400 italic flex items-center gap-2">
                         <div className="flex space-x-1">
@@ -391,20 +371,17 @@ const CodeTogetherPage = () => {
                     )}
                     <div ref={messagesEndRef} />
                   </div>
-
-                  {/* Message Input */}
                   <div className="p-4 border-t border-gray-200 dark:border-gray-700">
-                    <div className="flex gap-2">
+                    <form onSubmit={handleSendMessage} className="flex gap-2">
                       <input
                         type="text"
                         value={newMessage}
                         onChange={handleTyping}
-                        onKeyPress={e => handleSendMessage(e)}
                         placeholder="Type a message..."
                         className="flex-1 px-4 py-3 rounded-full bg-gray-100 dark:bg-gray-700 border-none focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 transition-all text-sm"
                       />
                       <motion.button
-                        onClick={e => handleSendMessage(e as any)}
+                        type="submit"
                         className="p-3 rounded-full bg-blue-500 hover:bg-blue-600 text-white shadow-lg hover:shadow-blue-500/25 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                         whileHover={{ scale: 1.05 }}
                         whileTap={{ scale: 0.95 }}
@@ -412,12 +389,10 @@ const CodeTogetherPage = () => {
                       >
                         <IoMdSend className="text-lg" />
                       </motion.button>
-                    </div>
+                    </form>
                   </div>
                 </>
               )}
-
-              {/* Users Tab */}
               {activeTab === 'users' && (
                 <div className="flex-1 p-4">
                   <div className="space-y-3">
@@ -426,7 +401,6 @@ const CodeTogetherPage = () => {
                         Connected Users
                       </h3>
                     </div>
-
                     {connectedUsers.map((user, index) => (
                       <div
                         key={index}
@@ -459,8 +433,6 @@ const CodeTogetherPage = () => {
             </motion.div>
           )}
         </AnimatePresence>
-
-        {/* Floating Chat Toggle */}
         {isSidebarCollapsed && (
           <motion.button
             onClick={toggleSidebar}

@@ -15,6 +15,7 @@ import { basicSetup } from 'codemirror';
 import type { Socket } from 'socket.io-client';
 import { debounce } from 'lodash';
 import { defaultKeymap, indentWithTab } from '@codemirror/commands';
+
 import { oneDark } from '@codemirror/theme-one-dark';
 import BackendApi from '../Constant/Api';
 import { ChevronDown, ChevronUp, Download } from 'lucide-react';
@@ -147,6 +148,22 @@ const CollaborativeEditor = ({
 }) => {
   const editorRef = useRef<EditorView | null>(null);
   const isRemoteChange = useRef(false);
+  // ... your other useState/useRef declarations ...
+
+  // Debounced emit functions defined with useRef so they are stable and always reference current props/refs
+  const debouncedEmitChanges = useRef(
+    debounce(() => {
+      if (!isRemoteChange.current && socket && editorRef.current) {
+        const code = editorRef.current.state.doc.toString();
+        socket.emit('codeChange', {
+          projectId,
+          userId,
+          changes: [{ from: 0, to: code.length, insert: code }],
+        });
+      }
+    }, 200)
+  ).current;
+
   const [language, setLanguage] = useState<Language>('javascript');
   const [output, setOutput] = useState<ExecutionResult>({
     output: '',
@@ -240,18 +257,26 @@ const CollaborativeEditor = ({
 
       const result = await response.json();
       const endTime = performance.now();
-
-      setOutput({
+      const outputResult: ExecutionResult = {
         output: result.output || '',
         error: result.error || null,
         executionTime: endTime - startTime,
-      });
+      };
+      setOutput(outputResult);
+      // Emit outputChanged to backend for collaboration
+      if (socket && projectId) {
+        socket.emit('outputChanged', { projectId, output: outputResult });
+      }
     } catch (error) {
-      setOutput({
+      const failResult: ExecutionResult = {
         output: '',
         error: 'Failed to execute code. Please try again.',
         executionTime: 0,
-      });
+      };
+      setOutput(failResult);
+      if (socket && projectId) {
+        socket.emit('outputChanged', { projectId, output: failResult });
+      }
     } finally {
       setIsExecuting(false);
     }
@@ -259,6 +284,30 @@ const CollaborativeEditor = ({
 
   const handleLanguageChange = (newLanguage: Language) => {
     setLanguage(newLanguage);
+    // Update CodeMirror extension
+    if (editorRef.current) {
+      const view = editorRef.current;
+      view.dispatch({
+        effects: StateEffect.reconfigure.of([
+          basicSetup,
+          languageExtensions[newLanguage],
+          EditorView.theme({
+            '.remote-cursor': {
+              position: 'relative',
+              display: 'inline-block',
+            },
+            '.cursor-label': {
+              fontSize: '11px',
+              fontFamily: 'system-ui, sans-serif',
+            },
+            '@keyframes blink': {
+              '0%, 50%': { opacity: '1' },
+              '51%, 100%': { opacity: '0' },
+            },
+          }),
+        ]),
+      });
+    }
     // Notify other users about language change
     socket.emit('languageChanged', { projectId, userId, language: newLanguage });
   };
@@ -270,6 +319,20 @@ const CollaborativeEditor = ({
       executeCode();
     }
   };
+
+  const debouncedEmitCursor = useRef(
+    debounce((position: number) => {
+      if (socket && userId) {
+        socket.emit('cursorMove', {
+          projectId,
+          userId,
+          username,
+          position,
+          color: getUserColor(userId),
+        });
+      }
+    }, 50)
+  ).current;
 
   useEffect(() => {
     // Create editor instance
@@ -283,8 +346,7 @@ const CollaborativeEditor = ({
         keymap.of([...defaultKeymap, indentWithTab]),
         EditorView.updateListener.of((update: ViewUpdate) => {
           if (update.docChanged && !isRemoteChange.current) {
-            const changes = update.changes.toJSON();
-            debouncedEmitChanges(changes);
+            debouncedEmitChanges();
           }
 
           // Track cursor position changes
@@ -315,65 +377,57 @@ const CollaborativeEditor = ({
       parent: document.getElementById('editor-container')!,
     });
 
-    // Request initial code
+    // Request initial code and language
     socket.emit('requestInitialCode', projectId);
 
     // Socket event listeners
-    socket.on('initialCode', (initialCode: string) => {
-      if (editorRef.current) {
-        const transaction = editorRef.current.state.update({
-          changes: { from: 0, to: editorRef.current.state.doc.length, insert: initialCode },
-        });
-        editorRef.current.dispatch(transaction);
+    socket.on(
+      'initialCode',
+      (data: { code: string; language: Language; lastOutput?: ExecutionResult }) => {
+        if (editorRef.current) {
+          const transaction = editorRef.current.state.update({
+            changes: { from: 0, to: editorRef.current.state.doc.length, insert: data.code },
+          });
+          editorRef.current.dispatch(transaction);
+        }
+        // Set language and update extension
+        setLanguage(data.language);
+        // Set output if present
+        if (data.lastOutput) setOutput(data.lastOutput);
       }
-    });
+    );
 
     socket.on('codeChange', (data: { userId: string; changes: CodeChange[] }) => {
       if (data.userId === userId) return;
-
-      if (editorRef.current) {
+      if (editorRef.current && data.changes && data.changes.length > 0) {
         isRemoteChange.current = true;
+        // Always replace the full content for real-time sync
         const transaction = editorRef.current.state.update({
-          changes: data.changes,
+          changes: {
+            from: 0,
+            to: editorRef.current.state.doc.length,
+            insert: data.changes[0].insert,
+          },
         });
         editorRef.current.dispatch(transaction);
         isRemoteChange.current = false;
       }
     });
 
+    socket.on('outputChanged', (result: ExecutionResult) => {
+      setOutput(result);
+    });
+
     return () => {
       socket.off('initialCode');
       socket.off('codeChange');
+      socket.off('outputChanged');
       if (editorRef.current) {
         editorRef.current.destroy();
       }
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [projectId, userId, socket]);
-
-  const debouncedEmitChanges = debounce((changes: CodeChange[]) => {
-    if (!isRemoteChange.current && socket) {
-      socket.emit('codeChange', {
-        projectId,
-        userId,
-        changes,
-      });
-    }
-  }, 200);
-
-  const debouncedEmitCursor = useRef(
-    debounce((position: number) => {
-      if (socket && userId) {
-        socket.emit('cursorMove', {
-          projectId,
-          userId,
-          username,
-          position,
-          color: getUserColor(userId),
-        });
-      }
-    }, 50)
-  ).current;
+  }, [projectId, userId, socket, debouncedEmitChanges, debouncedEmitCursor]);
 
   useEffect(() => {
     // Socket event listeners
@@ -414,6 +468,42 @@ const CollaborativeEditor = ({
     const handleLanguageChanged = (data: { userId: string; language: Language }) => {
       if (data.userId === userId) return;
       setLanguage(data.language);
+      // Update CodeMirror extension
+      if (editorRef.current) {
+        const view = editorRef.current;
+        view.dispatch({
+          effects: StateEffect.reconfigure.of([
+            basicSetup,
+            languageExtensions[data.language],
+            cursorsField,
+            oneDark,
+            keymap.of([...defaultKeymap, indentWithTab]),
+            EditorView.updateListener.of((update: ViewUpdate) => {
+              if (update.docChanged && !isRemoteChange.current) {
+                debouncedEmitChanges();
+              }
+              if (update.selectionSet && !isRemoteChange.current) {
+                const cursorPos = update.state.selection.main.head;
+                debouncedEmitCursor(cursorPos);
+              }
+            }),
+            EditorView.theme({
+              '.remote-cursor': {
+                position: 'relative',
+                display: 'inline-block',
+              },
+              '.cursor-label': {
+                fontSize: '11px',
+                fontFamily: 'system-ui, sans-serif',
+              },
+              '@keyframes blink': {
+                '0%, 50%': { opacity: '1' },
+                '51%, 100%': { opacity: '0' },
+              },
+            }),
+          ]),
+        });
+      }
     };
 
     socket.on('connect', handleConnect);
@@ -431,6 +521,7 @@ const CollaborativeEditor = ({
       socket.off('cursorMove', handleCursorMove);
       socket.off('languageChanged', handleLanguageChanged);
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [socket, userId, remoteCursors]);
 
   return (

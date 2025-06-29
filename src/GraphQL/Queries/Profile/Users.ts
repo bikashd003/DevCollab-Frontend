@@ -25,3 +25,22 @@ export const GET_CURRENT_USER_ID = gql`
     getCurrentUserId
   }
 `;
+export const GET_CURRENT_USER_DATA = gql`
+  query GetCurrentUser {
+    getCurrentUser {
+      username
+      email
+      profilePicture
+      projects {
+        title
+        description
+        imageUrl
+        projectLink
+      }
+      skills {
+        title
+        proficiency
+      }
+    }
+  }
+`;

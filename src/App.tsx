@@ -24,6 +24,8 @@ import CodeTogetherPage from './Pages/CodeTogetherPage';
 import QuestionDetails from './Pages/QuestionDetails';
 import EditorHomePage from './Pages/EditorHomePage';
 import { ConfirmProvider } from './Components/Global/ConfirmProvider';
+import { TipsProvider } from './Components/Tips/Tips';
+
 const MainLayout: React.FC = () => {
   return (
     <div>
@@ -115,11 +117,13 @@ const App = () => {
   return (
     <ErrorBoundary>
       <NextUIProvider>
-        <ThemeProvider>
-          <ConfirmProvider>
-            <RouterProvider router={router} />
-          </ConfirmProvider>
-        </ThemeProvider>
+        <TipsProvider>
+          <ThemeProvider>
+            <ConfirmProvider>
+              <RouterProvider router={router} />
+            </ConfirmProvider>
+          </ThemeProvider>
+        </TipsProvider>
       </NextUIProvider>
     </ErrorBoundary>
   );
