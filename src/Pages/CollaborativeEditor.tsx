@@ -6,11 +6,6 @@ import { javascript } from '@codemirror/lang-javascript';
 import { python } from '@codemirror/lang-python';
 import { java } from '@codemirror/lang-java';
 import { cpp } from '@codemirror/lang-cpp';
-import { html } from '@codemirror/lang-html';
-import { css } from '@codemirror/lang-css';
-import { php } from '@codemirror/lang-php';
-import { rust } from '@codemirror/lang-rust';
-import { go } from '@codemirror/lang-go';
 import { basicSetup } from 'codemirror';
 import type { Socket } from 'socket.io-client';
 import { debounce } from 'lodash';
@@ -27,7 +22,7 @@ interface CodeChange {
   insert: string;
 }
 
-type Language = 'javascript' | 'python' | 'java' | 'cpp' | 'html' | 'css' | 'php' | 'rust' | 'go';
+type Language = 'javascript' | 'python' | 'java' | 'cpp';
 
 interface ExecutionResult {
   output: string;
@@ -40,11 +35,6 @@ const languageExtensions = {
   python: python(),
   java: java(),
   cpp: cpp(),
-  html: html(),
-  css: css(),
-  php: php(),
-  rust: rust(),
-  go: go(),
 };
 
 const languageFileExtensions: Record<Language, string> = {
@@ -52,11 +42,6 @@ const languageFileExtensions: Record<Language, string> = {
   python: 'py',
   java: 'java',
   cpp: 'cpp',
-  html: 'html',
-  css: 'css',
-  php: 'php',
-  rust: 'rs',
-  go: 'go',
 };
 
 const CollaborativeEditor = ({
@@ -335,11 +320,6 @@ const CollaborativeEditor = ({
             <option value="python">Python</option>
             <option value="java">Java</option>
             <option value="cpp">C++</option>
-            <option value="html">HTML</option>
-            <option value="css">CSS</option>
-            <option value="php">PHP</option>
-            <option value="rust">Rust</option>
-            <option value="go">Go</option>
           </select>
 
           <button

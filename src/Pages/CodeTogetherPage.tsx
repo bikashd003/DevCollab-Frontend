@@ -194,7 +194,7 @@ const CodeTogetherPage = () => {
                         size={24}
                         className="bg-gradient-to-br from-blue-400 to-indigo-500 border-2 border-white dark:border-gray-700 text-white font-medium"
                       >
-                        {user.username.charAt(0).toUpperCase()}
+                        {user.username?.charAt(0)?.toUpperCase()}
                       </Avatar>
                     )}
                   </Tooltip>
@@ -417,7 +417,7 @@ const CodeTogetherPage = () => {
                               size={32}
                               className="bg-gradient-to-br from-blue-400 to-indigo-500 text-white font-medium"
                             >
-                              {user.username.charAt(0).toUpperCase()}
+                              {user.username?.charAt(0)?.toUpperCase()}
                             </Avatar>
                           )}
                           <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-green-500 border-2 border-white dark:border-gray-800"></div>
