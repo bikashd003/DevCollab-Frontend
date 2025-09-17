@@ -11,6 +11,9 @@ import RouteErrorBoundary from './Components/RouteErrorBoundary';
 import HomeLayout from './Components/Profile/HomeLayout';
 import Projects from './Pages/Projects';
 import Skills from './Pages/Skills';
+import Messages from './Pages/Messages';
+import Settings from './Pages/Settings';
+import Help from './Pages/Help';
 import Questions from './Pages/Questions';
 import AskQuestion from './Pages/AskQuestion';
 import Nav from './Components/Home/Nav';
@@ -26,6 +29,7 @@ import EditorHomePage from './Pages/EditorHomePage';
 import { ConfirmProvider } from './Components/Global/ConfirmProvider';
 import { TipsProvider } from './Components/Tips/Tips';
 import { Toaster } from 'sonner';
+import OAuthHandler from './Components/Auth/OAuthHandler';
 
 const MainLayout: React.FC = () => {
   return (
@@ -87,6 +91,18 @@ const router = createBrowserRouter([
         path: 'skills',
         element: <ProtectedRoute element={<Skills />} />,
       },
+      {
+        path: 'messages',
+        element: <ProtectedRoute element={<Messages />} />,
+      },
+      {
+        path: 'settings',
+        element: <ProtectedRoute element={<Settings />} />,
+      },
+      {
+        path: 'help',
+        element: <ProtectedRoute element={<Help />} />,
+      },
     ],
   },
   {
@@ -119,6 +135,7 @@ const App = () => {
     <ErrorBoundary>
       <NextUIProvider>
         <Toaster richColors closeButton />
+        <OAuthHandler />
         <TipsProvider>
           <ThemeProvider>
             <ConfirmProvider>

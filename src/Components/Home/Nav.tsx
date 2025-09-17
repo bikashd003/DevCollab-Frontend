@@ -50,7 +50,7 @@ const Nav = () => {
       icon: RiUser3Line,
       label: 'Profile',
       desc: 'Manage account',
-      path: '/home/user',
+      path: `/home/${data?.user?.username}`,
       color: 'blue',
     },
     {
@@ -530,7 +530,6 @@ const Nav = () => {
                     </motion.button>
                   </motion.div>
 
-                  {/* User Profile Section for Authenticated Users */}
                   {isAuthenticated && (
                     <motion.div
                       variants={animations.item}
@@ -595,7 +594,6 @@ const Nav = () => {
                     </motion.div>
                   )}
 
-                  {/* Sign Up Button for Non-Authenticated Users */}
                   {!isAuthenticated && (
                     <motion.div
                       variants={animations.item}
