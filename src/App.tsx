@@ -13,7 +13,6 @@ import Projects from './Pages/Projects';
 import Skills from './Pages/Skills';
 import Messages from './Pages/Messages';
 import Settings from './Pages/Settings';
-import Help from './Pages/Help';
 import Questions from './Pages/Questions';
 import AskQuestion from './Pages/AskQuestion';
 import Nav from './Components/Home/Nav';
@@ -98,10 +97,6 @@ const router = createBrowserRouter([
       {
         path: 'settings',
         element: <ProtectedRoute element={<Settings />} />,
-      },
-      {
-        path: 'help',
-        element: <ProtectedRoute element={<Help />} />,
       },
     ],
   },

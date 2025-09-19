@@ -18,7 +18,6 @@ import {
   RiLogoutBoxLine,
   RiSettings3Line,
   RiUser3Line,
-  RiQuestionLine,
   RiCodeLine,
   RiMenu3Line,
 } from 'react-icons/ri';
@@ -60,14 +59,6 @@ const Nav = () => {
       desc: 'Preferences',
       path: '/home/settings',
       color: 'gray',
-    },
-    {
-      key: 'help',
-      icon: RiQuestionLine,
-      label: 'Help',
-      desc: 'Support center',
-      path: '/home/help',
-      color: 'emerald',
     },
   ];
 
@@ -374,21 +365,6 @@ const Nav = () => {
                         <div>
                           <p className="text-sm">Settings</p>
                           <p className="text-xs opacity-60">Preferences</p>
-                        </div>
-                      </DropdownItem>
-
-                      <DropdownItem
-                        key="help"
-                        startContent={
-                          <div className="p-1.5 rounded-lg bg-emerald-100/60 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400">
-                            <RiQuestionLine className="text-base" />
-                          </div>
-                        }
-                        onClick={() => navigate('/home/help')}
-                      >
-                        <div>
-                          <p className="text-sm">Help</p>
-                          <p className="text-xs opacity-60">Support center</p>
                         </div>
                       </DropdownItem>
 

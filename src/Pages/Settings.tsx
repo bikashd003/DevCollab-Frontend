@@ -1,246 +1,194 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Settings as SettingsIcon, User, Bell, Shield, Palette, Globe } from 'lucide-react';
-import { Switch, Button, Select, SelectItem } from '@nextui-org/react';
+import { Trash2, AlertTriangle } from 'lucide-react';
+import {
+  Button,
+  Modal,
+  ModalContent,
+  ModalHeader,
+  ModalBody,
+  ModalFooter,
+  Input,
+} from '@nextui-org/react';
+import { useMutation } from '@apollo/client';
+import { DELETE_CURRENT_USER_ACCOUNT } from '../GraphQL/Mutations/Profile/User';
+import { useNavigate } from 'react-router-dom';
+import { toast } from 'sonner';
+import { useAuth } from '../Secure/AuthContext';
+import PageContainer from '../Components/Profile/PageContainer';
 
 const Settings: React.FC = () => {
-  const [notifications, setNotifications] = useState(true);
-  const [darkMode, setDarkMode] = useState(true);
-  const [publicProfile, setPublicProfile] = useState(true);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [confirmationText, setConfirmationText] = useState('');
+  const [isDeleting, setIsDeleting] = useState(false);
+  const navigate = useNavigate();
+  const { handleLogout } = useAuth();
 
-  const settingsSections = [
-    {
-      title: 'Profile Settings',
-      icon: <User className="w-5 h-5" />,
-      color: 'from-purple-500 to-pink-500',
-      settings: [
-        {
-          label: 'Public Profile',
-          description: 'Make your profile visible to other developers',
-          type: 'switch',
-          value: publicProfile,
-          onChange: setPublicProfile,
-        },
-      ],
+  const [deleteAccount] = useMutation(DELETE_CURRENT_USER_ACCOUNT, {
+    onCompleted: async data => {
+      if (data.deleteCurrentUserAccount.success) {
+        toast.success('Account deleted successfully');
+        await handleLogout();
+        localStorage.clear();
+        sessionStorage.clear();
+        navigate('/');
+      }
     },
-    {
-      title: 'Notifications',
-      icon: <Bell className="w-5 h-5" />,
-      color: 'from-blue-500 to-cyan-500',
-      settings: [
-        {
-          label: 'Push Notifications',
-          description: 'Receive notifications about messages and updates',
-          type: 'switch',
-          value: notifications,
-          onChange: setNotifications,
-        },
-      ],
+    onError: error => {
+      toast.error(`Failed to delete account: ${error.message}`);
+      setIsDeleting(false);
     },
-    {
-      title: 'Appearance',
-      icon: <Palette className="w-5 h-5" />,
-      color: 'from-emerald-500 to-teal-500',
-      settings: [
-        {
-          label: 'Dark Mode',
-          description: 'Use dark theme across the application',
-          type: 'switch',
-          value: darkMode,
-          onChange: setDarkMode,
-        },
-      ],
-    },
-    {
-      title: 'Privacy & Security',
-      icon: <Shield className="w-5 h-5" />,
-      color: 'from-red-500 to-orange-500',
-      settings: [
-        {
-          label: 'Two-Factor Authentication',
-          description: 'Add an extra layer of security to your account',
-          type: 'button',
-          buttonText: 'Enable 2FA',
-        },
-      ],
-    },
-  ];
+  });
+
+  const handleDeleteAccount = async () => {
+    if (confirmationText !== 'DELETE') {
+      toast.error('Please type "DELETE" to confirm');
+      return;
+    }
+
+    setIsDeleting(true);
+    try {
+      await deleteAccount();
+    } catch (error: any) {
+      toast.error(`Failed to delete account: ${error.message}`);
+    }
+  };
+
+  const openDeleteModal = () => {
+    setIsDeleteModalOpen(true);
+    setConfirmationText('');
+  };
+
+  const closeDeleteModal = () => {
+    setIsDeleteModalOpen(false);
+    setConfirmationText('');
+    setIsDeleting(false);
+  };
 
   return (
-    <div className="min-h-screen ml-16 lg:ml-64 p-6 lg:p-8">
-      <div className="max-w-4xl mx-auto">
-        {/* Header */}
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="mb-8">
-          <div className="flex items-center gap-3 mb-2">
-            <div className="w-10 h-10 bg-gradient-to-r from-slate-600 to-slate-700 rounded-xl flex items-center justify-center">
-              <SettingsIcon className="w-6 h-6 text-white" />
-            </div>
-            <div>
-              <h1 className="text-3xl font-bold text-white">Settings</h1>
-              <p className="text-slate-400">Manage your account preferences</p>
+    <PageContainer>
+      <div className="w-full max-w-none">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
+          className="bg-red-500/10 border border-red-500/20 rounded-2xl overflow-hidden"
+        >
+          {/* Section Header */}
+          <div className="p-6 border-b border-red-500/20 bg-gradient-to-r from-red-500/10 to-orange-500/10">
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 bg-gradient-to-r from-red-500 to-orange-500 rounded-lg flex items-center justify-center">
+                <AlertTriangle className="w-5 h-5 text-white" />
+              </div>
+              <h2 className="text-xl font-bold text-red-400">Danger Zone</h2>
             </div>
           </div>
-        </motion.div>
 
-        {/* Settings Sections */}
-        <div className="space-y-6">
-          {settingsSections.map((section, index) => (
-            <motion.div
-              key={section.title}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: index * 0.1 }}
-              className="bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-2xl overflow-hidden"
-            >
-              {/* Section Header */}
-              <div
-                className={`p-6 border-b border-slate-700/50 bg-gradient-to-r ${section.color.replace('500', '500/10')}`}
-              >
-                <div className="flex items-center gap-3">
-                  <div
-                    className={`w-8 h-8 bg-gradient-to-r ${section.color} rounded-lg flex items-center justify-center`}
-                  >
-                    {section.icon}
-                  </div>
-                  <h2 className="text-xl font-bold text-white">{section.title}</h2>
+          {/* Delete Account Content */}
+          <div className="p-6">
+            <div className="flex items-center justify-between">
+              <div className="flex-1">
+                <h3 className="font-medium text-white mb-2 flex items-center gap-2">
+                  <Trash2 className="w-4 h-4" />
+                  Delete Account
+                </h3>
+                <p className="text-slate-400 text-sm mb-2">
+                  Permanently delete your account and all associated data
+                </p>
+                <div className="text-xs text-red-400 space-y-1">
+                  <p>• All your projects, skills, and profile information will be deleted</p>
+                  <p>• Your questions, answers, and comments will be removed</p>
+                  <p>• This action cannot be undone</p>
                 </div>
               </div>
-
-              {/* Settings Items */}
-              <div className="p-6 space-y-6">
-                {section.settings.map((setting, settingIndex) => (
-                  <div key={settingIndex} className="flex items-center justify-between">
-                    <div className="flex-1">
-                      <h3 className="font-medium text-white mb-1">{setting.label}</h3>
-                      <p className="text-slate-400 text-sm">{setting.description}</p>
-                    </div>
-                    <div className="ml-4">
-                      {setting.type === 'switch' && 'value' in setting && (
-                        <Switch
-                          isSelected={setting.value}
-                          onValueChange={setting.onChange}
-                          classNames={{
-                            wrapper: 'bg-slate-600',
-                          }}
-                        />
-                      )}
-                      {setting.type === 'button' && 'buttonText' in setting && (
-                        <Button
-                          className={`bg-gradient-to-r ${section.color} text-white`}
-                          size="sm"
-                        >
-                          {setting.buttonText}
-                        </Button>
-                      )}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </motion.div>
-          ))}
-
-          {/* Account Management */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.4 }}
-            className="bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-2xl p-6"
-          >
-            <h2 className="text-xl font-bold text-white mb-6 flex items-center gap-3">
-              <div className="w-8 h-8 bg-gradient-to-r from-slate-600 to-slate-700 rounded-lg flex items-center justify-center">
-                <Globe className="w-5 h-5 text-white" />
-              </div>
-              Account Management
-            </h2>
-
-            <div className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-slate-300 mb-2">Language</label>
-                  <Select
-                    defaultSelectedKeys={['en']}
-                    className="w-full"
-                    classNames={{
-                      trigger: 'bg-slate-700/50 border-slate-600 hover:border-slate-500',
-                    }}
-                  >
-                    <SelectItem key="en" value="en">
-                      English
-                    </SelectItem>
-                    <SelectItem key="es" value="es">
-                      Spanish
-                    </SelectItem>
-                    <SelectItem key="fr" value="fr">
-                      French
-                    </SelectItem>
-                    <SelectItem key="de" value="de">
-                      German
-                    </SelectItem>
-                  </Select>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-slate-300 mb-2">Timezone</label>
-                  <Select
-                    defaultSelectedKeys={['utc']}
-                    className="w-full"
-                    classNames={{
-                      trigger: 'bg-slate-700/50 border-slate-600 hover:border-slate-500',
-                    }}
-                  >
-                    <SelectItem key="utc" value="utc">
-                      UTC
-                    </SelectItem>
-                    <SelectItem key="est" value="est">
-                      EST
-                    </SelectItem>
-                    <SelectItem key="pst" value="pst">
-                      PST
-                    </SelectItem>
-                    <SelectItem key="cet" value="cet">
-                      CET
-                    </SelectItem>
-                  </Select>
-                </div>
-              </div>
-
-              <div className="pt-4 border-t border-slate-700/50">
-                <div className="flex gap-3">
-                  <Button className="bg-gradient-to-r from-emerald-500 to-teal-500 text-white">
-                    Save Changes
-                  </Button>
-                  <Button variant="bordered" className="border-slate-600 text-slate-300">
-                    Reset to Default
-                  </Button>
-                </div>
-              </div>
-            </div>
-          </motion.div>
-
-          {/* Danger Zone */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.5 }}
-            className="bg-red-500/10 border border-red-500/20 rounded-2xl p-6"
-          >
-            <h2 className="text-xl font-bold text-red-400 mb-4">Danger Zone</h2>
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h3 className="font-medium text-white">Delete Account</h3>
-                  <p className="text-slate-400 text-sm">
-                    Permanently delete your account and all data
-                  </p>
-                </div>
-                <Button color="danger" variant="bordered" size="sm">
+              <div className="ml-6">
+                <Button
+                  color="danger"
+                  variant="bordered"
+                  size="sm"
+                  onPress={openDeleteModal}
+                  startContent={<Trash2 className="w-4 h-4" />}
+                >
                   Delete Account
                 </Button>
               </div>
             </div>
-          </motion.div>
-        </div>
+          </div>
+        </motion.div>
+
+        <Modal
+          isOpen={isDeleteModalOpen}
+          onClose={closeDeleteModal}
+          classNames={{
+            backdrop: 'bg-black/50 backdrop-blur-sm',
+            base: 'border border-red-500/20 bg-slate-900',
+            header: 'border-b border-red-500/20',
+            body: 'py-6',
+            footer: 'border-t border-red-500/20',
+          }}
+        >
+          <ModalContent>
+            <ModalHeader className="flex flex-col gap-1">
+              <div className="flex items-center gap-2 text-red-400">
+                <AlertTriangle className="w-5 h-5" />
+                Confirm Account Deletion
+              </div>
+            </ModalHeader>
+            <ModalBody>
+              <div className="space-y-4">
+                <p className="text-slate-300">
+                  This action will permanently delete your account and all associated data. This
+                  cannot be undone.
+                </p>
+
+                <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-4">
+                  <h4 className="text-red-400 font-medium mb-2">What will be deleted:</h4>
+                  <ul className="text-sm text-slate-400 space-y-1">
+                    <li>• Your profile and personal information</li>
+                    <li>• All projects and skills</li>
+                    <li>• Questions, answers, and comments</li>
+                    <li>• Account settings and preferences</li>
+                  </ul>
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-slate-300">
+                    Type <span className="text-red-400 font-bold">DELETE</span> to confirm:
+                  </label>
+                  <Input
+                    value={confirmationText}
+                    onChange={e => setConfirmationText(e.target.value)}
+                    placeholder="Type DELETE here"
+                    classNames={{
+                      input: 'bg-slate-800 text-white',
+                      inputWrapper: 'bg-slate-800 border-slate-600 hover:border-slate-500',
+                    }}
+                  />
+                </div>
+              </div>
+            </ModalBody>
+            <ModalFooter>
+              <Button
+                variant="bordered"
+                onPress={closeDeleteModal}
+                className="border-slate-600 text-slate-300"
+              >
+                Cancel
+              </Button>
+              <Button
+                color="danger"
+                onPress={handleDeleteAccount}
+                isLoading={isDeleting}
+                isDisabled={confirmationText !== 'DELETE'}
+                startContent={!isDeleting && <Trash2 className="w-4 h-4" />}
+              >
+                {isDeleting ? 'Deleting...' : 'Delete Account'}
+              </Button>
+            </ModalFooter>
+          </ModalContent>
+        </Modal>
       </div>
-    </div>
+    </PageContainer>
   );
 };
 

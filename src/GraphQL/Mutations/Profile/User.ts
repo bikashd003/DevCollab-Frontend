@@ -19,3 +19,12 @@ export const UPDATE_USER_PROFILE_DETAILS = gql`
     }
   }
 `;
+
+export const DELETE_CURRENT_USER_ACCOUNT = gql`
+  mutation DeleteCurrentUserAccount {
+    deleteCurrentUserAccount {
+      success
+      message
+    }
+  }
+`;

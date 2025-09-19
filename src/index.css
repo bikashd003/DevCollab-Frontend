@@ -4,6 +4,14 @@
 
 @layer base {
   body {
-      @apply bg-background text-foreground dark:bg-dark-background dark:text-dark-foreground;
-    }
+    @apply bg-background text-foreground dark:bg-dark-background dark:text-dark-foreground;
+  }
+}
+@layer utilities {
+  .line-clamp-3 {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
 }

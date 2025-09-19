@@ -13,6 +13,7 @@ const ADD_PROJECT_MUTATION = gql`
       imageUrl: $imageUrl
       projectLink: $projectLink
     ) {
+      id
       title
       description
       imageUrl
@@ -43,6 +44,7 @@ export const UPDATE_PROJECT = gql`
       imageUrl: $imageUrl
       projectLink: $projectLink
     ) {
+      id
       title
       description
       imageUrl
