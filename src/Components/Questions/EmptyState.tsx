@@ -3,14 +3,27 @@ import { motion } from 'framer-motion';
 import { FiMessageSquare, FiPlus, FiSearch, FiUsers } from 'react-icons/fi';
 import { Button } from '@nextui-org/react';
 import { useNavigate } from 'react-router-dom';
+import { MessageCircle, UserPlus, Users } from 'lucide-react';
 
 interface EmptyStateProps {
-  type: 'no-questions' | 'no-search-results' | 'error';
+  type:
+    | 'no-questions'
+    | 'no-search-results'
+    | 'error'
+    | 'no-conversations'
+    | 'no-connections'
+    | 'select-conversation';
   searchTerm?: string;
   onRetry?: () => void;
+  onStartNewConversation?: () => void;
 }
 
-const EmptyState: React.FC<EmptyStateProps> = ({ type, searchTerm, onRetry }) => {
+const EmptyState: React.FC<EmptyStateProps> = ({
+  type,
+  searchTerm,
+  onRetry,
+  onStartNewConversation,
+}) => {
   const navigate = useNavigate();
 
   const getEmptyStateContent = () => {
@@ -66,6 +79,46 @@ const EmptyState: React.FC<EmptyStateProps> = ({ type, searchTerm, onRetry }) =>
             onClick: () => navigate('/'),
             icon: <div className="w-4 h-4">🏠</div>,
           },
+        };
+
+      case 'no-connections':
+        return {
+          icon: <Users className="w-16 h-16 text-slate-600 mx-auto mb-4" />,
+          title: 'No connections yet',
+          description: 'Connect with other developers to start messaging',
+          action: (
+            <Button
+              onClick={() => navigate('/profile')}
+              className="bg-blue-500 hover:bg-blue-600 text-white mt-4"
+              startContent={<UserPlus className="w-4 h-4" />}
+            >
+              Find Developers
+            </Button>
+          ),
+        };
+
+      case 'no-conversations':
+        return {
+          icon: <MessageCircle className="w-16 h-16 text-slate-600 mx-auto mb-4" />,
+          title: 'No conversations yet',
+          description: 'Start messaging your connections to collaborate on projects',
+          action: onStartNewConversation && (
+            <Button
+              onClick={onStartNewConversation}
+              className="bg-blue-500 hover:bg-blue-600 text-white mt-4"
+              startContent={<MessageCircle className="w-4 h-4" />}
+            >
+              Start Conversation
+            </Button>
+          ),
+        };
+
+      case 'select-conversation':
+        return {
+          icon: <MessageCircle className="w-16 h-16 text-slate-600 mx-auto mb-4" />,
+          title: 'Select a conversation',
+          description: 'Choose a conversation from the list to start messaging',
+          action: null,
         };
 
       default:
@@ -143,7 +196,6 @@ const EmptyState: React.FC<EmptyStateProps> = ({ type, searchTerm, onRetry }) =>
         )}
       </motion.div>
 
-      {/* Decorative elements */}
       <div className="absolute inset-0 -z-10 overflow-hidden">
         <div className="absolute top-1/4 left-1/4 w-32 h-32 bg-theme-accent/5 rounded-full blur-3xl"></div>
         <div className="absolute bottom-1/4 right-1/4 w-40 h-40 bg-theme-accent/3 rounded-full blur-3xl"></div>
