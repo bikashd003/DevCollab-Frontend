@@ -1,21 +1,12 @@
 import { ApolloClient, InMemoryCache, createHttpLink, from } from '@apollo/client';
-// import { onError } from '@apollo/client/link/error';
 import { RetryLink } from '@apollo/client/link/retry';
+import BackendApi from '../Constant/Api';
 
 // Create the http link
 const httpLink = createHttpLink({
-  uri: 'http://localhost:5000/graphql',
+  uri: `${BackendApi}/graphql`,
   credentials: 'include',
 });
-
-// Error handling link
-// const errorLink = onError(({ graphQLErrors, networkError }) => {
-//   if (graphQLErrors)
-//     graphQLErrors.forEach(({ message, locations, path }) =>
-//       console.log(`[GraphQL error]: Message: ${message}, Location: ${locations}, Path: ${path}`)
-//     );
-//   if (networkError) console.log(`[Network error]: ${networkError}`);
-// });
 
 // Retry link
 const retryLink = new RetryLink({
@@ -28,11 +19,7 @@ const retryLink = new RetryLink({
 // Create the Apollo Client instance
 const client = new ApolloClient({
   link: from([retryLink, httpLink]),
-  cache: new InMemoryCache({
-    typePolicies: {
-      // Add type policies here if needed
-    },
-  }),
+  cache: new InMemoryCache({}),
   defaultOptions: {
     watchQuery: {
       fetchPolicy: 'cache-and-network',
